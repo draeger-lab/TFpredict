@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<tool name="Predict Transcription Factor" id="tf_predict1" version="1.0">
+  <description>
+    given a protein sequence   
+  </description>
+  <command interpreter="bash">
+    tf_predict.sh 
+     #if $input.type=="uniprot_id": 
+       -galaxy 
+       -uniprot_id $input.uniprot_id
+     #elif $input.type=="protein_sequence":
+       -galaxy 
+       -sequence $input.prot_seq
+       -species $input.organism
+     #end if
+    -html_outfile $html_outfile
+    -sabine_outfile $sabine_outfile
+  </command>
+  <inputs>
+    <conditional name="input">
+      <param name="type" type="select" label="Input type" help="The protein of interest can be given using a 'UniProt ID' or by pasting the protein sequence.">
+ 	<option value="uniprot_id"> UniProt ID </option>
+	<option value="protein_sequence"> Protein sequence </option>
+      </param>
+      <when value="uniprot_id">
+        <param name="uniprot_id" type="text" label="UniProt ID" size="10" value="" help="">
+          <validator type="regex" message="Empty field">.+</validator>
+        </param>
+      </when>	
+      <when value="protein_sequence">
+        <param name="prot_seq" type="text" area="true" size="5x35" label="Protein sequence" help="Paste the entire amino acid sequence of the protein here."> 
+          <validator type="regex" message="Invalid protein sequence">^[A-IK-NP-Za-ik-np-z\s]*$</validator>
+          <validator type="regex" message="Empty protein sequence">.+</validator>
+        </param>      
+	<param name="organism" type="select" label="Organism" help="Select the organism.">
+	  <options from_file="species_list.txt">
+	    <column name="value" index="1" />
+	    <column name="name" index="0" />
+	  </options>
+	</param>
+      </when>	
+    </conditional>
+  </inputs>
+  <outputs>
+    <data format="html" name="html_outfile"/>
+    <data format="sab.in" name="sabine_outfile"/>
+  </outputs>
+  <help>
+
+.. class:: infomark
+
+**Short description**
+
+tf_predict predicts the TF/NonTF classification, bindingdomain(s) and superclass of a given amino acid sequence.
+
+The tool runs IPRscan and extracts the IPR-domains. Those are used to classifiy the given sequence as TF or NonTF by a kNN classifier. The bindingdomains predicted by IPRscan are filtered under consideration of significant GO-terms which are found by IPRscan as well. Again, the IPR-domains found by IPRscan are used as input for a k-star classifier to predict the superclass.
+Note: Each classifier predicts the class memberships.
+  </help>
+</tool>
