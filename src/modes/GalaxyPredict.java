@@ -35,9 +35,9 @@ public class GalaxyPredict {
 	
 	static boolean silent = false;
 	
-	
-	static String iprpath = "";
+	static String iprpath = "/opt/iprscan/bin/iprscan";
 	static String basedir = "";
+	static String input_file = "";
 	static String html_outfile;
 	static String sabine_outfile;
 	static String sequence;
@@ -58,16 +58,26 @@ public class GalaxyPredict {
 	
 	private HashMap<String, IprEntry> seq2domain;
 	private HashMap<String, IprRaw> IPRdomains;
-	private HashMap<String,IprProcessed> seq2bindingDomain;
-	private double[] fDis;
-	private double[] sDis;
-	private String annotatedClass;
+	private HashMap<String, IprProcessed> seq2bindingDomain;
+	private HashMap<String, Double[]> probDist_TFclass;
+	private HashMap<String, Double[]> probDist_Superclass;
+	private HashMap<String, String> annotatedClass;
 	private ArrayList<String> bindingDomains;
 	
-	private boolean predictionPossible = false;
-	private boolean seqIsTF = false;
-	private boolean annotatedClassAvailable = false;
-	private boolean domainsPredicted = false;
+	private HashMap<String, Boolean> predictionPossible;
+	private HashMap<String, Boolean> seqIsTF;
+	private HashMap<String, Boolean> annotatedClassAvailable;
+	private HashMap<String, Boolean> domainsPredicted;
+	
+	private static final int Non_TF = 0;
+	private static final int TF = 1;
+	private static final int Basic_domain = 0;
+	private static final int Zinc_finger = 1;
+	private static final int Helix_turn_helix = 2;
+	private static final int Beta_scaffold = 3;
+	private static final int Other = 4;
+	
+	private final String[] labelSet_Superclass = new String[] {};
 	
 	static DecimalFormat df = new DecimalFormat("0.00");
 	static {
@@ -145,6 +155,7 @@ public class GalaxyPredict {
 		
         if(cmd.hasOption("basedir")) {
             basedir = cmd.getOptionValue("basedir");
+            input_file = basedir + "/query.fasta";
         }
 	}
 	
@@ -168,7 +179,7 @@ public class GalaxyPredict {
 		} 
 		
 		// write protein sequence to file
-		String input_file = basedir + "/query.fasta";
+		
         BasicTools.writeArrayToFile(BasicTools.wrapString(sequence), input_file);
 	}
 	
@@ -194,10 +205,11 @@ public class GalaxyPredict {
 
 		//TODO: fix query
 		// HACK: lines were excluded for testing purposes
-		// ArrayList<String[]> IPRentries = IPRrun.run(input_file, iprpath);
+		if (!silent) System.out.println("Running InterProScan to predict domains.");
+		//ArrayList<String[]> IPRoutput = IPRrun.run(input_file, iprpath);
 		
 		// HACK: line was included for testing purposes
-		ArrayList<String[]> IPRoutput = fp.parseIPRout("result");
+		ArrayList<String[]> IPRoutput = fp.parseIPRout("batch_result");
 	
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
@@ -216,44 +228,55 @@ public class GalaxyPredict {
 	private void performClassification() {
     
 		// create feature vectors
-		HashMap<String, Instance> id2fvector = createFeatureVectors(seq2domain, relDomains_TFclass);
-		HashMap<String, Instance> id2svector = createFeatureVectors(seq2domain, relDomains_Superclass);
+		HashMap<String, Instance> seq2feat_TFclass = createFeatureVectors(seq2domain, relDomains_TFclass);
+		HashMap<String, Instance> seq2feat_Superclass = createFeatureVectors(seq2domain, relDomains_Superclass);
 		
-		if (!id2fvector.keySet().isEmpty()) {
-			predictionPossible = true;
+		for (String seq: seq2feat_TFclass.keySet()) {
+			if (seq2feat_TFclass.get(seq) == null) {
+				predictionPossible.put(seq, false);
+			} else {
+				predictionPossible.put(seq, true);
+			}
 		}
 		
 		// perform all classification steps if feature vector could be created
 		try {
-			if (predictionPossible) {
-				String id = id2fvector.keySet().toArray(new String[]{})[0];
-				
-				// perform TF/Non-TF classification
-				Instance fvector = id2fvector.get(id);
-				fDis = cls.distributionForInstance(fvector);
-				
-				if (fDis[1]>fDis[0] && id2svector.containsKey(id)) {
-					seqIsTF = true;
-				}
-	    		
-				// if sequence was classified as TF --> predict superclass
-				if (seqIsTF) {
-					Instance svector = id2svector.get(id);
-					sDis = supercls.distributionForInstance(svector);
+			for (String seq: seq2feat_TFclass.keySet()) {
+				if (predictionPossible.get(seq)) {
 					
-					// predict DNA-binding domain
-			    	IprProcessed ipr_res = seq2bindingDomain.get(id);
-			    	
-			    	if (ipr_res != null) {
-			    		if (!ipr_res.anno_transfac_class.isEmpty()) {
-			    			annotatedClassAvailable = true;
-			    			annotatedClass = ipr_res.anno_transfac_class;
-			    		}
-			    		if (!ipr_res.binding_domains.isEmpty()) {
-			    			domainsPredicted = true;
-			    			bindingDomains = ipr_res.binding_domains;
-			    		}
-			    	}
+					// perform TF/Non-TF classification
+					Instance fvector = seq2feat_TFclass.get(seq);
+					probDist_TFclass = cls.distributionForInstance(fvector);
+					
+					if (probDist_TFclass[TF] > probDist_TFclass[Non_TF] && seq2feat_Superclass.containsKey(seq)) {
+						seqIsTF.put(seq, true);
+					} else {
+						seqIsTF.put(seq, false);
+					}
+		    		
+					// if sequence was classified as TF --> predict superclass
+					if (seqIsTF.get(seq)) {
+						Instance svector = seq2feat_Superclass.get(seq);
+						probDist_Superclass = supercls.distributionForInstance(svector);
+						
+						// predict DNA-binding domain
+				    	IprProcessed ipr_res = seq2bindingDomain.get(seq);
+				    	
+				    	if (ipr_res != null) {
+				    		if (!ipr_res.anno_transfac_class.isEmpty()) {
+				    			annotatedClassAvailable.put(seq, true);
+				    			annotatedClass.put(seq, ipr_res.anno_transfac_class);
+				    		} else {
+				    			annotatedClassAvailable.put(seq, false);
+				    		}
+				    		if (!ipr_res.binding_domains.isEmpty()) {
+				    			domainsPredicted.put(seq, true);
+				    			bindingDomains.put(seq, ipr_res.binding_domains);
+				    		} else {
+				    			domainsPredicted.put(seq, false);
+				    		}
+				    	}
+					}
 				}
 			}
 		} catch(Exception e) {
@@ -287,7 +310,7 @@ public class GalaxyPredict {
 				bw.write("<h1>TF/Non-TF prediction:</h1>\n");
 				bw.write("<table>\n");
 				bw.write("  <tr><th></th><th> TF </th><th> Non-TF </th></tr>\n");
-				bw.write("  <tr><th> Probability </th><td> "+ df.format(fDis[1]) +" </td><td> " + df.format(fDis[0])+" </td></tr>\n");
+				bw.write("  <tr><th> Probability </th><td> "+ df.format(probDist_TFclass[1]) +" </td><td> " + df.format(probDist_TFclass[0])+" </td></tr>\n");
 				bw.write("</table>\n\n");
 				bw.write("<br><br>\n\n");
 				    
@@ -295,7 +318,7 @@ public class GalaxyPredict {
 					bw.write("<h1>Superclass prediction:</h1>\n");
 					bw.write("<table>\n");
 					bw.write("  <tr><th> Superclass </th><td> 4 </td><td> 3 </td><td> 2 </td><td> 1 </td><td> 0 </td></tr>\n");
-					bw.write("  <tr><th> Probability </th><td> "+df.format(sDis[4])+" </td><td> "+df.format(sDis[3])+" </td><td> "+df.format(sDis[2])+" </td><td> "+df.format(sDis[1])+" </td><td> "+df.format(sDis[0])+" </td></tr>\n");
+					bw.write("  <tr><th> Probability </th><td> "+df.format(probDist_Superclass[4])+" </td><td> "+df.format(probDist_Superclass[3])+" </td><td> "+df.format(probDist_Superclass[2])+" </td><td> "+df.format(probDist_Superclass[1])+" </td><td> "+df.format(probDist_Superclass[0])+" </td></tr>\n");
 					bw.write("</table>\n\n");
 					bw.write("<br><br>\n\n");    	
 			    }
@@ -357,7 +380,7 @@ public class GalaxyPredict {
 				bw.write("CL  " + expandTransfacClass(annotatedClass) + "\n");
 			} else {
 				// TODO: determine superclass with highest probability
-				bw.write("CL  " + sDis + ".0.0.0.0");
+				bw.write("CL  " + probDist_Superclass + ".0.0.0.0");
 			}
 			bw.write("XX  \n");
 
