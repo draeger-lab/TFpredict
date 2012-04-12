@@ -7,9 +7,9 @@ public class IprEntry implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 	
-	public String id;
+	public String sequence_id;
 	public boolean label;
-	public ArrayList<String> iprs = new ArrayList<String>();
+	public ArrayList<String> domain_ids = new ArrayList<String>();
 	
 	public boolean isLabel() {
 		return label;
@@ -19,29 +19,29 @@ public class IprEntry implements Serializable{
 	}
 	
 	public IprEntry(String id) {
-		this.id = id;
+		this.sequence_id = id;
 	}
 	
 	public IprEntry(String id, boolean label) {
-		this.id = id;
+		this.sequence_id = id;
 		this.label = label;
 	}
 	
 	public IprEntry(String id, boolean label, ArrayList<String> iprs) {
-		this.id = id;
+		this.sequence_id = id;
 		this.label = label;
-		this.iprs = iprs;
+		this.domain_ids = iprs;
 	}
 	
 	public IprEntry(String id, boolean label, String ipr) {
-		this.id = id;
+		this.sequence_id = id;
 		this.label = label;
-		iprs.add(ipr);
+		domain_ids.add(ipr);
 	}
 	
 	public IprEntry(String id, String ipr) {
-		this.id = id;
-		iprs.add(ipr);
+		this.sequence_id = id;
+		domain_ids.add(ipr);
 	}
 
 }

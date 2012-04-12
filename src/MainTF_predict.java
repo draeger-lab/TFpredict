@@ -29,10 +29,14 @@ public class MainTF_predict {
 		Options options = new Options();
 
 		// galaxy options
-		options.addOption("galaxy", true, "predict the given sequence");
+		options.addOption("galaxy", false, "predict the given sequence");
 		options.addOption("galaxybatch", true, "predict the given sequences");
-		options.addOption("b", true, "basedir");
-		options.addOption("o", true, "outfile");
+		options.addOption("basedir", true, "directory for temporary files");
+		options.addOption("html_outfile", true, "HTML report");
+		options.addOption("sabine_outfile", true, "output file in SABINE format");
+		options.addOption("sequence", true, "output file in SABINE format");
+		options.addOption("uniprot_id", true, "UniProt Accession Number or Entry Name");
+		options.addOption("species", true, "organism (e.g., Homo sapiens)");
 		
 		// add options
 		options.addOption("train", false, "train classifier");
@@ -83,7 +87,6 @@ public class MainTF_predict {
 			}
 		}
 		else if (cmd.hasOption("galaxy")) {
-			System.out.println("Galaxy mode.");
 			try {
 				GalaxyPredict.main(cmd);
 			} catch (Exception e) {
@@ -91,7 +94,6 @@ public class MainTF_predict {
 			}
 		}
 		else if (cmd.hasOption("galaxybatch")) {
-			System.out.println("Galaxy batch mode.");
 			try {
 				GalaxyPredictBatch.main(cmd);
 			} catch (Exception e) {
@@ -101,11 +103,5 @@ public class MainTF_predict {
 		else {
 			lvFormater.printHelp("Available options: ", options);
 		}
-		
-		System.out.println("Done.");
-		
 	}
-	
-	
-
 }

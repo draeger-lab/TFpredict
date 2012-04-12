@@ -14,11 +14,21 @@ import java.util.ArrayList;
  * File Parser
  */
 
+
 public class FileParser {
+
+	boolean silent = false;
+	
+	public FileParser(boolean silent) {
+		this.silent = silent;
+	}
+	public FileParser() {}
+	
 	
 	public String parseSeq(String infile) {
 		
-		System.out.println("Parsing: " +infile);
+		if (! silent) System.out.println("Parsing: " +infile);
+		
 		
 		String seq = "";
 			
@@ -54,7 +64,7 @@ public class FileParser {
 	
 	public ArrayList<String[]> parseIPRout(String infile) {
 		
-		System.out.println("Parsing: "+infile);
+		if (! silent) System.out.println("Parsing: "+infile);
 		
 		ArrayList<String[]> IPRentries = new ArrayList<String[]>();
 		
@@ -91,7 +101,7 @@ public class FileParser {
 	// parse goterms
 	public ArrayList<String> parseGO(String infile) {
 		
-		System.out.println("Parsing: "+infile);
+		if (! silent) System.out.println("Parsing: "+infile);
 		
 		ArrayList<String> goterms = new ArrayList<String>();
 		
@@ -121,7 +131,7 @@ public class FileParser {
 			System.out.println("IOException occurred while parsing...");
 		}
 		
-		System.out.println(count+" goterms parsed.");
+		if (! silent) System.out.println(count+" goterms parsed.");
 		
 		return goterms;
 	}
