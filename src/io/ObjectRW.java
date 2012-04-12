@@ -20,8 +20,13 @@ public class ObjectRW {
 	////
 	// object writer
 	public static void write(Object O, String name) {
+		write(O, name, false);
+	}
+	
+	
+	public static void write(Object O, String name, boolean silent) {
 		
-		System.out.println("Writing: " + name);
+		if (! silent) System.out.println(" Writing object: " + name);
 		
 		// write object to file
 		FileOutputStream fos = null;
@@ -40,11 +45,15 @@ public class ObjectRW {
 	}
 	
 	
+	public static Object read(String name) {
+		return(read(name, false));
+	}
+	
 	////
 	// object reader
-	public static Object read(String name) {
+	public static Object read(String name, boolean silent) {
 		
-		System.out.println("Loading: " + name);
+		if (! silent) System.out.println("  Reading object: " + name);
 		
 		Object tmp = new Object(); 
 		

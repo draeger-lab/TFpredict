@@ -17,8 +17,8 @@ import io.ObjectRW;
 import ipr.IPRextract;
 import ipr.IPRprocess;
 import ipr.IprEntry;
-import ipr.IprFinal;
-import ipr.IprObject;
+import ipr.IprProcessed;
+import ipr.IprRaw;
 
 import org.apache.commons.cli.CommandLine;
 
@@ -115,11 +115,14 @@ public class Predict {
 	    //// iprprocess subroutines (rip-off)
 	    // process iprresults
 	    IPRextract iprextract = new IPRextract();
-		ArrayList<IprObject> entries = iprextract.extract(IPRentries);
+	    // TODO: fix code
+		//ArrayList<IprRaw> entries = iprextract.parseIPRoutput(IPRentries);
 		
 		// process result
 		IPRprocess iprprocess = new IPRprocess();
-		HashMap<String,IprFinal> id2ext = iprprocess.process(entries, goterms, transHM);
+	    // TODO: fix code
+		HashMap<String,IprProcessed> id2ext = null;
+		//HashMap<String,IprProcessed> id2ext = iprprocess.filterIPRdomains(entries, goterms, transHM);
 	    ////
 		
 		
@@ -147,17 +150,17 @@ public class Predict {
 			    
 			    
 			    // binding and domain
-		    	IprFinal curr = id2ext.get(id);
+		    	IprProcessed curr = id2ext.get(id);
 		    	
 		    	if (curr != null) {
-		    		ArrayList<String> binds = curr.bindings;
+		    		ArrayList<String> binds = curr.binding_domains;
 		    		
 		    		if (!binds.isEmpty()) {
 						System.out.println("\nBinding side(s):\nID\tstart\tend");
 						for (String bind : binds) System.out.println(bind);
 		    		}
 			    	
-					if (!curr.transfac.isEmpty()) System.out.println("\nID\tTransfac\n"+id+"\t"+convert2full(curr.transfac));
+					if (!curr.anno_transfac_class.isEmpty()) System.out.println("\nID\tTransfac\n"+id+"\t"+convert2full(curr.anno_transfac_class));
 		    	}
 		    	else {
 		    		System.out.println("No binding information and transfac class found.");
@@ -196,12 +199,12 @@ public class Predict {
 	    	
 	    	IprEntry entry = current.getValue();
 	    	
-	    	String fvector = createIPRvector(entry.iprs, iprs, 10);
+	    	String fvector = createIPRvector(entry.domain_ids, iprs, 10);
 	    	
 	    	//System.out.println(fvector);
 	    	
 	    	if (!fvector.isEmpty()) {
-	    		id2fvector.put(entry.id, getInst("0 "+fvector));
+	    		id2fvector.put(entry.sequence_id, getInst("0 "+fvector));
 	    	}
 	    	
 	    }
@@ -268,9 +271,9 @@ public class Predict {
 			IprEntry curr_entry;
 			if (id2entry.containsKey(id)) {
 				curr_entry = id2entry.get(id);
-				ArrayList<String> curr_iprs = curr_entry.iprs;
+				ArrayList<String> curr_iprs = curr_entry.domain_ids;
 				if (!curr_iprs.contains(ipr)) curr_iprs.add(ipr);
-				curr_entry.iprs = curr_iprs;
+				curr_entry.domain_ids = curr_iprs;
 				id2entry.put(id, curr_entry);
 			}
 			else {

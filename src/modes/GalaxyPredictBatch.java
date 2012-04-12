@@ -23,8 +23,8 @@ import io.ObjectRW;
 import ipr.IPRextract;
 import ipr.IPRprocess;
 import ipr.IprEntry;
-import ipr.IprFinal;
-import ipr.IprObject;
+import ipr.IprProcessed;
+import ipr.IprRaw;
 
 import org.apache.commons.cli.CommandLine;
 
@@ -33,7 +33,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.LibSVMLoader;
 
-public class GalaxyPredict {
+public class GalaxyPredictBatch {
 	
 	static String iprpath;
 	
@@ -41,11 +41,8 @@ public class GalaxyPredict {
 	
 	static ArrayList<String> iprs;
 	static ArrayList<String> superiprs;
-	
 	static ArrayList<String> goterms;
-	
 	static FileParser fp = new FileParser();
-	
 	
 	static String basedir;
 	static String outfile;
@@ -88,8 +85,8 @@ public class GalaxyPredict {
 			iprpath = cmd.getOptionValue("p");
 		}
 		
-		if(cmd.hasOption("galaxy")) {
-			sequence = cmd.getOptionValue("galaxy");
+		if(cmd.hasOption("galaxybatch")) {
+			sequence = cmd.getOptionValue("galaxybatch");
 		}
 		
 		if(cmd.hasOption("b")) {
@@ -100,7 +97,6 @@ public class GalaxyPredict {
 		
 		if(cmd.hasOption("o")) {
 			outfile = cmd.getOptionValue("o");
-			System.out.println("Outfile: "+outfile);
 		}
 
 		
@@ -109,11 +105,11 @@ public class GalaxyPredict {
 		
 		// deserialize model
 	    Classifier cls = (Classifier) weka.core.SerializationHelper.read(trainfile);
-	    System.out.println("Classifier-Info:\n"+cls.toString());
+	    System.out.print("Classifier-Info:\n"+cls.toString());
 	    
 	    // superclass classifier
 	    Classifier supercls = (Classifier) weka.core.SerializationHelper.read(superfile);
-	    System.out.print("Classifier-Info:\n"+supercls.toString()+"\n");
+	    System.out.print("Classifier-Info:\n"+supercls.toString());
 	    
 	    System.out.println("Number of significant IPRs: "+iprs.size());
 	    
@@ -121,7 +117,7 @@ public class GalaxyPredict {
 	    ArrayList<String[]> IPRentries = runIPR(query);
 
 	    // parse iprresults
-	    //ArrayList<String[]> IPRentries = fp.parseIPRout("result");
+	    //ArrayList<String[]> IPRentries = fp.parseIPRout("multiresult");
 		
 	    // extract iprresults
 	    HashMap<String, IprEntry> id2entry = extract(IPRentries);
@@ -130,11 +126,12 @@ public class GalaxyPredict {
 	    //// iprprocess subroutines (rip-off)
 	    // process iprresults
 	    IPRextract iprextract = new IPRextract();
-		ArrayList<IprObject> entries = iprextract.extract(IPRentries);
+		//ArrayList<IprRaw> entries = iprextract.parseIPRoutput(IPRentries);
 		
 		// process result
 		IPRprocess iprprocess = new IPRprocess();
-		HashMap<String,IprFinal> id2ext = iprprocess.process(entries, goterms, transHM);
+		HashMap<String,IprProcessed> id2ext = null;
+		//HashMap<String,IprProcessed> id2ext = iprprocess.filterIPRdomains(entries, goterms, transHM);
 	    ////
 		
 		
@@ -176,8 +173,10 @@ public class GalaxyPredict {
 		    		System.out.println("\nPrediction Results:\nID\tTF\tNon-TF");
 			    	Instance fvector = id2fvector.get(id);
 			    	
+			    	bw.write("<h1>Results for: "+id+"</h1>\n");
+			    	
 			    	// write TF/Non-TF result
-					bw.write("<h1>TF/Non-TF prediction results:</h1>\n");
+					bw.write("<h2>TF/Non-TF prediction results:</h2>\n");
 					bw.write("<table>\n");
 					bw.write("  <tr><th> Class </th><th> TF </th><th> Non-TF </th></tr>\n");
 			    	
@@ -187,18 +186,18 @@ public class GalaxyPredict {
 				    bw.write("  <tr><th> Probability </th><th> "+ df.format(fDis[1]) +" </th><th> " + df.format(fDis[0])+" </th></tr>\n");
 				   
 					bw.write("</table>\n\n");
-					bw.write("<br><br>\n\n");
+					bw.write("<br>\n\n");
 				    
 				    // binding and domain
-			    	IprFinal curr = id2ext.get(id);
+			    	IprProcessed curr = id2ext.get(id);
 			    	
 			    	if (curr != null) {
-			    		ArrayList<String> binds = curr.bindings;
+			    		ArrayList<String> binds = curr.binding_domains;
 			    		
 			    		if (!binds.isEmpty()) {
 							System.out.println("\nBinding side(s):\nID\tstart\tend");
 							
-							bw.write("<h1>Binding side(s):</h1>\n");
+							bw.write("<h2>Binding side(s):</h2>\n");
 							bw.write("<table>\n");
 							bw.write("  <tr><th> Start </th><th> End </th></tr>\n");
 							
@@ -213,12 +212,12 @@ public class GalaxyPredict {
 							bw.write("<br>\n\n");
 			    		}
 				    	
-						if (!curr.transfac.isEmpty()) {
-							System.out.println("\nID\tTransfac\n"+id+"\t"+convert2full(curr.transfac));
+						if (!curr.anno_transfac_class.isEmpty()) {
+							System.out.println("\nID\tTransfac\n"+id+"\t"+convert2full(curr.anno_transfac_class));
 							
-							bw.write("<h1>Static transfac-mapping:</h1>\n");
-							bw.write("<h3>"+convert2full(curr.transfac)+"</h3>\n");
-							bw.write("<br>\n\n");
+							bw.write("<h2>Static transfac-mapping: "+convert2full(curr.anno_transfac_class)+ "</h2>\n");
+							//bw.write("<h3>"+convert2full(curr.transfac)+"</h3>\n");
+							//bw.write("<br>\n\n");
 						}
 			    	}
 			    	else {
@@ -238,15 +237,16 @@ public class GalaxyPredict {
 					    	System.out.println("\nSuperClass Prediction:\nID\t4\t3\t2\t1\t0");
 					    	System.out.println(id+"\t"+df.format(sDis[4])+"\t"+df.format(sDis[3])+"\t"+df.format(sDis[2])+"\t"+df.format(sDis[1])+"\t"+df.format(sDis[0]));
 					    	
-					    	bw.write("<h1>Superclass prediction:</h1>\n");
+					    	bw.write("<h2>Superclass prediction:</h2>\n");
 							bw.write("<table>\n");
 							bw.write("  <tr><th> Superclass </th><th> 4 </th><th> 3 </th><th> 2 </th><th> 1 </th><th> 0 </th></tr>\n");
 							bw.write("  <tr><th> Probability </th><th> "+df.format(sDis[4])+" </th><th> "+df.format(sDis[3])+" </th><th> "+df.format(sDis[2])+" </th><th> "+df.format(sDis[1])+" </th><th> "+df.format(sDis[0])+" </th></tr>\n");
 							bw.write("</table>\n\n");
-							bw.write("<br><br>\n\n");
+							bw.write("<br>\n\n");
 					    	
 				    	}
 			    	}
+			    	bw.write("<br><hr>\n\n");
 			    }
 		    
 		    }
@@ -265,7 +265,7 @@ public class GalaxyPredict {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	    	
+	    		
 	}
 
 	
@@ -279,12 +279,12 @@ public class GalaxyPredict {
 	    	
 	    	IprEntry entry = current.getValue();
 	    	
-	    	String fvector = createIPRvector(entry.iprs, iprs, 10);
+	    	String fvector = createIPRvector(entry.domain_ids, iprs, 10);
 	    	
 	    	//System.out.println(fvector);
 	    	
 	    	if (!fvector.isEmpty()) {
-	    		id2fvector.put(entry.id, getInst("0 "+fvector));
+	    		id2fvector.put(entry.sequence_id, getInst("0 "+fvector));
 	    	}
 	    
 	    }
@@ -351,9 +351,9 @@ public class GalaxyPredict {
 			IprEntry curr_entry;
 			if (id2entry.containsKey(id)) {
 				curr_entry = id2entry.get(id);
-				ArrayList<String> curr_iprs = curr_entry.iprs;
+				ArrayList<String> curr_iprs = curr_entry.domain_ids;
 				if (!curr_iprs.contains(ipr)) curr_iprs.add(ipr);
-				curr_entry.iprs = curr_iprs;
+				curr_entry.domain_ids = curr_iprs;
 				id2entry.put(id, curr_entry);
 			}
 			else {
@@ -371,7 +371,7 @@ public class GalaxyPredict {
 		
 		System.out.println("Running IPRscan ...");
 		
-		//System.out.println(iprpath+" -cli -i "+seqfile+" -format raw -goterms -iprlookup -altjobs");
+		System.out.println(iprpath+" -cli -i "+seqfile+" -format raw -goterms -iprlookup -altjobs");
 		
 		Runtime rt = Runtime.getRuntime();
 
@@ -405,8 +405,6 @@ public class GalaxyPredict {
 			 line = br.readLine();
 			 
 			 while (line != null) {
-				 
-				 System.out.println(line);
 				 
 				 String[] entry = line.split("\t");
 				 
