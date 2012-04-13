@@ -5,7 +5,6 @@
  */
 
 import modes.GalaxyPredict;
-import modes.GalaxyPredictBatch;
 import modes.Predict;
 import modes.SuperTrain;
 import modes.Train;
@@ -28,29 +27,31 @@ public class MainTF_predict {
 		// create Options object
 		Options options = new Options();
 
-		// galaxy options
-		options.addOption("galaxy", false, "predict the given sequence");
-		options.addOption("galaxybatch", true, "predict the given sequences");
-		options.addOption("basedir", true, "directory for temporary files");
-		options.addOption("html_outfile", true, "HTML report");
+		// mandatory arguments passed from Galaxy
+		options.addOption("galaxy", false, "switch to run web-tool version of the tool");
+		options.addOption("sequence", true, "input protein sequence");
+		options.addOption("uniprot_id", true, "input UniProt Accession Number or Entry Name");
+		options.addOption("fasta", true, "input FASTA file for batch mode");
+		options.addOption("html_outfile", true, "output HTML report");
 		options.addOption("sabine_outfile", true, "output file in SABINE format");
-		options.addOption("sequence", true, "output file in SABINE format");
-		options.addOption("uniprot_id", true, "UniProt Accession Number or Entry Name");
+		options.addOption("basedir", true, "directory for temporary files");
+
 		options.addOption("species", true, "organism (e.g., Homo sapiens)");
 		
-		// add options
+		// optional arguments
+		options.addOption("iprscanPath", true, "path to InterProScan");
+		options.addOption("tfClassifierFile", true, "file containing TF/Non-TF classifier");
+		options.addOption("superClassifierFile", true, "file containing Superclass classifier");
+		options.addOption("tfClassFeatureFile", true, "file containing features used by TF/Non-TF classifier");
+		options.addOption("superClassFeatureFile", true, "file containing features used by Superclass classifier");
+		options.addOption("relGOtermsFile", true, "file containing GO terms relevant for DNA-binding domain prediction");
+		options.addOption("tfName2ClassFile", true, "file containing mapping from TF names to TransFac classes");
+		
+		// options not needed for web-tool version of TFpredict
 		options.addOption("train", false, "train classifier");
 		options.addOption("super", false, "train super classifier");
 		options.addOption("predict", true, "predict this sequence file");
-		options.addOption("i", true, "model input");
-		options.addOption("s", true, "super model input");
-		options.addOption("f", true, "number of folds");
-		options.addOption("p", true, "Path to IPRscan");
-		options.addOption("r", true, "iprs object");
-		options.addOption("sr", true, "super iprs object");
-		options.addOption("g", true, "go-terms file");
-		options.addOption("t", true, "transfac map");
-
+		options.addOption("f", true, "number of folds");		
 		
 		CommandLine cmd = null;
 		CommandLineParser cmdparser = new PosixParser();
@@ -89,13 +90,6 @@ public class MainTF_predict {
 		else if (cmd.hasOption("galaxy")) {
 			try {
 				GalaxyPredict.main(cmd);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		else if (cmd.hasOption("galaxybatch")) {
-			try {
-				GalaxyPredictBatch.main(cmd);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
