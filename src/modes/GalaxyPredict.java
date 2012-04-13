@@ -34,50 +34,60 @@ import weka.core.converters.LibSVMLoader;
 public class GalaxyPredict {
 	
 	static boolean silent = false;
-	
+	static boolean batchMode = false;
+
+	// static arguments required by TFpredict
 	static String iprpath = "/opt/iprscan/bin/iprscan";
+	static String tfClassifier_file = "data/ipr.model";
+	static String superClassifier_file = "data/super.model";
+	static String relDomainsTF_file = "data/ipr.iprs";
+	static String relDomainsSuper_file = "data/super.iprs";
+	static String relGOterms_file = "data/DNA.go";
+	static String tfName2class_file = "data/transHMan";
+	
+	// arguments passed from Galaxy to TFpredict
 	static String basedir = "";
 	static String input_file = "";
 	static String html_outfile;
 	static String sabine_outfile;
-	static String sequence;
 	static String species;
+	static String sequence;
+	static String tfName = "Sequence_1";
 	static String uniprot_id;
-	static String tfName = "InputTF";
-	static String trainfile = "";
-	static String superfile = "";
-	static String tfName2classFile = "";
-	
+	static String fasta_file;
+
+	private Classifier tfClassifier;
+	private Classifier superClassifier;
 	private ArrayList<String> relDomains_TFclass;
 	private ArrayList<String> relDomains_Superclass;
 	private ArrayList<String> relGOterms;
-	private FileParser fp = new FileParser(true);
 	private HashMap<String,String> tfName2class;
-	private Classifier cls;
-	private Classifier supercls;
+	private FileParser fp = new FileParser(true);
 	
 	private HashMap<String, IprEntry> seq2domain;
 	private HashMap<String, IprRaw> IPRdomains;
 	private HashMap<String, IprProcessed> seq2bindingDomain;
-	private HashMap<String, Double[]> probDist_TFclass;
-	private HashMap<String, Double[]> probDist_Superclass;
-	private HashMap<String, String> annotatedClass;
-	private ArrayList<String> bindingDomains;
 	
-	private HashMap<String, Boolean> predictionPossible;
-	private HashMap<String, Boolean> seqIsTF;
-	private HashMap<String, Boolean> annotatedClassAvailable;
-	private HashMap<String, Boolean> domainsPredicted;
+	private HashMap<String, String> sequences = new HashMap<String, String>();
+	private HashMap<String, Double[]> probDist_TFclass  = new HashMap<String, Double[]>();
+	private HashMap<String, Double[]> probDist_Superclass = new HashMap<String, Double[]>();
+	private HashMap<String, Integer> predictedSuperclass  = new HashMap<String, Integer>();
+	private HashMap<String, String> annotatedClass  = new HashMap<String, String>();
+	private HashMap<String, String[]> bindingDomains  = new HashMap<String, String[]>();
+	
+	private HashMap<String, Boolean> predictionPossible = new HashMap<String, Boolean>();
+	private HashMap<String, Boolean> seqIsTF = new HashMap<String, Boolean>();
+	private HashMap<String, Boolean> annotatedClassAvailable = new HashMap<String, Boolean>();
+	private HashMap<String, Boolean> domainsPredicted = new HashMap<String, Boolean>();
 	
 	private static final int Non_TF = 0;
 	private static final int TF = 1;
-	private static final int Basic_domain = 0;
-	private static final int Zinc_finger = 1;
-	private static final int Helix_turn_helix = 2;
-	private static final int Beta_scaffold = 3;
-	private static final int Other = 4;
-	
-	private final String[] labelSet_Superclass = new String[] {};
+	private static final int Basic_domain = 1;
+	private static final int Zinc_finger = 2;
+	private static final int Helix_turn_helix = 3;
+	private static final int Beta_scaffold = 4;
+	private static final int Other = 0;
+	private static final String[] superclassNames = new String[] {"Other", "Basic domain", "Zinc finger", "Helix-turn-helix", "Beta scaffold"};
 	
 	static DecimalFormat df = new DecimalFormat("0.00");
 	static {
@@ -85,7 +95,6 @@ public class GalaxyPredict {
 		symb.setDecimalSeparator('.');
 		df.setDecimalFormatSymbols(symb);
 	}
-
 
 	public static void main(CommandLine cmd) throws Exception {
 		
@@ -100,39 +109,8 @@ public class GalaxyPredict {
 		TFpredictor.writeSABINEoutput();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void parseArguments(CommandLine cmd) {
 		
-		if(cmd.hasOption("i")) {
-			trainfile = cmd.getOptionValue("i");
-		}
-
-		if(cmd.hasOption("s")) {
-			superfile = cmd.getOptionValue("s");
-		}
-		
-		if(cmd.hasOption("g")) {
-			relGOterms = fp.parseGO(cmd.getOptionValue("g"));
-		}
-		
-		if(cmd.hasOption("r")) {
-			relDomains_TFclass = (ArrayList<String>) ObjectRW.read(cmd.getOptionValue("r"), true);
-		}
-	
-		if(cmd.hasOption("sr")) {
-		   	relDomains_Superclass = (ArrayList<String>) ObjectRW.read(cmd.getOptionValue("sr"), true);
-		}
-		
-		// load static map (Factor name --> TransFac class) for TF class annotation
-		if(cmd.hasOption("t")) {
-			tfName2class = (HashMap<String, String>) ObjectRW.read(cmd.getOptionValue("t"), true);
-		}
-		
-		if(cmd.hasOption("p")) {
-			iprpath = cmd.getOptionValue("p");
-		}
-		
-		// input protein can be given either as protein sequence or Uniprot Accession / Entry Name 
 		if(cmd.hasOption("sequence")) {
 			sequence = cmd.getOptionValue("sequence");
 		}
@@ -143,6 +121,11 @@ public class GalaxyPredict {
 		
 		if(cmd.hasOption("uniprot_id")) {
 			uniprot_id = cmd.getOptionValue("uniprot_id");
+		}
+		
+		if(cmd.hasOption("fasta")) {
+			fasta_file = cmd.getOptionValue("fasta");
+			batchMode = true;
 		}
 		
 		if(cmd.hasOption("html_outfile")) {
@@ -157,9 +140,44 @@ public class GalaxyPredict {
             basedir = cmd.getOptionValue("basedir");
             input_file = basedir + "/query.fasta";
         }
+        
+		if(cmd.hasOption("tfClassifierFile")) {
+			tfClassifier_file = cmd.getOptionValue("tfClassifierFile");
+		}
+
+		if(cmd.hasOption("superClassifierFile")) {
+			superClassifier_file = cmd.getOptionValue("superClassifierFile");
+		}
+		
+		if(cmd.hasOption("tfClassFeatureFile")) {
+			relDomainsTF_file = cmd.getOptionValue("tfClassFeatureFile");
+		}
+	
+		if(cmd.hasOption("superClassFeatureFile")) {
+			relDomainsSuper_file = cmd.getOptionValue("superClassFeatureFile");
+		}
+		
+		if(cmd.hasOption("relGOtermsFile")) {
+			relGOterms_file = cmd.getOptionValue("relGOtermsFile");
+		}
+
+		if(cmd.hasOption("tfName2ClassFile")) {
+			tfName2class_file = cmd.getOptionValue("tfName2ClassFile");
+		}
+		
+		if(cmd.hasOption("iprscanPath")) {
+			iprpath = cmd.getOptionValue("iprscanPath");
+		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void prepareInput() {
+		
+		relDomains_TFclass = (ArrayList<String>) ObjectRW.read(relDomainsTF_file, true);
+		relDomains_Superclass = (ArrayList<String>) ObjectRW.read(relDomainsSuper_file, true);
+		tfName2class = (HashMap<String, String>) ObjectRW.read(tfName2class_file, true);
+		
+		relGOterms = fp.parseGO(relGOterms_file);
 		
 		// if UniProt ID was given --> retrieve sequence and species from UniProt
 		if (uniprot_id != null) {
@@ -178,17 +196,23 @@ public class GalaxyPredict {
 			}
 		} 
 		
-		// write protein sequence to file
-		
-        BasicTools.writeArrayToFile(BasicTools.wrapString(sequence), input_file);
+		if (batchMode) {
+			// BatchMode --> parse sequences from given FASTA file (and shorten long headers)
+			sequences = BasicTools.readFASTA(fasta_file);
+			BasicTools.writeFASTA(sequences, input_file);
+			
+		} else {
+			// SingleQueryMode --> write protein sequence to file
+			BasicTools.writeArrayToFile(BasicTools.wrapString(sequence), input_file);
+		}
 	}
 	
 	private void prepareClassifiers() {
 
 		// load TF/Non-TF and superclass classifier
 		try {
-			cls = (Classifier) weka.core.SerializationHelper.read(trainfile);
-			supercls = (Classifier) weka.core.SerializationHelper.read(superfile);
+			tfClassifier = (Classifier) weka.core.SerializationHelper.read(tfClassifier_file);
+			superClassifier = (Classifier) weka.core.SerializationHelper.read(superClassifier_file);
 		
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -203,26 +227,30 @@ public class GalaxyPredict {
 	 // execute iprscan and get results
 	private void runInterproScan() {
 
-		//TODO: fix query
-		// HACK: lines were excluded for testing purposes
-		if (!silent) System.out.println("Running InterProScan to predict domains.");
-		//ArrayList<String[]> IPRoutput = IPRrun.run(input_file, iprpath);
+		// HACK: line can be excluded for testing purposes
+		ArrayList<String[]> IPRoutput = IPRrun.run(input_file, iprpath);
 		
-		// HACK: line was included for testing purposes
-		ArrayList<String[]> IPRoutput = fp.parseIPRout("batch_result");
+		// HACK: line can be included for testing purposes
+		// ArrayList<String[]> IPRoutput = fp.parseIPRout("batch_result");
 	
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
-		
-		String id = seq2domain.keySet().toArray(new String[]{})[0];
-		if (!silent) System.out.println(seq2domain.get(id).domain_ids.size() + " InterPro domain(s) found in given protein sequence.");
+		if (!silent) {
+			for	(String seq: seq2domain.keySet()) {
+				System.out.println(seq2domain.get(seq).domain_ids.size() + " InterPro domain(s) found in given protein sequence.");
+			}
+		}
     
 		// generates map of from domain ID to object containing the InterPro ID, description, position, and GO classes
 		IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
 	
 		// process result
 		seq2bindingDomain = IPRprocess.filterIPRdomains(seq2domain, IPRdomains, relGOterms, tfName2class);
-		if (!silent) System.out.println(seq2bindingDomain.get(id).binding_domains.size() + " DNA-binding domain(s) found in given protein sequence.");
+		if (!silent) {
+			for	(String seq: seq2bindingDomain.keySet()) {
+				System.out.println(seq2bindingDomain.get(seq).binding_domains.size() + " DNA-binding domain(s) found in given protein sequence.");
+			}
+		}
 	}
 	
 	private void performClassification() {
@@ -244,20 +272,27 @@ public class GalaxyPredict {
 			for (String seq: seq2feat_TFclass.keySet()) {
 				if (predictionPossible.get(seq)) {
 					
-					// perform TF/Non-TF classification
-					Instance fvector = seq2feat_TFclass.get(seq);
-					probDist_TFclass = cls.distributionForInstance(fvector);
+					seqIsTF.put(seq, false);
+					annotatedClassAvailable.put(seq, false);
+					domainsPredicted.put(seq, false);
 					
-					if (probDist_TFclass[TF] > probDist_TFclass[Non_TF] && seq2feat_Superclass.containsKey(seq)) {
+					// perform TF/Non-TF classification
+					Instance featVectorTF = seq2feat_TFclass.get(seq);
+					double[] currProbDistTF = tfClassifier.distributionForInstance(featVectorTF);
+					probDist_TFclass.put(seq, BasicTools.double2Double(currProbDistTF));
+					
+					if (currProbDistTF[TF] > currProbDistTF[Non_TF] && seq2feat_Superclass.containsKey(seq)) {
 						seqIsTF.put(seq, true);
-					} else {
-						seqIsTF.put(seq, false);
 					}
 		    		
 					// if sequence was classified as TF --> predict superclass
 					if (seqIsTF.get(seq)) {
-						Instance svector = seq2feat_Superclass.get(seq);
-						probDist_Superclass = supercls.distributionForInstance(svector);
+						Instance featVectorSuper = seq2feat_Superclass.get(seq);
+						double[] currProbDistSuper = superClassifier.distributionForInstance(featVectorSuper);
+						probDist_Superclass.put(seq, BasicTools.double2Double(currProbDistSuper));
+						
+						int maxIndex = BasicTools.getMaxIndex(currProbDistSuper);
+						predictedSuperclass.put(seq, maxIndex);
 						
 						// predict DNA-binding domain
 				    	IprProcessed ipr_res = seq2bindingDomain.get(seq);
@@ -266,14 +301,10 @@ public class GalaxyPredict {
 				    		if (!ipr_res.anno_transfac_class.isEmpty()) {
 				    			annotatedClassAvailable.put(seq, true);
 				    			annotatedClass.put(seq, ipr_res.anno_transfac_class);
-				    		} else {
-				    			annotatedClassAvailable.put(seq, false);
-				    		}
+				    		} 
 				    		if (!ipr_res.binding_domains.isEmpty()) {
 				    			domainsPredicted.put(seq, true);
-				    			bindingDomains.put(seq, ipr_res.binding_domains);
-				    		} else {
-				    			domainsPredicted.put(seq, false);
+				    			bindingDomains.put(seq, ipr_res.binding_domains.toArray(new String[]{}));
 				    		}
 				    	}
 					}
@@ -298,58 +329,72 @@ public class GalaxyPredict {
 			bw.write("<title>TF_predict Result</title>\n");
 			bw.write("<style type=\"text/css\">\n");
 			bw.write("  h1 { font-size: 150%;color: #002780; }\n");
-			bw.write("  table { width: 500px; background-color: #E6E8FA; border: 1px solid black; padding: 3px; vertical-align: middle;}\n");
+			bw.write("  table { width: 300px; background-color: #E6E8FA; border: 1px solid black; padding: 3px; vertical-align: middle;}\n");
 			bw.write("  tr.secRow { background-color:#FFFFFF; margin-bottom: 50px; vertical-align: middle;}\n");
-			bw.write("  th { font-weight: bold; padding-bottom: 8px; padding-top: 8px; text-align: center}\n");
-			bw.write("  td { padding-bottom: 8px; padding-top: 8px; text-align: center}\n");
+			bw.write("  th { font-weight: bold; padding-bottom: 4px; padding-top: 4px; text-align: center;}\n");
+			bw.write("  td { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#FFFFFF;}\n");
 			bw.write("</style>\n");
 			bw.write("</head>\n");
 			bw.write("<body style=\"padding-left: 30px\">\n");
 			
-			if (predictionPossible) {
-				bw.write("<h1>TF/Non-TF prediction:</h1>\n");
-				bw.write("<table>\n");
-				bw.write("  <tr><th></th><th> TF </th><th> Non-TF </th></tr>\n");
-				bw.write("  <tr><th> Probability </th><td> "+ df.format(probDist_TFclass[1]) +" </td><td> " + df.format(probDist_TFclass[0])+" </td></tr>\n");
-				bw.write("</table>\n\n");
-				bw.write("<br><br>\n\n");
-				    
-				if (seqIsTF) {
-					bw.write("<h1>Superclass prediction:</h1>\n");
+			String[] sequence_ids = seq2domain.keySet().toArray(new String[]{});
+			for (int i=0; i<sequence_ids.length; i++) {
+				String seq = sequence_ids[i];
+				
+				if (i > 0) {
+					bw.write("<br><hr>\n\n");
+				}
+			
+				if (predictionPossible.get(seq)) {
+					bw.write("<h1>TF/Non-TF prediction:</h1>\n");
 					bw.write("<table>\n");
-					bw.write("  <tr><th> Superclass </th><td> 4 </td><td> 3 </td><td> 2 </td><td> 1 </td><td> 0 </td></tr>\n");
-					bw.write("  <tr><th> Probability </th><td> "+df.format(probDist_Superclass[4])+" </td><td> "+df.format(probDist_Superclass[3])+" </td><td> "+df.format(probDist_Superclass[2])+" </td><td> "+df.format(probDist_Superclass[1])+" </td><td> "+df.format(probDist_Superclass[0])+" </td></tr>\n");
+					bw.write("  <tr><th></th><th>Probability<th></tr>\n");
+					bw.write("  <tr><th> TF </th><td> " + df.format(probDist_TFclass.get(seq)[TF]) + " </td></tr>\n");
+					bw.write("  <tr><th> Non-TF </th><td> " + df.format(probDist_TFclass.get(seq)[Non_TF]) + " </td></tr>\n");
 					bw.write("</table>\n\n");
-					bw.write("<br><br>\n\n");    	
+					bw.write("<br><br>\n\n");
+					    
+					if (seqIsTF.get(seq)) {
+						bw.write("<h1>Superclass prediction:</h1>\n");
+						bw.write("<table>\n");
+						bw.write("  <tr><th></th><th> Probability </th></tr>\n");
+						bw.write("  <tr><th> Basic domain </th><td> " + df.format(probDist_Superclass.get(seq)[Basic_domain]) + " </td></tr>\n");
+						bw.write("  <tr><th> Zinc finger </th><td> " + df.format(probDist_Superclass.get(seq)[Zinc_finger]) + " </td></tr>\n");
+						bw.write("  <tr><th> Helix-turn-helix </th><td> " + df.format(probDist_Superclass.get(seq)[Helix_turn_helix]) + " </td></tr>\n");
+						bw.write("  <tr><th> Beta scaffold </th><td> " + df.format(probDist_Superclass.get(seq)[Beta_scaffold]) + " </td></tr>\n");
+						bw.write("  <tr><th> Other </th><td> " + df.format(probDist_Superclass.get(seq)[Other]) + " </td></tr>\n");
+						bw.write("</table>\n\n");
+						bw.write("<br><br>\n\n");    	
+				    }
+						
+		    		if (annotatedClassAvailable.get(seq)) {	
+						bw.write("<h1>Annotated structural class:</h1>\n");
+						bw.write("<h3>" + getAnnotatedSuperclass(annotatedClass.get(seq)) + " (" + annotatedClass.get(seq) + ") </h3>\n");
+						bw.write("<br>\n\n");
+					} else {
+			    		bw.write("<h1>No structural class annotation available from TransFac.</h1>\n");
+			    	}
+				    	
+				    if (domainsPredicted.get(seq)) {
+						bw.write("<h1>DNA-binding domain(s):</h1>\n");
+						bw.write("<table>\n");
+						bw.write("  <tr><th> Start </th><th> End </th></tr>\n");	
+				    	
+						for (String domain : bindingDomains.get(seq)) {
+							String[] splitted_domain = domain.replace("    ", "\t").split("\t");
+							bw.write("  <tr><td> "+ splitted_domain[1] +" </td><td> " + splitted_domain[2] +" </td></tr>\n"); 
+						}
+						bw.write("</table>\n\n");
+						bw.write("<br>\n\n");
+						
+				    } else {
+			    		bw.write("<h1>No DNA-binding domain could be predicted.</h1>\n");
+			    	}
 			    }
-					
-	    		if (annotatedClassAvailable) {	
-					bw.write("<h1>Annotated structural class:</h1>\n");
-					bw.write("<h3>" + annotatedClass + "</h3>\n");
-					bw.write("<br>\n\n");
-				} else {
-		    		bw.write("<h1>No structural class annotation available from TransFac.</h1>\n");
-		    	}
-			    	
-			    if (domainsPredicted) {
-					bw.write("<h1>DNA-binding domain(s):</h1>\n");
-					bw.write("<table>\n");
-					bw.write("  <tr><th> Start </th><th> End </th></tr>\n");	
-			    	
-					for (String domain : bindingDomains) {
-						String[] splitted_domain = domain.replace("    ", "\t").split("\t");
-						bw.write("  <tr><td> "+ splitted_domain[1] +" </td><td> " + splitted_domain[2] +" </td></tr>\n"); 
-					}
-					bw.write("</table>\n\n");
-					bw.write("<br>\n\n");
-					
-			    } else {
-		    		bw.write("<h1>No DNA-binding domain could be predicted.</h1>\n");
-		    	}
-		    }
-		    else {
-		    	bw.write("<h1>No prediction possible.</h1>");
-		    }
+			    else {
+			    	bw.write("<h1>No prediction possible.</h1>");
+			    }
+			}
 			
 			// close HTML file
 			bw.write("</body>\n");
@@ -368,40 +413,59 @@ public class GalaxyPredict {
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(sabine_outfile)));
 			
-			bw.write("NA  " + tfName + "\n");
-			bw.write("XX  \n");
-			bw.write("SP  " + species + "\n");
-			bw.write("XX  \n");
-			if (uniprot_id != null) {
-				bw.write("RF  " + uniprot_id + "\n");
-				bw.write("XX  \n");
-			}
-			if (annotatedClassAvailable) {
-				bw.write("CL  " + expandTransfacClass(annotatedClass) + "\n");
-			} else {
-				// TODO: determine superclass with highest probability
-				bw.write("CL  " + probDist_Superclass + ".0.0.0.0");
-			}
-			bw.write("XX  \n");
-
-			// write sequence
-			String[] wrapped_seq = BasicTools.wrapString(sequence);
-			for (String line: wrapped_seq) {
-				bw.write("S1  " + line + "\n"); 
-			}
-			bw.write("XX  \n");
-					
-			// write domains
-			if (domainsPredicted) {
-				for (String domain : bindingDomains) {
-					bw.write("FT  " + domain + "\n");
+			String[] sequence_ids = seq2domain.keySet().toArray(new String[]{});
+			for (int i=0; i<sequence_ids.length; i++) {
+				String seq = sequence_ids[i];
+				
+				if (i > 0) {
+					bw.write("//\nXX\n");
 				}
-				bw.write("XX\n");
+				
+				// TODO: use first token from FASTA header as "tfName" if batch-mode was called
+				if (batchMode) {
+					bw.write("NA  " + seq + "\n");
+				} else {
+					bw.write("NA  " + tfName + "\n");
+				}
+				bw.write("XX  \n");
+				bw.write("SP  " + species + "\n");
+				bw.write("XX  \n");
+				if (uniprot_id != null) {
+					bw.write("RF  " + uniprot_id + "\n");
+					bw.write("XX  \n");
+				}
+				if (annotatedClassAvailable.get(seq)) {
+					bw.write("CL  " + expandTransfacClass(annotatedClass.get(seq)) + "\n");
+				} else {
+					bw.write("CL  " + predictedSuperclass.get(seq) + ".0.0.0.0" + "\n");
+				}
+				bw.write("XX  \n");
+	
+				// write sequence
+				// TODO: Fix Bug: sequence is not initialized in Batch mode
+				String[] wrapped_seq;
+				if (batchMode) {
+					wrapped_seq = BasicTools.wrapString(sequences.get(seq));
+				} else {
+					wrapped_seq = BasicTools.wrapString(sequence);
+				}
+				for (String line: wrapped_seq) {
+					bw.write("S1  " + line + "\n"); 
+				}
+				bw.write("XX  \n");
+						
+				// write domains
+				if (domainsPredicted.get(seq)) {
+					for (String domain : bindingDomains.get(seq)) {
+						bw.write("FT  " + domain + "\n");
+					}
+					bw.write("XX\n");
+				}
 			}
 			bw.flush();
 			bw.close();
-		}
-		catch(IOException ioe) {
+			
+		} catch(IOException ioe) {
 			System.out.println(ioe.getMessage());
 			System.out.println("IOException occurred while writing input file for SABINE.");
 		}
@@ -418,7 +482,9 @@ public class GalaxyPredict {
             return expanded_class;
     }
 
-	
+    private static String getAnnotatedSuperclass(String transfac_class) {
+    	return(superclassNames[Integer.parseInt(transfac_class.substring(0,1))]);
+    }
 	
 	/*
 	 * functions used to create the feature vectors for TF/Non-TF classification and superclass prediction
