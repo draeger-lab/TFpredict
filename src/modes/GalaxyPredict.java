@@ -35,6 +35,7 @@ public class GalaxyPredict {
 	
 	static boolean silent = false;
 	static boolean batchMode = false;
+	public static boolean useWeb = false;
 
 	// static arguments required by TFpredict
 	static String iprpath = "/opt/iprscan/bin/iprscan";
@@ -167,6 +168,9 @@ public class GalaxyPredict {
 		
 		if(cmd.hasOption("iprscanPath")) {
 			iprpath = cmd.getOptionValue("iprscanPath");
+		}
+		if(cmd.hasOption("useWeb")) {
+			useWeb = true;
 		}
 	}
 	
