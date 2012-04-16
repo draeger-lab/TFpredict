@@ -19,21 +19,22 @@ import uk.ac.ebi.webservices.jaxws.IPRScanClient;
 
 
 public class IPRrun {
-
+	
 	public static ArrayList<String[]> run(String seqfile, String iprpath) {
 		
 		ArrayList<String[]> IPRoutput = null;
 		
-		if (GalaxyPredict.useWeb) { // SOAP 
+		if (GalaxyPredict.useWeb) { // SOAP
 			
 			// set parameter
-			String[] param = new String[5];
+			String[] param = new String[6];
 			
 			param[0] = "--async";
 			param[1] = "--email";
-			param[2] = "auto459526@hushmail.com";	// TODO request email?
+			param[2] = "auto459526@hushmail.com";	// TODO request email
 			param[3] = "--goterms";
-			param[4] = seqfile;
+			param[4] = "--multifasta";
+			param[5] = seqfile;
 			
 			// redirect System.out
 			PrintStream orig_stdout = System.out;
@@ -45,57 +46,38 @@ public class IPRrun {
 			System.setSecurityManager(new NoExitSecurityManager());
 						
 			// submit job
-			String jobid = "";
 			try {
 				IPRScanClient.main(param);
 			} catch (Exception e) {	}
 			
-			// grab jobid
-			jobid = jobid.concat(stdout.toString().trim());
-			
 			// restore System.exit
 			System.setSecurityManager(SecMan);
 			
+			// grab jobids
+			ArrayList<String> joblist = grabJobIDs(new ByteArrayInputStream(stdout.toByteArray()));
+			
+			// get results only
+			stdout.reset();
 			IPRScanClient webIPR = new IPRScanClient();
-			String status = "";
-			orig_stdout.println("Waiting for job \""+jobid+"\" ...");
-			// poll job
-			while (!status.matches("FINISHED")) {
-				
-				if (status.matches("RUNNING")) {
-					waiting(30);
-				}
+			orig_stdout.println("Waiting for "+joblist.size()+" job(s) to finish ...");
+			for (String jobid : joblist) {
+				orig_stdout.println("Polling job \""+jobid+"\" ...");
 				try {
-					status = webIPR.checkStatus(jobid);
-					//orig_stdout.println(status);
-					if (status.matches("NOT_FOUND")) {
-						System.exit(1);
-					}
-					
-				}
-				catch (IOException e) {
+					webIPR.getResults(jobid, "-", "out");
+				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (ServiceException e) {
 					e.printStackTrace();
 				}
+				orig_stdout.println("Job \""+jobid+"\" finished.");
 			}
-			
-			// get result
-			try {
-				stdout.reset();
-				webIPR.getResults(jobid, "-", "out");
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (ServiceException e) {
-				e.printStackTrace();
-			}
-			
+						
 			// restore System.out
 			System.setOut(orig_stdout);
 			
 			IPRoutput = readIPRoutput(new ByteArrayInputStream(stdout.toByteArray()));
-
-		} else { // local IPRscan
+			
+		} else { // local
 			
 			Runtime rt = Runtime.getRuntime();
 
@@ -115,16 +97,26 @@ public class IPRrun {
 		}
 		return IPRoutput;
 	}
-	
 
-	// waits n seconds
-	private static void waiting (int n){    
-		long t0, t1;
-		t0 =  System.currentTimeMillis();
-		do{
-			t1 = System.currentTimeMillis();
+	
+	private static ArrayList<String> grabJobIDs(ByteArrayInputStream byteArrayInputStream) {
+		
+		ArrayList<String> jobids = new ArrayList<String>();
+		
+		String line = null;
+		try {
+			 BufferedReader br = new BufferedReader(new InputStreamReader(byteArrayInputStream, "UTF-8")); 
+			 while ((line = br.readLine()) != null) {
+				 jobids.add(line.trim());
+			 }			 
+			 br.close();
+		} catch(IOException ioe) {
+			System.out.println(ioe.getMessage());
 		}
-		while ((t1 - t0) < (n * 1000));
+		
+		if (jobids.isEmpty()) System.err.println("Empty Joblist!");
+		
+		return jobids;
 	}
 	
 	
@@ -138,7 +130,7 @@ public class IPRrun {
 			 BufferedReader br = new BufferedReader(new InputStreamReader(IPRoutputStream, "UTF-8")); 
 			 while ((line = br.readLine()) != null) {
 				 IPRoutput.add(line.split("\t"));
-				 //System.out.println(line);
+				 System.out.println(line);
 			 }			 
 			 br.close();
 		}
