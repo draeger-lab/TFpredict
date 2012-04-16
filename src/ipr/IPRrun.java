@@ -3,6 +3,9 @@ package ipr;
 import io.NoExitSecurityManager;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,21 +13,31 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
-
 import javax.xml.rpc.ServiceException;
-
 import modes.GalaxyPredict;
-
 import uk.ac.ebi.webservices.jaxws.IPRScanClient;
 
 
 public class IPRrun {
 	
+	// default: use local installation of InterProScan and do not write output of tool to file
 	public static ArrayList<String[]> run(String seqfile, String iprpath) {
+		return(run(seqfile, iprpath, null, false));
+	}
+	
+	public static ArrayList<String[]> run(String seqfile, String iprpath, boolean useWeb) {
+		return(run(seqfile, iprpath, null, useWeb));
+	}
+	
+	public static ArrayList<String[]> run(String seqfile, String iprpath, String outputFile) {
+		return(run(seqfile, iprpath, outputFile, false));
+	}
+	
+	public static ArrayList<String[]> run(String seqfile, String iprpath, String outputFile, boolean useWeb) {
 		
 		ArrayList<String[]> IPRoutput = null;
 		
-		if (GalaxyPredict.useWeb) { // SOAP
+		if (useWeb) { // SOAP
 			
 			// set parameter
 			String[] param = new String[6];
@@ -97,7 +110,53 @@ public class IPRrun {
 		}
 		return IPRoutput;
 	}
-
+	
+	private static ArrayList<String[]> readIPRoutput(InputStream IPRoutputStream) {
+		return(readIPRoutput(IPRoutputStream, null));
+	}
+	
+	// reads the standard output from InterProScan
+	private static ArrayList<String[]> readIPRoutput(InputStream IPRoutputStream, String outputFile) {
+		
+		ArrayList<String[]> IPRoutput = new ArrayList<String[]>();
+		
+		// switch to save standard output of InterProScan to file (primarily used for testing and debugging)
+		boolean saveIPRoutput2file = false;
+		if (outputFile != null) {
+			saveIPRoutput2file = true;
+		}
+		
+		String line = null;
+		try {
+			 BufferedReader br = new BufferedReader(new InputStreamReader(IPRoutputStream, "UTF-8")); 
+			 BufferedWriter bw = null;
+			 if (saveIPRoutput2file) {
+				 bw = new BufferedWriter(new FileWriter(new File(outputFile)));
+			 }
+			 
+			 while ((line = br.readLine()) != null) {
+				 IPRoutput.add(line.split("\t"));
+				 if (saveIPRoutput2file) {
+					 bw.write(line + "\n");
+				 }
+				 System.out.println(line);
+			 }			 
+			 br.close();
+			 if (saveIPRoutput2file) {
+				 bw.flush();
+				 bw.close();
+			 }
+		}
+		
+		catch(IOException ioe) {
+			System.out.println(ioe.getMessage());
+			System.out.println("Parse Error. The error occurred while parsing the output of InterProScan.");
+			System.exit(1);
+		}
+		
+		return IPRoutput;
+	}
+	
 	
 	private static ArrayList<String> grabJobIDs(ByteArrayInputStream byteArrayInputStream) {
 		
@@ -118,30 +177,4 @@ public class IPRrun {
 		
 		return jobids;
 	}
-	
-	
-	// reads the standard output from InterProScan
-	private static ArrayList<String[]> readIPRoutput(InputStream IPRoutputStream) {
-		
-		ArrayList<String[]> IPRoutput = new ArrayList<String[]>();
-		
-		String line = null;
-		try {
-			 BufferedReader br = new BufferedReader(new InputStreamReader(IPRoutputStream, "UTF-8")); 
-			 while ((line = br.readLine()) != null) {
-				 IPRoutput.add(line.split("\t"));
-				 System.out.println(line);
-			 }			 
-			 br.close();
-		}
-		
-		catch(IOException ioe) {
-			System.out.println(ioe.getMessage());
-			System.out.println("Parse Error. The error occurred while parsing the output of InterProScan.");
-			System.exit(1);
-		}
-		
-		return IPRoutput;
-	}
-		
 }
