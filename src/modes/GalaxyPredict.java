@@ -17,12 +17,7 @@ import io.ObjectRW;
 import io.BasicTools;
 import io.UniProtClient;
 
-import ipr.IPRrun;
-import ipr.IPRextract;
-import ipr.IPRprocess;
-import ipr.IprEntry;
-import ipr.IprProcessed;
-import ipr.IprRaw;
+import ipr.*;
 
 import org.apache.commons.cli.CommandLine;
 
@@ -36,6 +31,8 @@ public class GalaxyPredict {
 	static boolean silent = false;
 	static boolean batchMode = false;
 	public static boolean useWeb = false;
+	public static String email;
+
 
 	// static arguments required by TFpredict
 	static String iprpath = "/opt/iprscan/bin/iprscan";
@@ -56,7 +53,7 @@ public class GalaxyPredict {
 	static String tfName = "Sequence_1";
 	static String uniprot_id;
 	static String fasta_file;
-
+	
 	private Classifier tfClassifier;
 	private Classifier superClassifier;
 	private ArrayList<String> relDomains_TFclass;
@@ -172,6 +169,9 @@ public class GalaxyPredict {
 		if(cmd.hasOption("useWeb")) {
 			useWeb = true;
 		}
+		if(cmd.hasOption("email")) {
+			email = cmd.getOptionValue("email");
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -235,7 +235,7 @@ public class GalaxyPredict {
 		ArrayList<String[]> IPRoutput = IPRrun.run(input_file, iprpath);
 		
 		// HACK: line can be included for testing purposes
-		// ArrayList<String[]> IPRoutput = fp.parseIPRout("batch_result");
+		//ArrayList<String[]> IPRoutput = fp.parseIPRout("result");
 	
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
@@ -348,7 +348,8 @@ public class GalaxyPredict {
 				if (i > 0) {
 					bw.write("<br><hr>\n\n");
 				}
-			
+				
+				// Null pointer exception ?
 				if (predictionPossible.get(seq)) {
 					bw.write("<h1>TF/Non-TF prediction:</h1>\n");
 					bw.write("<table>\n");

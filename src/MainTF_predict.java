@@ -38,6 +38,7 @@ public class MainTF_predict {
 
 		options.addOption("species", true, "organism (e.g., Homo sapiens)");
 		options.addOption("useWeb", false, "use IPRscan webservice");
+		options.addOption("email", false, "needed for IPRscan webservice");
 		
 		// optional arguments
 		options.addOption("iprscanPath", true, "path to InterProScan");
