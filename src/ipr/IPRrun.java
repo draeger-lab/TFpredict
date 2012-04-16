@@ -31,7 +31,7 @@ public class IPRrun {
 			
 			param[0] = "--async";
 			param[1] = "--email";
-			param[2] = "auto459526@hushmail.com";	// TODO request email
+			param[2] = GalaxyPredict.email;
 			param[3] = "--goterms";
 			param[4] = "--multifasta";
 			param[5] = seqfile;
