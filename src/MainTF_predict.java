@@ -36,9 +36,8 @@ public class MainTF_predict {
 		options.addOption("sabine_outfile", true, "output file in SABINE format");
 		options.addOption("basedir", true, "directory for temporary files");
 
-		options.addOption("species", true, "organism (e.g., Homo sapiens)");
-		options.addOption("useWeb", false, "use IPRscan webservice");
-		options.addOption("email", false, "needed for IPRscan webservice");
+		options.addOption("species", true, "organism (e.g. Homo sapiens)");
+		options.addOption("useWeb", true, "use IPRscan webservice, provide email");
 		
 		// optional arguments
 		options.addOption("iprscanPath", true, "path to InterProScan");

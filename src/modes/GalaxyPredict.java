@@ -30,6 +30,8 @@ public class GalaxyPredict {
 	
 	static boolean silent = false;
 	static boolean batchMode = false;
+	
+	// IPRwebservice
 	public static boolean useWeb = false;
 	public static String email;
 
@@ -168,9 +170,7 @@ public class GalaxyPredict {
 		}
 		if(cmd.hasOption("useWeb")) {
 			useWeb = true;
-		}
-		if(cmd.hasOption("email")) {
-			email = cmd.getOptionValue("email");
+			email = cmd.getOptionValue("useWeb");
 		}
 	}
 	
