@@ -29,12 +29,11 @@ import weka.core.converters.LibSVMLoader;
 public class GalaxyPredict {
 	
 	static boolean silent = false;
+	static boolean useWeb = false;
 	static boolean batchMode = false;
 	
-	// IPRwebservice
-	public static boolean useWeb = false;
+	// TODO: Hard-coded e-mail in IPRrun class
 	public static String email;
-
 
 	// static arguments required by TFpredict
 	static String iprpath = "/opt/iprscan/bin/iprscan";
@@ -168,9 +167,9 @@ public class GalaxyPredict {
 		if(cmd.hasOption("iprscanPath")) {
 			iprpath = cmd.getOptionValue("iprscanPath");
 		}
+		
 		if(cmd.hasOption("useWeb")) {
 			useWeb = true;
-			email = cmd.getOptionValue("useWeb");
 		}
 	}
 	
@@ -232,7 +231,7 @@ public class GalaxyPredict {
 	private void runInterproScan() {
 
 		// HACK: line can be excluded for testing purposes
-		ArrayList<String[]> IPRoutput = IPRrun.run(input_file, iprpath);
+		ArrayList<String[]> IPRoutput = IPRrun.run(input_file, iprpath, basedir + "/InterproScanOutput.txt", useWeb);
 		
 		// HACK: line can be included for testing purposes
 		//ArrayList<String[]> IPRoutput = fp.parseIPRout("result");
