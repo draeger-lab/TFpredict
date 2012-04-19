@@ -32,9 +32,6 @@ public class GalaxyPredict {
 	static boolean useWeb = false;
 	static boolean batchMode = false;
 	
-	// Hard-coded e-mail in IPRrun class
-	public static String email = "tfpredict@hushmail.com";
-
 	// static arguments required by TFpredict
 	static String iprpath = "/opt/iprscan/bin/iprscan";
 	static String tfClassifier_file = "data/ipr.model";
