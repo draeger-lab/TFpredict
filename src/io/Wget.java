@@ -1,5 +1,9 @@
 package io;
-
+/*
+ * ===============================================
+ * (C) Florian Topf, University of Tuebingen, 2010
+ * ===============================================
+ */
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URL;

@@ -1,5 +1,9 @@
 package ipr;
-
+/*
+ * ===============================================
+ * (C) Florian Topf, University of Tuebingen, 2012
+ * ===============================================
+ */
 import io.NoExitSecurityManager;
 
 import java.io.BufferedReader;

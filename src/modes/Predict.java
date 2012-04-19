@@ -27,16 +27,14 @@ import weka.core.Instances;
 import weka.core.converters.LibSVMLoader;
 
 public class Predict {
-	
-
-	
+		
 	static boolean useWeb = false;
 	static boolean standAloneMode = false;
 	static boolean batchMode = false;
 	static boolean silent = false;
 	
-	// TODO: Hard-coded e-mail in IPRrun class
-	public static String email;
+	// Hard-coded e-mail in IPRrun class
+	public static String email = "tfpredict@hushmail.com";
 
 	// static arguments required by TFpredict
 	static String iprpath = "/opt/iprscan/bin/iprscan";
@@ -362,7 +360,6 @@ public class Predict {
 					bw.write("<br><hr>\n\n");
 				}
 				
-				// Null pointer exception ?
 				if (predictionPossible.get(seq)) {
 					bw.write("<h1>TF/Non-TF prediction:</h1>\n");
 					bw.write("<table>\n");

@@ -1,4 +1,9 @@
 package io;
+/*
+ * ===============================================
+ * (C) Florian Topf, University of Tuebingen, 2012
+ * ===============================================
+ */
 import java.security.Permission;
 
 public class NoExitSecurityManager extends SecurityManager {
