@@ -1,5 +1,9 @@
 package ipr;
-
+/*
+ * ===============================================
+ * (C) Florian Topf, University of Tuebingen, 2010
+ * ===============================================
+ */
 import java.util.ArrayList;
 
 public class IprProcessed {

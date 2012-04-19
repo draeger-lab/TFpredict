@@ -1,5 +1,9 @@
 package io;
-
+/*
+ * ===============================================
+ * (C) Florian Topf, University of Tuebingen, 2010
+ * ===============================================
+ */
 import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;

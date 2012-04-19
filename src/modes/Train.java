@@ -1,5 +1,9 @@
 package modes;
-
+/*
+ * ===============================================
+ * (C) Florian Topf, University of Tuebingen, 2010
+ * ===============================================
+ */
 import io.GenerateROC;
 
 import java.io.BufferedReader;

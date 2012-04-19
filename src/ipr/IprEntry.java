@@ -1,4 +1,9 @@
 package ipr;
+/*
+ * ===============================================
+ * (C) Florian Topf, University of Tuebingen, 2010
+ * ===============================================
+ */
 import java.io.Serializable;
 import java.util.ArrayList;
 
