@@ -18,7 +18,6 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import javax.xml.rpc.ServiceException;
-import modes.Predict;
 import uk.ac.ebi.webservices.jaxws.IPRScanClient;
 
 
@@ -48,7 +47,7 @@ public class IPRrun {
 			
 			param[0] = "--async";
 			param[1] = "--email";
-			param[2] = Predict.email;
+			param[2] = "tfpredict@hushmail.com";
 			param[3] = "--goterms";
 			param[4] = "--multifasta";
 			param[5] = seqfile;
