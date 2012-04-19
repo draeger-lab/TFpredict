@@ -8,8 +8,6 @@ import java.io.File;
 import java.io.IOException;
 
 import modes.Predict;
-import modes.Predict;
-import modes.SuperTrain;
 import modes.Train;
 
 import org.apache.commons.cli.CommandLine;
@@ -54,8 +52,6 @@ public class TFpredictMain {
 			e.printStackTrace();
 		}
 		
-		HelpFormatter lvFormater = new HelpFormatter();
-		
 		if (galaxyMode) {
 			try {
 				Predict.main(cmd);
@@ -83,10 +79,10 @@ public class TFpredictMain {
 	
 	// returns the correct mode based on the string passed as first argument
 	private static void getMode(String firstArg) {
-		if (firstArg == "-galaxy") {
+		if (firstArg.equals("-galaxy")) {
 			galaxyMode = true;
 			
-		} else if (firstArg == "-train") {
+		} else if (firstArg.equals("-train")) {
 			trainMode = true;
 			
 		} else {
@@ -131,6 +127,7 @@ public class TFpredictMain {
 		if (galaxyMode) {
 			
 			// mandatory arguments passed from Galaxy
+			options.addOption("galaxy", false, "use InterProScan webservice");
 			options.addOption("sequence", true, "input protein sequence");
 			options.addOption("uniprotID", true, "input UniProt Accession Number or Entry Name");
 			options.addOption("fasta", true, "input FASTA file for batch mode");
