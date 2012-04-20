@@ -12,7 +12,6 @@ import modes.Train;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -204,7 +203,7 @@ public class TFpredictMain {
 		System.out.println("-----------------------------------------------------------------------------------");
 		System.out.println("(version 1.0)\n");
 		System.out.println("Copyright (C) 2012 Center for Bioinformatics T\u00fcbingen (ZBIT),");
-        System.out.println("University of T\u00fcbingen, Johannes Eichner and Florian Topf.\n");
+        System.out.println("University of T\u00fcbingen, Florian Topf und Johannes Eichner.\n");
         System.out.println("This program comes with ABSOLUTELY NO WARRANTY.");
         System.out.println("This is free software, and you are welcome to redistribute it under certain conditions.");
         System.out.print("For details see: ");
