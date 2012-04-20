@@ -232,7 +232,7 @@ public class GalaxyPredict {
 
 		IPRrun runner = new IPRrun();
 		// HACK: line can be excluded for testing purposes
-		ArrayList<String[]> IPRoutput = runner.run(input_file, iprpath, basedir, useWeb);
+		ArrayList<String[]> IPRoutput = runner.run(input_file, iprpath, basedir, useWeb, false);
 		
 		// HACK: line can be included for testing purposes
 		//ArrayList<String[]> IPRoutput = fp.parseIPRout("result");

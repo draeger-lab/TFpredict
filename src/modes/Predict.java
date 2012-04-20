@@ -238,12 +238,13 @@ public class Predict {
 	 // execute iprscan and get results
 	private void runInterproScan() {
 
+		IPRrun runner = new IPRrun();
 		// HACK: line can be excluded for testing purposes
-		// ArrayList<String[]> IPRoutput = IPRrun.run(input_file, iprpath, basedir + "/InterproScanOutput.txt", useWeb);
+		ArrayList<String[]> IPRoutput = runner.run(input_file, iprpath, basedir, useWeb, standAloneMode);
 		
 		// HACK: line can be included for testing purposes
-		basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1626_files";
-		ArrayList<String[]> IPRoutput = fp.parseIPRout(basedir + "/InterproScanOutput.txt");
+		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1626_files";
+		//ArrayList<String[]> IPRoutput = fp.parseIPRout(basedir + "/InterproScanOutput.txt");
 	
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
