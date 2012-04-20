@@ -37,11 +37,15 @@ public class IPRrun {
 		return(run(seqfile, iprpath, null, useWeb, false));
 	}
 	
+	public ArrayList<String[]> run(String seqfile, String iprpath, boolean useWeb, boolean standAloneMode) {
+		return(run(seqfile, iprpath, null, useWeb, standAloneMode));
+	}
+	
 	public ArrayList<String[]> run(String seqfile, String iprpath, String basedir) {
 		return(run(seqfile, iprpath, basedir, false, false));
 	}
 	
-	public ArrayList<String[]> run(String seqfile, String iprpath, String basedir, boolean useWeb, boolean alone) {
+	public ArrayList<String[]> run(String seqfile, String iprpath, String basedir, boolean useWeb, boolean standAloneMode) {
 		
 		ArrayList<String[]> IPRoutput = null;
 		
@@ -77,26 +81,52 @@ public class IPRrun {
 			// grab jobids
 			ArrayList<String> jobs = grabJobIDs(new ByteArrayInputStream(stdout.toByteArray()));
 			
-			// get results only
-			stdout.reset();
 			IPRScanClient webIPR = new IPRScanClient();
-			orig_stdout.println("Waiting for "+jobs.size()+" job(s) to finish ...");
-			for (String jobid : jobs) {
-				orig_stdout.println("Polling job \""+jobid+"\" ...");
-				try {
-					webIPR.getResults(jobid, "-", "out");
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (ServiceException e) {
-					e.printStackTrace();
-				}
-				orig_stdout.println("Job \""+jobid+"\" finished.");
-			}
-						
-			// restore System.out
-			System.setOut(orig_stdout);
 			
-			IPRoutput = readIPRoutput(new ByteArrayInputStream(stdout.toByteArray()));
+			if (standAloneMode) {
+				
+				// get results as stream
+				stdout.reset();
+				orig_stdout.println("Waiting for "+jobs.size()+" job(s) to finish ...");
+				for (String jobid : jobs) {
+					orig_stdout.println("Polling job \""+jobid+"\" ...");
+					try {
+						webIPR.getResults(jobid, "-", "out");
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (ServiceException e) {
+						e.printStackTrace();
+					}
+					orig_stdout.println("Job \""+jobid+"\" finished.");
+				}
+							
+				// restore System.out
+				System.setOut(orig_stdout);
+				
+				IPRoutput = readIPRoutput(new ByteArrayInputStream(stdout.toByteArray()));
+				
+			} else {
+				
+				// restore System.out
+				System.setOut(orig_stdout);
+				
+				// get results as files
+				System.out.println("Waiting for "+jobs.size()+" job(s) to finish ...");
+				for (String jobid : jobs) {
+					System.out.println("Polling job \""+jobid+"\" ...");
+					try {
+						webIPR.getResults(jobid, basedir+"/"+jobid, "out");
+						webIPR.getResults(jobid, basedir+"/"+jobid, "visual-png");
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (ServiceException e) {
+						e.printStackTrace();
+					}
+					System.out.println("Job \""+jobid+"\" finished.");
+				}
+				
+				IPRoutput = readIPRoutput(jobs);
+			}
 			
 		} else { // local
 			
@@ -119,6 +149,11 @@ public class IPRrun {
 		return IPRoutput;
 	}
 	
+	private ArrayList<String[]> readIPRoutput(ArrayList<String> jobs) {
+		// TODO
+		return null;
+	}
+
 	private static ArrayList<String[]> readIPRoutput(InputStream IPRoutputStream) {
 		return(readIPRoutput(IPRoutputStream, null));
 	}
