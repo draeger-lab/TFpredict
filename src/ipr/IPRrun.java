@@ -27,22 +27,21 @@ public class IPRrun {
 	
 	// gfx related
 	private HashMap<String, String> seq2job;
-	private HashMap<String, Boolean> gfxAvailable;
 	
 	// default: use local installation of InterProScan and do not write output of tool to file
-	public static ArrayList<String[]> run(String seqfile, String iprpath) {
+	public ArrayList<String[]> run(String seqfile, String iprpath) {
 		return(run(seqfile, iprpath, null, false));
 	}
 	
-	public static ArrayList<String[]> run(String seqfile, String iprpath, boolean useWeb) {
+	public ArrayList<String[]> run(String seqfile, String iprpath, boolean useWeb) {
 		return(run(seqfile, iprpath, null, useWeb));
 	}
 	
-	public static ArrayList<String[]> run(String seqfile, String iprpath, String basedir) {
+	public ArrayList<String[]> run(String seqfile, String iprpath, String basedir) {
 		return(run(seqfile, iprpath, basedir, false));
 	}
 	
-	public static ArrayList<String[]> run(String seqfile, String iprpath, String basedir, boolean useWeb) {
+	public ArrayList<String[]> run(String seqfile, String iprpath, String basedir, boolean useWeb) {
 		
 		ArrayList<String[]> IPRoutput = null;
 		
@@ -186,4 +185,9 @@ public class IPRrun {
 		
 		return jobids;
 	}
+
+	public HashMap<String, String> getSeq2job() {
+		return seq2job;
+	}
+
 }
