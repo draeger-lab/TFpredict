@@ -27,7 +27,10 @@ import weka.core.Instances;
 import weka.core.converters.LibSVMLoader;
 
 public class Predict {
-		
+	
+	private static final String interproPrefix = "http://www.ebi.ac.uk/interpro/ISearch?query=";
+	private static final String transfacURL = "http://www.gene-regulation.com/pub/databases/transfac/clSM.html";
+
 	static boolean useWeb = false;
 	static boolean standAloneMode = false;
 	static boolean batchMode = false;
@@ -249,9 +252,7 @@ public class Predict {
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
 		if (!silent) {
-			for	(String seq: seq2domain.keySet()) {
-				System.out.println(seq2domain.get(seq).domain_ids.size() + " InterPro domain(s) found in given protein sequence.");
-			}
+
 		}
     
 		// generates map of from domain ID to object containing the InterPro ID, description, position, and GO classes
@@ -261,7 +262,11 @@ public class Predict {
 		seq2bindingDomain = IPRprocess.filterIPRdomains(seq2domain, IPRdomains, relGOterms, tfName2class);
 		if (!silent) {
 			for	(String seq: seq2bindingDomain.keySet()) {
-				System.out.println(seq2bindingDomain.get(seq).binding_domains.size() + " DNA-binding domain(s) found in given protein sequence.");
+				System.out.println("Processed " + seq + ":");
+				int numDomains = seq2domain.get(seq).domain_ids.size();
+				int numBindingDomains = seq2bindingDomain.get(seq).binding_domains.size();
+				System.out.println("  " + numDomains + " InterPro domain(s) found.");
+				System.out.println("  " +  numBindingDomains + " / " + numDomains + " were identified as DNA-binding domain(s).\n");
 			}
 		}
 	}
@@ -342,10 +347,14 @@ public class Predict {
 			bw.write("<title>TF_predict Result</title>\n");
 			bw.write("<style type=\"text/css\">\n");
 			bw.write("  h1 { font-size: 150%;color: #002780; }\n");
+			bw.write("  h2 { font-size: 135%;color: #002780; }\n");
 			bw.write("  table { width: 300px; background-color: #E6E8FA; border: 1px solid black; padding: 3px; vertical-align: middle;}\n");
 			bw.write("  tr.secRow { background-color:#FFFFFF; margin-bottom: 50px; vertical-align: middle;}\n");
 			bw.write("  th { font-weight: bold; padding-bottom: 4px; padding-top: 4px; text-align: center;}\n");
 			bw.write("  td { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#FFFFFF;}\n");
+			bw.write("  td.win { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#98FB98;}\n");
+			bw.write("  td.draw { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#F0E68C}\n");
+			bw.write("  td.lose { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#FF7F50;}\n");
 			bw.write("</style>\n");
 			bw.write("</head>\n");
 			bw.write("<body style=\"padding-left: 30px\">\n");
@@ -358,8 +367,10 @@ public class Predict {
 					bw.write("<br><hr>\n\n");
 				}
 				
+				bw.write("<h1>Results report: " + seq + "</h1>\n");
+				
+				bw.write("<h2>TF/Non-TF prediction:</h2>\n");
 				if (predictionPossible.get(seq)) {
-					bw.write("<h1>TF/Non-TF prediction:</h1>\n");
 					bw.write("<table>\n");
 					bw.write("  <tr><th></th><th>Probability<th></tr>\n");
 					bw.write("  <tr><th> TF </th><td> " + df.format(probDist_TFclass.get(seq)[TF]) + " </td></tr>\n");
@@ -368,44 +379,46 @@ public class Predict {
 					bw.write("<br><br>\n\n");
 					    
 					if (seqIsTF.get(seq)) {
-						bw.write("<h1>Superclass prediction:</h1>\n");
+						bw.write("<h2>Superclass prediction:</h2>\n");
 						bw.write("<table>\n");
 						bw.write("  <tr><th></th><th> Probability </th></tr>\n");
 						bw.write("  <tr><th> Basic domain </th><td> " + df.format(probDist_Superclass.get(seq)[Basic_domain]) + " </td></tr>\n");
 						bw.write("  <tr><th> Zinc finger </th><td> " + df.format(probDist_Superclass.get(seq)[Zinc_finger]) + " </td></tr>\n");
-						bw.write("  <tr><th> Helix-turn-helix </th><td> " + df.format(probDist_Superclass.get(seq)[Helix_turn_helix]) + " </td></tr>\n");
+						bw.write("  <tr><th> Helix-turn-helix </th><td class=\" + outcome_Superclass.get(seq)[Zinc_finger] + \"> " + df.format(probDist_Superclass.get(seq)[Helix_turn_helix]) + " </td></tr>\n");
 						bw.write("  <tr><th> Beta scaffold </th><td> " + df.format(probDist_Superclass.get(seq)[Beta_scaffold]) + " </td></tr>\n");
 						bw.write("  <tr><th> Other </th><td> " + df.format(probDist_Superclass.get(seq)[Other]) + " </td></tr>\n");
 						bw.write("</table>\n\n");
 						bw.write("<br><br>\n\n");    	
-				    }
 						
-		    		if (annotatedClassAvailable.get(seq)) {	
-						bw.write("<h1>Annotated structural class:</h1>\n");
-						bw.write("<h3>" + getAnnotatedSuperclass(annotatedClass.get(seq)) + " (" + annotatedClass.get(seq) + ") </h3>\n");
-						bw.write("<br>\n\n");
-					} else {
-			    		bw.write("<h1>No structural class annotation available from TransFac.</h1>\n");
-			    	}
-				    	
-				    if (domainsPredicted.get(seq)) {
-						bw.write("<h1>DNA-binding domain(s):</h1>\n");
-						bw.write("<table>\n");
-						bw.write("  <tr><th> Start </th><th> End </th></tr>\n");	
-				    	
-						for (String domain : bindingDomains.get(seq)) {
-							String[] splitted_domain = domain.replace("    ", "\t").split("\t");
-							bw.write("  <tr><td> "+ splitted_domain[1] +" </td><td> " + splitted_domain[2] +" </td></tr>\n"); 
-						}
-						bw.write("</table>\n\n");
-						bw.write("<br>\n\n");
-						
-				    } else {
-			    		bw.write("<h1>No DNA-binding domain could be predicted.</h1>\n");
-			    	}
+						bw.write("<h2>Annotated structural class:</h2>\n");
+			    		if (annotatedClassAvailable.get(seq)) {	
+							bw.write("<h3>" + getAnnotatedSuperclass(annotatedClass.get(seq)) + " (<a href=\"" + transfacURL + "\" target=\"_blank\">" + annotatedClass.get(seq) + "</a>) </h3>\n");
+							bw.write("<br>\n\n");
+						} else {
+				    		bw.write("<h3>Not available.</h3>\n");
+				    		bw.write("<br>\n\n");
+				    	}
+					    
+			    		bw.write("<h2>DNA-binding domain(s):</h2>\n");
+					    if (domainsPredicted.get(seq)) {
+							bw.write("<table>\n");
+							bw.write("  <tr><th> Domain ID </th><th> Start </th><th> End </th></tr>\n");	
+					    	
+							for (String domain : bindingDomains.get(seq)) {
+								String[] splitted_domain = domain.replace("    ", "\t").split("\t");
+								String currLink =  "<a href=\"" + interproPrefix + splitted_domain[0] + "\" target=\"_blank\"> " + splitted_domain[0] + " </a>";
+								bw.write("  <tr><td> "+ currLink + " </td><td> "+ splitted_domain[1] +" </td><td> " + splitted_domain[2] +" </td></tr>\n"); 
+							}
+							bw.write("</table>\n\n");
+							bw.write("<br>\n\n");
+							
+					    } else {
+				    		bw.write("<h2>No DNA-binding domain found.</h2>\n");
+				    	}
+					}
 			    }
 			    else {
-			    	bw.write("<h1>No prediction possible.</h1>");
+			    	bw.write("<h3>No prediction possible, as InterProScan did not find any known domains.</h3>");
 			    }
 			}
 			
@@ -541,7 +554,32 @@ public class Predict {
 			System.out.println("IOException occurred while writing input file for SABINE.");
 		}
 	}
-
+	
+	// returns "win", "lose", or "draw" for each class depending on the given probabilities
+	private static String[] getClassificationOutcomes(double[] probDist) {
+		
+		String[] classOutcome = new String[probDist.length];
+		double maxProb = BasicTools.getMax(probDist);
+		ArrayList<Integer> winIdx = new ArrayList<Integer>();
+		int numWinners = 0;
+		
+		for (int i=0; i<probDist.length; i++) {
+			if (probDist[i] == maxProb) {
+				classOutcome[i] = "win";
+				winIdx.add(i);
+				numWinners++;
+			}
+		}
+		
+		// multiple winning classes -> set outcome for winning classes to "draw" 
+		if (numWinners > 1) {
+			for (int i=0; i<winIdx.size(); i++) {
+				classOutcome[winIdx.get(i)] = "draw";
+			}
+		}
+		return classOutcome;
+	}
+	
    // convert transfac-classification to SABINE-InputFileFormat                                                                                                                                 
     private static String expandTransfacClass(String transfac_class) {
             String expanded_class = transfac_class + ".";

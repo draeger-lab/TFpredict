@@ -68,7 +68,16 @@ public class BasicTools {
 		return(res);
 	}
 	
+	
+	public static double getMax(double[] doubleArray) {
+		return getMax(doubleArray, false);
+	}
+	
 	public static int getMaxIndex(double[] doubleArray) {
+		return (int) getMax(doubleArray, true);
+	}
+	
+	public static double getMax(double[] doubleArray, boolean returnIndex) {
 		
 		double max = doubleArray[0];
 	    int maxIndex = 0;
@@ -78,7 +87,11 @@ public class BasicTools {
 	            maxIndex = i;
 	        }
 	    }
-	    return maxIndex;
+	    if (returnIndex) {
+	    	return maxIndex;
+	    } else {
+	    	return max;
+	    }
 	}
 
 	public static HashMap<String, String> readFASTA(String fasta_file) {
