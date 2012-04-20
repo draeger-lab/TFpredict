@@ -30,18 +30,18 @@ public class IPRrun {
 	
 	// default: use local installation of InterProScan and do not write output of tool to file
 	public ArrayList<String[]> run(String seqfile, String iprpath) {
-		return(run(seqfile, iprpath, null, false));
+		return(run(seqfile, iprpath, null, false, false));
 	}
 	
 	public ArrayList<String[]> run(String seqfile, String iprpath, boolean useWeb) {
-		return(run(seqfile, iprpath, null, useWeb));
+		return(run(seqfile, iprpath, null, useWeb, false));
 	}
 	
 	public ArrayList<String[]> run(String seqfile, String iprpath, String basedir) {
-		return(run(seqfile, iprpath, basedir, false));
+		return(run(seqfile, iprpath, basedir, false, false));
 	}
 	
-	public ArrayList<String[]> run(String seqfile, String iprpath, String basedir, boolean useWeb) {
+	public ArrayList<String[]> run(String seqfile, String iprpath, String basedir, boolean useWeb, boolean alone) {
 		
 		ArrayList<String[]> IPRoutput = null;
 		
@@ -75,13 +75,13 @@ public class IPRrun {
 			System.setSecurityManager(SecMan);
 			
 			// grab jobids
-			ArrayList<String> joblist = grabJobIDs(new ByteArrayInputStream(stdout.toByteArray()));
+			ArrayList<String> jobs = grabJobIDs(new ByteArrayInputStream(stdout.toByteArray()));
 			
 			// get results only
 			stdout.reset();
 			IPRScanClient webIPR = new IPRScanClient();
-			orig_stdout.println("Waiting for "+joblist.size()+" job(s) to finish ...");
-			for (String jobid : joblist) {
+			orig_stdout.println("Waiting for "+jobs.size()+" job(s) to finish ...");
+			for (String jobid : jobs) {
 				orig_stdout.println("Polling job \""+jobid+"\" ...");
 				try {
 					webIPR.getResults(jobid, "-", "out");
@@ -114,7 +114,7 @@ public class IPRrun {
 			}
 			
 			// get the output stream
-			IPRoutput = readIPRoutput(proc.getInputStream(), basedir+"/IPRout");
+			IPRoutput = readIPRoutput(proc.getInputStream(), basedir+"/InterproScanOutput.txt");
 		}
 		return IPRoutput;
 	}
