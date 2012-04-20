@@ -144,7 +144,7 @@ public class IPRrun {
 			}
 			
 			// get the output stream
-			IPRoutput = readIPRoutput(proc.getInputStream(), basedir+"/InterproScanOutput.txt");
+			IPRoutput = readIPRoutput(proc.getInputStream(), basedir + "/InterproScanOutput.txt");
 		}
 		return IPRoutput;
 	}
