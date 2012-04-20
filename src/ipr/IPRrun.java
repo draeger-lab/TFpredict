@@ -50,7 +50,7 @@ public class IPRrun {
 		
 		ArrayList<String[]> IPRoutput = null;
 		
-		if (useWeb) { // SOAP
+		if (useWeb || iprpath.isEmpty()) { // SOAP
 			
 			// set parameter
 			String[] param = new String[6];
