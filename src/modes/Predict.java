@@ -468,6 +468,8 @@ public class Predict {
 			System.out.println("\n==========================================");
 			System.out.println("Results report for sequence: " + seq);
 			System.out.println("==========================================\n");
+			
+			// TODO: Null Pointer Exception
 			if (predictionPossible.get(seq)) {
 				System.out.println("  TF/Non-TF prediction:");
 				System.out.println(hline);
