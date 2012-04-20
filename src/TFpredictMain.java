@@ -146,7 +146,7 @@ public class TFpredictMain {
 			options.addOption("tfName2ClassFile", true, "file containing mapping from TF names to TransFac classes");
 		
 		// TRAINING MODE
-		//TODO: @Florian: Trainingsmode überarbeiten
+		//TODO: @Florian: Trainingsmode ueberarbeiten
 		} else if (trainMode) {
 				
 			// options not needed for web-tool version of TFpredict
