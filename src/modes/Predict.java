@@ -30,12 +30,15 @@ public class Predict {
 	
 	private static final String interproPrefix = "http://www.ebi.ac.uk/interpro/ISearch?query=";
 	private static final String transfacURL = "http://www.gene-regulation.com/pub/databases/transfac/clSM.html";
-
+	
 	static boolean useWeb = false;
 	static boolean standAloneMode = false;
 	static boolean batchMode = false;
 	static boolean silent = false;
 	
+	// TODO: Hard-coded e-mail in IPRrun class
+	public static String email;
+
 	// static arguments required by TFpredict
 	static String iprpath = "/opt/iprscan/bin/iprscan";
 	static String tfClassifier_file = "data/ipr.model";
@@ -241,9 +244,9 @@ public class Predict {
 	 // execute iprscan and get results
 	private void runInterproScan() {
 
-		IPRrun runner = new IPRrun();
 		// HACK: line can be excluded for testing purposes
-		ArrayList<String[]> IPRoutput = runner.run(input_file, iprpath, basedir, useWeb, standAloneMode);
+		IPRrun InterProScanRunner = new IPRrun(); 
+		ArrayList<String[]> IPRoutput = InterProScanRunner.run(input_file, iprpath, basedir, useWeb, standAloneMode);
 		
 		// HACK: line can be included for testing purposes
 		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1626_files";
@@ -351,10 +354,10 @@ public class Predict {
 			bw.write("  table { width: 300px; background-color: #E6E8FA; border: 1px solid black; padding: 3px; vertical-align: middle;}\n");
 			bw.write("  tr.secRow { background-color:#FFFFFF; margin-bottom: 50px; vertical-align: middle;}\n");
 			bw.write("  th { font-weight: bold; padding-bottom: 4px; padding-top: 4px; text-align: center;}\n");
-			bw.write("  td { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#FFFFFF;}\n");
+			bw.write("  td { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#F8F8FF;}\n");
 			bw.write("  td.win { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#98FB98;}\n");
 			bw.write("  td.draw { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#F0E68C}\n");
-			bw.write("  td.lose { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#FF7F50;}\n");
+			bw.write("  td.lose { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#F8F8FF;}\n");
 			bw.write("</style>\n");
 			bw.write("</head>\n");
 			bw.write("<body style=\"padding-left: 30px\">\n");
@@ -367,28 +370,31 @@ public class Predict {
 					bw.write("<br><hr>\n\n");
 				}
 				
-				bw.write("<h1>Results report: " + seq + "</h1>\n");
+				bw.write("<h1><span style=\"color:#000000\">Results report: </span>" + seq + "</h1>\n");
 				
 				bw.write("<h2>TF/Non-TF prediction:</h2>\n");
 				if (predictionPossible.get(seq)) {
+					
+					String[] outcomesTF = getClassificationOutcomes(BasicTools.Double2double(probDist_TFclass.get(seq)));
 					bw.write("<table>\n");
 					bw.write("  <tr><th></th><th>Probability<th></tr>\n");
-					bw.write("  <tr><th> TF </th><td> " + df.format(probDist_TFclass.get(seq)[TF]) + " </td></tr>\n");
-					bw.write("  <tr><th> Non-TF </th><td> " + df.format(probDist_TFclass.get(seq)[Non_TF]) + " </td></tr>\n");
+					bw.write("  <tr><th> TF </th><td class=\"" + outcomesTF[TF] + "\"> " + df.format(probDist_TFclass.get(seq)[TF]) + " </td></tr>\n");
+					bw.write("  <tr><th> Non-TF </th><td class=\"" + outcomesTF[Non_TF] + "\"> " + df.format(probDist_TFclass.get(seq)[Non_TF]) + " </td></tr>\n");
 					bw.write("</table>\n\n");
-					bw.write("<br><br>\n\n");
+					bw.write("<br>\n\n");
 					    
 					if (seqIsTF.get(seq)) {
+						String[] outcomesSuper = getClassificationOutcomes(BasicTools.Double2double(probDist_Superclass.get(seq)));
 						bw.write("<h2>Superclass prediction:</h2>\n");
 						bw.write("<table>\n");
 						bw.write("  <tr><th></th><th> Probability </th></tr>\n");
-						bw.write("  <tr><th> Basic domain </th><td> " + df.format(probDist_Superclass.get(seq)[Basic_domain]) + " </td></tr>\n");
-						bw.write("  <tr><th> Zinc finger </th><td> " + df.format(probDist_Superclass.get(seq)[Zinc_finger]) + " </td></tr>\n");
-						bw.write("  <tr><th> Helix-turn-helix </th><td class=\" + outcome_Superclass.get(seq)[Zinc_finger] + \"> " + df.format(probDist_Superclass.get(seq)[Helix_turn_helix]) + " </td></tr>\n");
-						bw.write("  <tr><th> Beta scaffold </th><td> " + df.format(probDist_Superclass.get(seq)[Beta_scaffold]) + " </td></tr>\n");
-						bw.write("  <tr><th> Other </th><td> " + df.format(probDist_Superclass.get(seq)[Other]) + " </td></tr>\n");
+						bw.write("  <tr><th> Basic domain </th><td class=\"" + outcomesSuper[Basic_domain] + "\"> " + df.format(probDist_Superclass.get(seq)[Basic_domain]) + " </td></tr>\n");
+						bw.write("  <tr><th> Zinc finger </th><td class=\"" + outcomesSuper[Zinc_finger] + "\"> " + df.format(probDist_Superclass.get(seq)[Zinc_finger]) + " </td></tr>\n");
+						bw.write("  <tr><th> Helix-turn-helix </th><td class=\"" + outcomesSuper[Helix_turn_helix] + "\"> " + df.format(probDist_Superclass.get(seq)[Helix_turn_helix]) + " </td></tr>\n");
+						bw.write("  <tr><th> Beta scaffold </th><td class=\"" + outcomesSuper[Beta_scaffold] + "\"> " + df.format(probDist_Superclass.get(seq)[Beta_scaffold]) + " </td></tr>\n");
+						bw.write("  <tr><th> Other </th><td class=\"" + outcomesSuper[Other] + "\"> " + df.format(probDist_Superclass.get(seq)[Other]) + " </td></tr>\n");
 						bw.write("</table>\n\n");
-						bw.write("<br><br>\n\n");    	
+						bw.write("<br>\n\n");    	
 						
 						bw.write("<h2>Annotated structural class:</h2>\n");
 			    		if (annotatedClassAvailable.get(seq)) {	
@@ -568,6 +574,8 @@ public class Predict {
 				classOutcome[i] = "win";
 				winIdx.add(i);
 				numWinners++;
+			} else {
+				classOutcome[i] = "lose";
 			}
 		}
 		

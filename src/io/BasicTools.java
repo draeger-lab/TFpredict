@@ -68,6 +68,14 @@ public class BasicTools {
 		return(res);
 	}
 	
+	public static double[] Double2double(Double[] doubleArray) {
+		
+		double[] res = new double[doubleArray.length];
+		for (int i=0; i<res.length; i++) {
+			res[i] = doubleArray[i].doubleValue();
+		}
+		return(res);
+	}
 	
 	public static double getMax(double[] doubleArray) {
 		return getMax(doubleArray, false);
