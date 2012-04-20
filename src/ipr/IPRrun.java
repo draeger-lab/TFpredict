@@ -17,11 +17,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import javax.xml.rpc.ServiceException;
 import uk.ac.ebi.webservices.jaxws.IPRScanClient;
 
 
 public class IPRrun {
+	
+	// gfx related
+	private HashMap<String, String> seq2job;
+	private HashMap<String, Boolean> gfxAvailable;
 	
 	// default: use local installation of InterProScan and do not write output of tool to file
 	public static ArrayList<String[]> run(String seqfile, String iprpath) {
@@ -32,11 +38,11 @@ public class IPRrun {
 		return(run(seqfile, iprpath, null, useWeb));
 	}
 	
-	public static ArrayList<String[]> run(String seqfile, String iprpath, String outputFile) {
-		return(run(seqfile, iprpath, outputFile, false));
+	public static ArrayList<String[]> run(String seqfile, String iprpath, String basedir) {
+		return(run(seqfile, iprpath, basedir, false));
 	}
 	
-	public static ArrayList<String[]> run(String seqfile, String iprpath, String outputFile, boolean useWeb) {
+	public static ArrayList<String[]> run(String seqfile, String iprpath, String basedir, boolean useWeb) {
 		
 		ArrayList<String[]> IPRoutput = null;
 		
@@ -109,7 +115,7 @@ public class IPRrun {
 			}
 			
 			// get the output stream
-			IPRoutput = readIPRoutput(proc.getInputStream(), outputFile);
+			IPRoutput = readIPRoutput(proc.getInputStream(), basedir+"/IPRout");
 		}
 		return IPRoutput;
 	}
