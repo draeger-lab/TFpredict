@@ -30,6 +30,7 @@ public class TFpredictMain {
 		
 		if (args.length == 0) {
 			printCopyright();
+			usage();
 		}
 		
 		// switch between modes based on first argument
@@ -215,6 +216,12 @@ public class TFpredictMain {
 	}
 	
 	private static void usage() {
+		
+		/*
+		 * Alternative zu fester Usage:
+		 * HelpFormatter lvFormater = new HelpFormatter();
+		 * lvFormater.printHelp("Available options: ", options);
+		 */
 		
 		System.out.println("  Usage   : java -jar TFpredict.jar <fasta_file> [OPTIONS]\n");
 		System.out.println("  OPTIONS : -sabineOutput <output_file_name>");
