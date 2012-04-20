@@ -50,7 +50,7 @@ public class IPRrun {
 		
 		ArrayList<String[]> IPRoutput = null;
 		
-		if (useWeb || iprpath.isEmpty()) { // SOAP
+		if (useWeb || standAloneMode) { // SOAP
 			
 			// set parameter
 			String[] param = new String[6];
@@ -211,7 +211,7 @@ public class IPRrun {
 				 if (saveIPRoutput2file) {
 					 bw.write(line + "\n");
 				 }
-				 System.out.println(line);
+				 //System.out.println(line);
 			 }			 
 			 br.close();
 			 if (saveIPRoutput2file) {
