@@ -50,7 +50,7 @@ public class IPRrun {
 		
 		ArrayList<String[]> IPRoutput = null;
 		
-		if (useWeb || standAloneMode) { // SOAP
+		if (useWeb) { // SOAP
 			
 			// set parameter
 			String[] param = new String[6];
@@ -88,9 +88,9 @@ public class IPRrun {
 				
 				// get results as stream
 				stdout.reset();
-				orig_stdout.println("Waiting for "+jobs.size()+" job(s) to finish ...");
+				orig_stdout.println("Waiting for " + jobs.size() + " job(s) to finish ...");
 				for (String jobid : jobs) {
-					orig_stdout.println("Polling job \""+jobid+"\" ...");
+					orig_stdout.println("Polling job \"" + jobid + "\" ...");
 					try {
 						webIPR.getResults(jobid, "-", "out");
 					} catch (IOException e) {
@@ -98,7 +98,7 @@ public class IPRrun {
 					} catch (ServiceException e) {
 						e.printStackTrace();
 					}
-					orig_stdout.println("Job \""+jobid+"\" finished.");
+					orig_stdout.println("Job \"" + jobid + "\" finished.");
 				}
 							
 				// restore System.out
@@ -113,18 +113,18 @@ public class IPRrun {
 				
 				if (!basedir.endsWith("/")) basedir = basedir.concat("/");
 				// get results as files
-				System.out.println("Waiting for "+jobs.size()+" job(s) to finish ...");
+				System.out.println("Waiting for " + jobs.size() + " job(s) to finish ...");
 				for (String jobid : jobs) {
-					System.out.println("Polling job \""+jobid+"\" ...");
+					System.out.println("Polling job \"" + jobid + "\" ...");
 					try {
-						webIPR.getResults(jobid, basedir+jobid, "out");
-						webIPR.getResults(jobid, basedir+jobid, "visual-png");
+						webIPR.getResults(jobid, basedir + jobid, "out");
+						webIPR.getResults(jobid, basedir + jobid, "visual-png");
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (ServiceException e) {
 						e.printStackTrace();
 					}
-					System.out.println("Job \""+jobid+"\" finished.");
+					System.out.println("Job \"" + jobid + "\" finished.");
 				}
 				
 				IPRoutput = readIPROutput(basedir, jobs);

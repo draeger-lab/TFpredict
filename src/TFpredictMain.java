@@ -38,6 +38,8 @@ public class TFpredictMain {
 		
 		if (standAloneMode) {
 			args = prepareStandAloneMode(args);
+		} else {
+			args = prepareOnlineMode(args);
 		}
 		
 		// create Options object
@@ -116,6 +118,32 @@ public class TFpredictMain {
 		args[args.length-2] = "-basedir";
 		args[args.length-1] = tempDir.getAbsolutePath() + File.separator;
 		
+		return(args);
+	}
+	
+	private static String[] prepareOnlineMode(String[] args) {
+		
+		// concatenate species name to a single argument
+		boolean containsSpecies = false;
+		int speciesPos = 0;
+		for (String arg: args) {
+			if (arg.equals("-species")) {
+				containsSpecies = true;
+				break;
+			}
+			speciesPos++;
+		}
+		if (containsSpecies) {
+			String[] originalArgs = args;
+			args = new String[originalArgs.length-1];
+			for (int i=0; i<=speciesPos; i++) {
+				args[i] = originalArgs[i];
+			}
+			args[speciesPos+1] = originalArgs[speciesPos+1] + " " +originalArgs[speciesPos+2];
+			for (int i=speciesPos+3; i<originalArgs.length; i++) {
+				args[i-1] = originalArgs[i];
+			}
+		}		
 		return(args);
 	}
 	
