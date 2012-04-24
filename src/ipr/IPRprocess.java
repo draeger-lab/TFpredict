@@ -16,7 +16,6 @@ public class IPRprocess {
 	public static HashMap<String, IprProcessed> filterIPRdomains(HashMap<String,IprEntry> seq2domain, HashMap<String,IprRaw> IPRdomains, ArrayList<String> relGOterms, HashMap<String, String> tfName2class) {
 		
 		HashMap<String, IprProcessed> seq2bindingDomain = new HashMap<String, IprProcessed>();
-	
 		
 		for (String sequence_id: seq2domain.keySet()) {
 			ArrayList<String> curr_domains = seq2domain.get(sequence_id).domain_ids;
