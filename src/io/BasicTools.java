@@ -179,6 +179,27 @@ public class BasicTools {
 		}
 	}
 	
+	public static ArrayList<String> readFile2List(String filename) {
+		
+		ArrayList<String> fileContent = new ArrayList<String>();
+		
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(new File(filename)));
+			
+			String line;
+			while ((line = br.readLine()) != null) {
+				fileContent.add(line.trim());
+			}
+			br.close();
+			
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+		
+		return(fileContent);
+	}
+	
+	
 	public static void main(String args[]) {
 		
 		String fasta_file = "/rahome/eichner/web_home/test_seq.fasta";

@@ -23,8 +23,11 @@
  * ===============================================
  */
 
+import io.BasicTools;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import modes.Predict;
 import modes.Train;
@@ -41,6 +44,8 @@ public class TFpredictMain {
 	private static boolean galaxyMode = false;
 	private static boolean standAloneMode = false;
 	private static boolean trainMode = false;
+	
+	private static final String sabineSpeciesList = "data/organism_list.txt"; 
 	
 	/**
 	 * @param args
@@ -220,24 +225,36 @@ public class TFpredictMain {
 		
 		// check if input FASTA file exists
 		if (!new File(cmd.getOptionValue("fasta")).exists()) {
-			System.out.println("Error. Input FASTA file not found.");
+			System.out.println("  Error. Input FASTA file not found.");
 			usage();
 		}
 		
 		//  if SABINE output file shall be generated, check if species is also provided
 		if (cmd.hasOption("sabineOutfile") && !cmd.hasOption("species")) {
-			System.out.println("Error. Species has to be provided as argument if output file for SABINE shall be created.");
+			System.out.println("  Error. Species has to be provided as argument if output file for SABINE shall be created.");
 			usage();
-		
-		} else {
-			System.out.println("  Input FASTA file:       " + cmd.getOptionValue("fasta"));
-			if (cmd.hasOption("sabineOutfile")) {
-				System.out.println("  SABINE output file:     " + cmd.getOptionValue("sabineOutfile"));
-				System.out.println("  Organism:               " + cmd.getOptionValue("species"));
-			} else {
-				System.out.println("  SABINE output file:     not generated.");
-			} 
 		}
+		
+		// check species for compatibility with SABINE
+		if (cmd.hasOption("species")) { 
+			ArrayList<String> speciesList = BasicTools.readFile2List(sabineSpeciesList);
+			String species = cmd.getOptionValue("species");
+			if (!speciesList.contains(species)) {
+				System.out.println("  Error. Unknown species. A list of accepted values for the argument \"-species\" can be found here:");
+				System.out.println("  http://www.cogsys.cs.uni-tuebingen.de/software/SABINE/doc/organism_list.txt");
+				System.out.println("  Please make sure that species names are surrounded by quotes (e.g., -species \"Homo sapiens\").\n"); 
+				usage();
+			}
+		}
+			
+		// print values of provided arguments 
+		System.out.println("  Input FASTA file:       " + cmd.getOptionValue("fasta"));
+		if (cmd.hasOption("sabineOutfile")) {
+			System.out.println("  SABINE output file:     " + cmd.getOptionValue("sabineOutfile"));
+			System.out.println("  Organism:               " + cmd.getOptionValue("species"));
+		} else {
+			System.out.println("  SABINE output file:     not generated.");
+		} 
 	}
 	
 	/*
