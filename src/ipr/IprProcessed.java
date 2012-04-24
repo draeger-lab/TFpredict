@@ -1,7 +1,7 @@
 /*
     TFpredict performs the identification and structural characterization
     of transcription factors.
-    Copyright (C) 2009 ZBIT, University of Tübingen, Johannes Eichner
+    Copyright (C) 2012 ZBIT, University of Tübingen, Florian Topf and Johannes Eichner
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
