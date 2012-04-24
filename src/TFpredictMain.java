@@ -216,7 +216,7 @@ public class TFpredictMain {
 				System.out.println("  SABINE output file:     " + cmd.getOptionValue("sabineOutfile"));
 				System.out.println("  Organism:               " + cmd.getOptionValue("species"));
 			} else {
-				System.out.println("  SABINE output file:     not generated." + cmd.getOptionValue("sabineOutfile"));
+				System.out.println("  SABINE output file:     not generated.");
 			} 
 		}
 	}

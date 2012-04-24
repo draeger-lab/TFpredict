@@ -114,6 +114,9 @@ public class Predict {
 	    	TFpredictor.writeConsoleOutput();
 	    } else {
 	    	TFpredictor.writeHTMLoutput();
+
+	    }
+	    if (sabine_outfile != null) {
 	    	TFpredictor.writeSABINEoutput();
 	    }
 	}
@@ -147,7 +150,8 @@ public class Predict {
 		
         if(cmd.hasOption("basedir")) {
             basedir = cmd.getOptionValue("basedir");
-            input_file = basedir + "/query.fasta";
+            if (!basedir.endsWith("/")) basedir += "/" ;
+            input_file = basedir + "query.fasta";
         }
         
 		if(cmd.hasOption("tfClassifierFile")) {
@@ -254,13 +258,13 @@ public class Predict {
 	private void runInterproScan() {
 
 		// HACK: line can be excluded for testing purposes
-		IPRrun InterProScanRunner = new IPRrun(); 
+		IPRrun InterProScanRunner = new IPRrun(silent); 
 		ArrayList<String[]> IPRoutput = InterProScanRunner.run(input_file, iprpath, basedir, useWeb, standAloneMode);
 		seq2job = InterProScanRunner.getSeq2job();
 		
 		// HACK: line can be included for testing purposes
-		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1626_files";
-		//ArrayList<String[]> IPRoutput = fp.parseIPRout(basedir + "/InterproScanOutput.txt");
+		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1598_files";
+		//ArrayList<String[]> IPRoutput = fp.parseIPRout(basedir + "/iprscan-S20120423-134103-0091-72601055-pg.out.txt");
 	
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
@@ -271,10 +275,16 @@ public class Predict {
 		// process result
 		seq2bindingDomain = IPRprocess.filterIPRdomains(seq2domain, IPRdomains, relGOterms, tfName2class);
 		if (!silent) {
-			for	(String seq: seq2bindingDomain.keySet()) {
+			for	(String seq: seq2domain.keySet()) {
 				System.out.println("Processed " + seq + ":");
-				int numDomains = seq2domain.get(seq).domain_ids.size();
-				int numBindingDomains = seq2bindingDomain.get(seq).binding_domains.size();
+				int numDomains = 0;
+				if (seq2domain.get(seq) != null) {
+					numDomains = seq2domain.get(seq).domain_ids.size();
+				}
+				int numBindingDomains = 0;
+				if (seq2bindingDomain.get(seq) != null) {
+					numBindingDomains = seq2bindingDomain.get(seq).binding_domains.size();
+				}
 				System.out.println("  " + numDomains + " InterPro domain(s) found.");
 				System.out.println("  " +  numBindingDomains + " / " + numDomains + " were identified as DNA-binding domain(s).\n");
 			}
@@ -287,7 +297,7 @@ public class Predict {
 		HashMap<String, Instance> seq2feat_TFclass = createFeatureVectors(seq2domain, relDomains_TFclass);
 		HashMap<String, Instance> seq2feat_Superclass = createFeatureVectors(seq2domain, relDomains_Superclass);
 		
-		for (String seq: seq2feat_TFclass.keySet()) {
+		for (String seq: seq2domain.keySet()) {
 			if (seq2feat_TFclass.get(seq) == null) {
 				predictionPossible.put(seq, false);
 			} else {
@@ -440,7 +450,7 @@ public class Predict {
 					}
 			    }
 			    else {
-			    	bw.write("<h3>No prediction possible, as InterProScan did not find any known domains.</h3>");
+			    	bw.write("<h3>No prediction possible. InterProScan did not find any known domains in the given sequence.</h3>");
 			    }
 			}
 			
@@ -472,7 +482,6 @@ public class Predict {
 			System.out.println("Results report for sequence: " + seq);
 			System.out.println("==========================================\n");
 			
-			// TODO: Null Pointer Exception
 			if (predictionPossible.get(seq)) {
 				System.out.println("  TF/Non-TF prediction:");
 				System.out.println(hline);
@@ -480,7 +489,6 @@ public class Predict {
 				System.out.println("  TF            " + df.format(probDist_TFclass.get(seq)[TF]));
 				System.out.println("  Non-TF        " + df.format(probDist_TFclass.get(seq)[Non_TF]) + "\n");
 
-				
 				if (seqIsTF.get(seq)) {
 					System.out.println("  Superclass prediction:");
 					System.out.println(hline);
@@ -490,29 +498,29 @@ public class Predict {
 					System.out.println("  Helix-turn-helix    " + df.format(probDist_Superclass.get(seq)[Helix_turn_helix]));
 					System.out.println("  Beta scaffold       " + df.format(probDist_Superclass.get(seq)[Beta_scaffold]));
 					System.out.println("  Other               " + df.format(probDist_Superclass.get(seq)[Other]) + "\n");
-				}
 				
-				if (annotatedClassAvailable.get(seq)) {	
-					System.out.println("  Annotated structural class:");
-					System.out.println(hline);
-					System.out.println("  " + getAnnotatedSuperclass(annotatedClass.get(seq)) + " (" + annotatedClass.get(seq) + ") \n");
-				}
-				
-				if (domainsPredicted.get(seq)) {
-					System.out.println("  DNA-binding domain(s):");
-					System.out.println(hline);
-					System.out.println("  Domain ID \t Start \t End");
-					for (String domain : bindingDomains.get(seq)) {
-						String[] splitted_domain = domain.replace("    ", "\t").split("\t");
-						System.out.println("  " + splitted_domain[0] + " \t " + splitted_domain[1] + " \t " + splitted_domain[2]); 
+					if (annotatedClassAvailable.get(seq)) {	
+						System.out.println("  Annotated structural class:");
+						System.out.println(hline);
+						System.out.println("  " + getAnnotatedSuperclass(annotatedClass.get(seq)) + " (" + annotatedClass.get(seq) + ") \n");
 					}
-				
-				} else {
-					System.out.println("  DNA-binding domain could be predicted.\n");
+					
+					if (domainsPredicted.get(seq)) {
+						System.out.println("  DNA-binding domain(s):");
+						System.out.println(hline);
+						System.out.println("  Domain ID \t Start \t End");
+						for (String domain : bindingDomains.get(seq)) {
+							String[] splitted_domain = domain.replace("    ", "\t").split("\t");
+							System.out.println("  " + splitted_domain[0] + " \t " + splitted_domain[1] + " \t " + splitted_domain[2]); 
+						}
+					
+					} else {
+						System.out.println("  DNA-binding domain could be predicted.\n");
+					}
 				}
 				
 			} else {
-				System.out.println("  No prediction possible.");
+				System.out.println("  No prediction possible. InterProScan did not find any known domains in the given sequence.\n");
 			}
 		}
 	}
@@ -542,31 +550,39 @@ public class Predict {
 					bw.write("RF  " + uniprot_id + "\n");
 					bw.write("XX  \n");
 				}
-				if (annotatedClassAvailable.get(seq)) {
-					bw.write("CL  " + expandTransfacClass(annotatedClass.get(seq)) + "\n");
-				} else {
-					bw.write("CL  " + predictedSuperclass.get(seq) + ".0.0.0.0" + "\n");
-				}
-				bw.write("XX  \n");
-	
-				// write sequence
-				String[] wrapped_seq;
-				if (batchMode) {
-					wrapped_seq = BasicTools.wrapString(sequences.get(seq));
-				} else {
-					wrapped_seq = BasicTools.wrapString(sequence);
-				}
-				for (String line: wrapped_seq) {
-					bw.write("S1  " + line + "\n"); 
-				}
-				bw.write("XX  \n");
-						
-				// write domains
-				if (domainsPredicted.get(seq)) {
-					for (String domain : bindingDomains.get(seq)) {
-						bw.write("FT  " + domain + "\n");
+				
+				if (predictionPossible.get(seq) && seqIsTF.get(seq)) {
+					
+					if (annotatedClassAvailable.get(seq)) {
+						bw.write("CL  " + expandTransfacClass(annotatedClass.get(seq)) + "\n");
+					} else {
+						bw.write("CL  " + predictedSuperclass.get(seq) + ".0.0.0.0" + "\n");
 					}
-					bw.write("XX\n");
+					bw.write("XX  \n");
+		
+					// write sequence
+					String[] wrapped_seq;
+					if (batchMode) {
+						wrapped_seq = BasicTools.wrapString(sequences.get(seq));
+					} else {
+						wrapped_seq = BasicTools.wrapString(sequence);
+					}
+					for (String line: wrapped_seq) {
+						bw.write("S1  " + line + "\n"); 
+					}
+					bw.write("XX  \n");
+							
+					// write domains
+					if (domainsPredicted.get(seq)) {
+						for (String domain : bindingDomains.get(seq)) {
+							bw.write("FT  " + domain + "\n");
+						}
+						bw.write("XX\n");
+					}
+					
+				// Protein was either not classified (no IPR domains found) or classified as Non-TF
+				} else {
+					bw.write("CL  Non-TF\nXX\n");
 				}
 			}
 			bw.flush();

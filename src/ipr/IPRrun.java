@@ -25,7 +25,15 @@ import uk.ac.ebi.webservices.jaxws.IPRScanClient;
 
 
 public class IPRrun {
+
+	public IPRrun(boolean silent) {
+		this.silent = silent;
+	}
 	
+	public IPRrun() {}
+	
+	private boolean silent = false;
+
 	// gfx related map
 	private static HashMap<String, String> seq2job = new HashMap<String,String>();
 	
@@ -49,6 +57,7 @@ public class IPRrun {
 	public ArrayList<String[]> run(String seqfile, String iprpath, String basedir, boolean useWeb, boolean standAloneMode) {
 		
 		ArrayList<String[]> IPRoutput = null;
+		InputStream iprScan_StdOut;
 		
 		if (useWeb) { // SOAP
 			
@@ -62,10 +71,14 @@ public class IPRrun {
 			param[4] = "--multifasta";
 			param[5] = seqfile;
 			
-			// redirect System.out
+			// redirect System.out and System.err
 			PrintStream orig_stdout = System.out;
 			ByteArrayOutputStream stdout = new ByteArrayOutputStream();
 			System.setOut(new PrintStream(stdout));
+			PrintStream orig_stderr = System.err;
+			if (silent) {
+				System.setErr(new PrintStream(new ByteArrayOutputStream()));
+			}
 			
 			// prevent System.exit
 			SecurityManager SecMan = System.getSecurityManager();
@@ -82,40 +95,14 @@ public class IPRrun {
 			// grab jobids
 			ArrayList<String> jobs = grabJobIDs(new ByteArrayInputStream(stdout.toByteArray()));
 			
-			IPRScanClient webIPR = new IPRScanClient();
+			// restore System.out
+			System.setOut(orig_stdout);
 			
-			if (standAloneMode) {
-				
-				// get results as stream
-				stdout.reset();
-				orig_stdout.println("Waiting for " + jobs.size() + " job(s) to finish ...");
-				for (String jobid : jobs) {
-					orig_stdout.println("Polling job \"" + jobid + "\" ...");
-					try {
-						webIPR.getResults(jobid, "-", "out");
-					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (ServiceException e) {
-						e.printStackTrace();
-					}
-					orig_stdout.println("Job \"" + jobid + "\" finished.");
-				}
-							
-				// restore System.out
-				System.setOut(orig_stdout);
-				
-				IPRoutput = readIPRoutput(new ByteArrayInputStream(stdout.toByteArray()));
-				
-			} else {
-				
-				// restore System.out
-				System.setOut(orig_stdout);
-				
-				if (!basedir.endsWith("/")) basedir = basedir.concat("/");
-				// get results as files
-				System.out.println("Waiting for " + jobs.size() + " job(s) to finish ...");
-				for (String jobid : jobs) {
-					System.out.println("Polling job \"" + jobid + "\" ...");
+			IPRScanClient webIPR = new IPRScanClient();
+
+			if (!silent) System.out.println("Waiting for " + jobs.size() + " job(s) to finish ...");
+			for (String jobid : jobs) {
+				if (!silent) System.out.println("Polling job \"" + jobid + "\" ...");
 					try {
 						webIPR.getResults(jobid, basedir + jobid, "out");
 						webIPR.getResults(jobid, basedir + jobid, "visual-png");
@@ -124,12 +111,15 @@ public class IPRrun {
 					} catch (ServiceException e) {
 						e.printStackTrace();
 					}
-					System.out.println("Job \"" + jobid + "\" finished.");
-				}
-				
-				IPRoutput = readIPROutput(basedir, jobs);
+				if (!silent) System.out.println("Job \"" + jobid + "\" finished.");
 			}
 			
+			// restore System.err
+			if (silent) {
+				System.setErr(orig_stderr);
+			}
+			IPRoutput = readIPROutput(basedir, jobs);
+	
 		} else { // local
 			
 			Runtime rt = Runtime.getRuntime();
@@ -144,12 +134,12 @@ public class IPRrun {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
-			// get the output stream
-			IPRoutput = readIPRoutput(proc.getInputStream(), basedir + "/InterproScanOutput.txt");
+			iprScan_StdOut = proc.getInputStream();
+			String iprScan_resultFile = basedir + "/InterproScanOutput.txt";
+			IPRoutput = readIPRoutput(iprScan_StdOut, iprScan_resultFile);
 		}
 		return IPRoutput;
-	}
+	}	
 	
 	
 	private static ArrayList<String[]> readIPROutput(String basedir, ArrayList<String> jobs) {
@@ -159,34 +149,26 @@ public class IPRrun {
 		String line = null;
 		
 		for (String job : jobs) {
-		try {
-			 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".out.txt"));
-			 while ((line = br.readLine()) != null) {
-				 String[] tabpos = line.split("\t");
-				 String seqID = tabpos[0].trim();
-				 if (!seq2job.containsKey(seqID) && !seq2job.containsValue(job)) seq2job.put(seqID, job);
-				 if (!line.isEmpty()) {
-					 IPRoutput.add(tabpos);
-				 }
-				
-			 }			 
-			 br.close();
+			try {
+				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".out.txt"));
+				 while ((line = br.readLine()) != null) {
+					 String[] tabpos = line.split("\t");
+					 String seqID = tabpos[0].trim();
+					 if (!seq2job.containsKey(seqID) && !seq2job.containsValue(job)) seq2job.put(seqID, job);
+					 if (!line.isEmpty()) {
+						 IPRoutput.add(tabpos);
+					 }
+				 }			 
+				 br.close();
+			
+			} catch(IOException ioe) {
+				System.out.println(ioe.getMessage());
+				System.exit(1);
+			}
 		}
-		
-		catch(IOException ioe) {
-			System.out.println(ioe.getMessage());
-			System.exit(1);
-		}
-		}
-		
 		return IPRoutput;
 	}
 
-	private static ArrayList<String[]> readIPRoutput(InputStream IPRoutputStream) {
-		return(readIPRoutput(IPRoutputStream, null));
-	}
-	
-	
 	// reads the standard output from InterProScan
 	private static ArrayList<String[]> readIPRoutput(InputStream IPRoutputStream, String outputFile) {
 		
@@ -207,6 +189,9 @@ public class IPRrun {
 			 }
 			 
 			 while ((line = br.readLine()) != null) {
+				 // skip empty lines
+				 if (line.trim().equals("")) continue;
+				 
 				 IPRoutput.add(line.split("\t"));
 				 if (saveIPRoutput2file) {
 					 bw.write(line + "\n");
