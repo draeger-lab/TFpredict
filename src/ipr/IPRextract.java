@@ -1,3 +1,22 @@
+/*
+    TFpredict performs the identification and structural characterization
+    of transcription factors.
+    Copyright (C) 2009 ZBIT, University of Tübingen, Johannes Eichner
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package ipr;
 
 import java.util.ArrayList;
@@ -25,6 +44,7 @@ public class IPRextract {
 
 			String[] domain_entry = IPRoutput.get(i);
 			String sequence_id = domain_entry[0].trim();
+			System.out.println(sequence_id);
 			String domain_id = domain_entry[11].trim();
 			
 			// skip domains for which no InterPro-ID is given

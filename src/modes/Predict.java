@@ -1,3 +1,22 @@
+/*
+    TFpredict performs the identification and structural characterization
+    of transcription factors.
+    Copyright (C) 2009 ZBIT, University of Tübingen, Johannes Eichner
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package modes;
 
 import java.io.BufferedWriter;
@@ -64,7 +83,7 @@ public class Predict {
 	private ArrayList<String> relGOterms;
 	private HashMap<String,String> tfName2class;
 	private FileParser fp = new FileParser(true);
-	
+
 	private HashMap<String, IprEntry> seq2domain;
 	private HashMap<String, IprRaw> IPRdomains;
 	private HashMap<String, IprProcessed> seq2bindingDomain;
@@ -72,6 +91,7 @@ public class Predict {
 	// gfx related mapping of seqid to jobid
 	private HashMap<String, String> seq2job;
 	
+	private String[] sequence_ids;
 	private HashMap<String, String> sequences = new HashMap<String, String>();
 	private HashMap<String, Double[]> probDist_TFclass  = new HashMap<String, Double[]>();
 	private HashMap<String, Double[]> probDist_Superclass = new HashMap<String, Double[]>();
@@ -124,7 +144,7 @@ public class Predict {
 	private void parseArguments(CommandLine cmd) {
 		
 		if(cmd.hasOption("sequence")) {
-			sequence = cmd.getOptionValue("sequence");
+			sequence = cmd.getOptionValue("sequence").replaceAll("\\s", "");
 		}
 		
 		if(cmd.hasOption("species")) {
@@ -186,11 +206,6 @@ public class Predict {
 		if(cmd.hasOption("standAloneMode")) {
 			standAloneMode = true;
 			silent = true;
-			if (cmd.hasOption("iprscanPath")) {
-				useWeb = false;
-			} else {
-				useWeb = true;
-			}
 		}
 	}
 	
@@ -223,6 +238,7 @@ public class Predict {
 		if (batchMode) {
 			// BatchMode --> parse sequences from given FASTA file (and shorten long headers)
 			sequences = BasicTools.readFASTA(fasta_file);
+			sequence_ids = sequences.keySet().toArray(new String[] {});
 			BasicTools.writeFASTA(sequences, input_file);
 			
 		} else {
@@ -230,6 +246,7 @@ public class Predict {
 			String[] inputSeq = BasicTools.wrapString(sequence);
 			String[] fastaSeq = new String[inputSeq.length+1];
 			fastaSeq[0] = ">" + tfName;
+			sequence_ids = new String[] {tfName};
 			for (int i=0; i<inputSeq.length; i++) {
 				fastaSeq[i+1] = inputSeq[i];
 			}
@@ -263,8 +280,8 @@ public class Predict {
 		seq2job = InterProScanRunner.getSeq2job();
 		
 		// HACK: line can be included for testing purposes
-		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1598_files";
-		//ArrayList<String[]> IPRoutput = fp.parseIPRout(basedir + "/iprscan-S20120423-134103-0091-72601055-pg.out.txt");
+		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1667_files";
+		//ArrayList<String[]> IPRoutput = fp.parseIPRout(basedir + "/iprscan-S20120424-154912-0758-43130522-oy.out.txt");
 	
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
@@ -297,10 +314,13 @@ public class Predict {
 		HashMap<String, Instance> seq2feat_TFclass = createFeatureVectors(seq2domain, relDomains_TFclass);
 		HashMap<String, Instance> seq2feat_Superclass = createFeatureVectors(seq2domain, relDomains_Superclass);
 		
+		// flag all sequences for which no prediction is possible
+		// (i.e., none of the IPRdomains which are relevant for TF/Non-TF classification was found)
+		for (String seq: sequence_ids) {
+			predictionPossible.put(seq, false);
+		}
 		for (String seq: seq2domain.keySet()) {
-			if (seq2feat_TFclass.get(seq) == null) {
-				predictionPossible.put(seq, false);
-			} else {
+			if (seq2feat_TFclass.get(seq) != null) {
 				predictionPossible.put(seq, true);
 			}
 		}
@@ -353,7 +373,6 @@ public class Predict {
 		}
 	}
 	
-	
 	private void writeHTMLoutput() {
 		
 		try {
@@ -377,8 +396,7 @@ public class Predict {
 			bw.write("</style>\n");
 			bw.write("</head>\n");
 			bw.write("<body style=\"padding-left: 30px\">\n");
-			
-			String[] sequence_ids = seq2domain.keySet().toArray(new String[]{});
+		
 			for (int i=0; i<sequence_ids.length; i++) {
 				String seq = sequence_ids[i];
 				
@@ -450,7 +468,8 @@ public class Predict {
 					}
 			    }
 			    else {
-			    	bw.write("<h3>No prediction possible. InterProScan did not find any known domains in the given sequence.</h3>");
+			    	bw.write("<h3>No prediction possible.</h3>");
+			    	bw.write("InterProScan did not detect any of the domains relevant for TF-/Non-TF classification in the given sequence. Consequently, TFpredict could not perform the prediction task.");
 			    }
 			}
 			
@@ -470,7 +489,6 @@ public class Predict {
 		
 		String hline = "  -----------------------";
 		
-		String[] sequence_ids = seq2domain.keySet().toArray(new String[]{});
 		for (int i=0; i<sequence_ids.length; i++) {
 			String seq = sequence_ids[i];
 			
@@ -520,7 +538,7 @@ public class Predict {
 				}
 				
 			} else {
-				System.out.println("  No prediction possible. InterProScan did not find any known domains in the given sequence.\n");
+				System.out.println("  No prediction possible.\n");
 			}
 		}
 	}
@@ -530,7 +548,6 @@ public class Predict {
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(sabine_outfile)));
 			
-			String[] sequence_ids = seq2domain.keySet().toArray(new String[]{});
 			for (int i=0; i<sequence_ids.length; i++) {
 				String seq = sequence_ids[i];
 				
