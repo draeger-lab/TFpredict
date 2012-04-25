@@ -38,6 +38,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
+import resources.Resource;
+
 
 public class TFpredictMain {
 
@@ -45,7 +47,7 @@ public class TFpredictMain {
 	private static boolean standAloneMode = false;
 	private static boolean trainMode = false;
 	
-	private static final String sabineSpeciesList = "data/organism_list.txt"; 
+	private static final String sabineSpeciesList = Resource.class.getResource("organism_list.txt").getFile(); 
 	
 	/**
 	 * @param args
@@ -240,7 +242,7 @@ public class TFpredictMain {
 			ArrayList<String> speciesList = BasicTools.readFile2List(sabineSpeciesList);
 			String species = cmd.getOptionValue("species");
 			if (!speciesList.contains(species)) {
-				System.out.println("  Error. Unknown species. A list of accepted values for the argument \"-species\" can be found here:");
+				System.out.println("  Error. Unknown species: \"" + species + "\" A list of accepted values for the argument \"-species\" can be found here:");
 				System.out.println("  http://www.cogsys.cs.uni-tuebingen.de/software/SABINE/doc/organism_list.txt");
 				System.out.println("  Please make sure that species names are surrounded by quotes (e.g., -species \"Homo sapiens\").\n"); 
 				usage();

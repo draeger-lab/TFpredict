@@ -40,6 +40,8 @@ import ipr.*;
 
 import org.apache.commons.cli.CommandLine;
 
+import resources.Resource;
+
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -58,12 +60,12 @@ public class Predict {
 
 	// static arguments required by TFpredict
 	static String iprpath = "/opt/iprscan/bin/iprscan";
-	static String tfClassifier_file = "data/ipr.model";
-	static String superClassifier_file = "data/super.model";
-	static String relDomainsTF_file = "data/ipr.iprs";
-	static String relDomainsSuper_file = "data/super.iprs";
-	static String relGOterms_file = "data/DNA.go";
-	static String tfName2class_file = "data/transHMan";
+	static String tfClassifier_file = Resource.class.getResource("ipr.model").getFile();
+	static String superClassifier_file = Resource.class.getResource("super.model").getFile();
+	static String relDomainsTF_file = Resource.class.getResource("ipr.iprs").getFile();
+	static String relDomainsSuper_file = Resource.class.getResource("super.iprs").getFile();
+	static String relGOterms_file = Resource.class.getResource("DNA.go").getFile();
+	static String tfName2class_file = Resource.class.getResource("transHMan").getFile();
 	
 	// arguments passed from Galaxy to TFpredict
 	static String basedir = "";
