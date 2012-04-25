@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.StringTokenizer;
 
 import resources.Resource;
@@ -217,6 +218,46 @@ public class BasicTools {
 		}
 		
 		return(fileContent);
+	}
+	
+	public static ArrayList<String[]> readFile2ListSplitLines(String infile) {
+		
+		ArrayList<String[]> splittedLines = new ArrayList<String[]>();
+		String line = null;
+		
+		try {
+			 BufferedReader br = new BufferedReader(new FileReader(infile));
+			 
+			 while ((line = br.readLine()) != null) {
+				 
+				 // skip blank lines
+				 if (line.trim().equals("")) continue;
+				 
+				 // add splitted line
+				 splittedLines.add(line.split("\t"));
+			}		 
+			 br.close();
+		}
+		
+		catch(IOException ioe) {
+			System.out.println(ioe.getMessage());
+		}
+		
+		return splittedLines;
+	}	
+	
+	public static ArrayList<String> intersect(ArrayList<String> list1, ArrayList<String> list2) {
+		
+		HashSet<String> intersectionSet = new HashSet<String>();
+		for (String element: list1) {
+			if (list2.contains(element)) {
+				intersectionSet.add(element);
+			}
+		}
+		ArrayList<String> intersection = new ArrayList<String>();
+		intersection.addAll(intersectionSet);
+		
+		return(intersection);
 	}
 	
 	

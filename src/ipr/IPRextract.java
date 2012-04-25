@@ -75,6 +75,15 @@ public class IPRextract {
 			String[] domain_entry = IPRoutput.get(i);
 					
 			String domain_id = domain_entry[11].trim();
+			// skip domains for which no InterPro-ID is given
+			if (domain_id.equals("NULL")) {
+				continue;
+			}
+			// skip domain IDs which were already added
+			if (ipr_domains.containsKey(domain_id)) {
+				continue;
+			}
+			
 			String domain_name1 = domain_entry[5].trim().split(",")[0].trim();
 			String domain_name2 = domain_entry[12].trim().split(",")[0].trim();
 			String domain_interval = domain_id + "    " + domain_entry[6].trim() + "\t" + domain_entry[7].trim();

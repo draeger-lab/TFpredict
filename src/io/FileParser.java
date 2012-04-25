@@ -27,7 +27,6 @@ package io;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /*
  * File Parser
@@ -81,30 +80,5 @@ public class FileParser {
 	}
 	
 	
-	public ArrayList<String[]> parseIPRout(String infile) {
-		
-		if (! silent) System.out.println("Parsing: "+infile);
-		ArrayList<String[]> IPRentries = new ArrayList<String[]>();
-		String line = null;
-		
-		try {
-			 
-			 BufferedReader br = new BufferedReader(new FileReader(infile));
-			 
-			 while ((line = br.readLine()) != null) {
-				 
-				 if (line.trim().equals("")) continue;
-				 IPRentries.add(line.split("\t"));
-			}		 
-			 br.close();
-		}
-		
-		catch(IOException ioe) {
-			System.out.println(ioe.getMessage());
-			System.out.println("IOException occurred while parsing...");
-			System.exit(1);
-		}
-		
-		return IPRentries;
-	}	
+
 }

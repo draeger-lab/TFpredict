@@ -287,7 +287,7 @@ public class TFpredictMain {
 		 */
 		
 		System.out.println("  Usage   : java -jar TFpredict.jar <fasta_file> [OPTIONS]\n");
-		System.out.println("  OPTIONS : -sabineOutput <output_file_name>");
+		System.out.println("  OPTIONS : -sabineOutfile <output_file_name>");
 		System.out.println("            -species <organism_name>          (e.g., \"Homo sapiens\")");		
 		System.out.println("            -iprscanPath <path_to_iprscan>    (e.g., \"/opt/iprscan/bin/iprscan\")\n");
 		System.exit(0);

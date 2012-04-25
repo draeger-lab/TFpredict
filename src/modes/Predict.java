@@ -134,7 +134,6 @@ public class Predict {
 	    	TFpredictor.writeConsoleOutput();
 	    } else {
 	    	TFpredictor.writeHTMLoutput();
-
 	    }
 	    if (sabine_outfile != null) {
 	    	TFpredictor.writeSABINEoutput();
@@ -266,8 +265,8 @@ public class Predict {
 		}
 		
     	if (!silent) {
-    		System.out.println(relDomains_TFclass.size() + " domains used for TF/Non-TF classification.");
-    		System.out.println(relDomains_Superclass.size() + " domains used for Superclass classification.\n");
+    		//System.out.println("  " + relDomains_TFclass.size() + " domains used for TF/Non-TF classification.");
+    		//System.out.println("  " + relDomains_Superclass.size() + " domains used for Superclass classification.\n");
     	}
 	}
     
@@ -280,8 +279,8 @@ public class Predict {
 		seq2job = InterProScanRunner.getSeq2job();
 		
 		// HACK: line can be included for testing purposes
-		//basedir = "/tmp/TFpredict_7963184977214500951_basedir";
-		//ArrayList<String[]> IPRoutput = fp.parseIPRout(basedir + "/iprscan-S20120425-085604-0302-81227913-oy.out.txt");
+		//basedir = "/tmp/TFpredict_4215575705942655684_basedir";
+		//ArrayList<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(basedir + "/iprscan-S20120425-145757-0037-1931185-pg.out.txt");
 		
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
@@ -291,19 +290,29 @@ public class Predict {
 	
 		// process result
 		seq2bindingDomain = IPRprocess.filterIPRdomains(seq2domain, IPRdomains, relGOterms, tfName2class);
-		if (!silent) {
-			for	(String seq: seq2domain.keySet()) {
-				System.out.println("Processed " + seq + ":");
+		if (standAloneMode || !silent) {
+			for	(String seq: sequence_ids) {
+				System.out.println("\nProcessed " + seq + ":");
 				int numDomains = 0;
 				if (seq2domain.get(seq) != null) {
 					numDomains = seq2domain.get(seq).domain_ids.size();
+				}
+				int numDomainsTFclass = 0;
+				if (seq2domain.get(seq) != null) {
+					numDomainsTFclass = BasicTools.intersect(seq2domain.get(seq).domain_ids, relDomains_TFclass).size();
+				}
+				int numDomainsSuperclass = 0;
+				if (seq2domain.get(seq) != null) {
+					numDomainsSuperclass = BasicTools.intersect(seq2domain.get(seq).domain_ids, relDomains_Superclass).size();
 				}
 				int numBindingDomains = 0;
 				if (seq2bindingDomain.get(seq) != null) {
 					numBindingDomains = seq2bindingDomain.get(seq).binding_domains.size();
 				}
 				System.out.println("  " + numDomains + " InterPro domain(s) found.");
-				System.out.println("  " +  numBindingDomains + " / " + numDomains + " were identified as DNA-binding domain(s).\n");
+				System.out.println("  " + numDomainsTFclass + " / " + numDomains + " InterPro domain(s) are relevant for TF/Non-TF classification.");
+				System.out.println("  " + numDomainsSuperclass + " / " + numDomains + " InterPro domain(s) are relevant for Superclass prediction.");
+				System.out.println("  " + numBindingDomains + " / " + numDomains + " InterPro domain(s) were identified as DNA-binding domain(s).");
 			}
 		}
 	}
