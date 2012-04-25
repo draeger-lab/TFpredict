@@ -27,7 +27,7 @@ import java.util.ArrayList;
 
 public class IprProcessed {
 	
-	String sequence_id;
+	public String sequence_id;
 	public ArrayList<String> binding_domains;
 	public String anno_transfac_class;
 	
