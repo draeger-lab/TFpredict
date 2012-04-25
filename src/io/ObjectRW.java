@@ -25,10 +25,14 @@ package io;
  */
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
+import resources.Resource;
 
 /*
  * Provides read/write support for serializable objects
@@ -68,19 +72,35 @@ public class ObjectRW {
 		return(read(name, false));
 	}
 	
-	////
-	// object reader
+	
 	public static Object read(String name, boolean silent) {
 		
 		if (! silent) System.out.println("  Reading object: " + name);
 		
+		// read object from file
+		Object tmp = null;
+		
+		try {
+			FileInputStream fis = new FileInputStream(name);
+			tmp = read(fis, silent);
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return tmp;
+	}
+	
+	public static Object readFromResource(String name) {
+		return(read(Resource.class.getResourceAsStream(name), true));
+	}
+	
+	public static Object read(InputStream fis, boolean silent) {
+				
 		Object tmp = new Object(); 
 		
 		// read object from file
-		FileInputStream fis = null;
 		ObjectInputStream in = null;
 		try {
-			fis = new FileInputStream(name);
 			in = new ObjectInputStream(fis);
 			tmp = in.readObject();
 			in.close();
@@ -93,7 +113,7 @@ public class ObjectRW {
 			}
 		
 		return tmp;
-		
 	}
 	
+
 }

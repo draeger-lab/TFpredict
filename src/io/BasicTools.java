@@ -25,9 +25,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
+
+import resources.Resource;
 
 public class BasicTools {
 	
@@ -143,6 +147,10 @@ public class BasicTools {
 					}
 					// read new header
 					header = new StringTokenizer(line).nextToken().replaceFirst(">", "");
+					if (header.contains("|")) {
+						String[] splitted_header = header.split("\\|");
+						header = splitted_header[splitted_header.length-1].trim();
+					}
 					curr_seq = new StringBuffer();
 					first = false;
 				} else {
@@ -178,17 +186,29 @@ public class BasicTools {
 			ioe.printStackTrace();
 		}
 	}
+		
+	public static ArrayList<String> readResource2List(String resourceName) {
+		return(readResource2List(resourceName, false));
+	}
 	
-	public static ArrayList<String> readFile2List(String filename) {
+	public static ArrayList<String> readResource2List(String resourceName, boolean upperCase) {
+		return(readStream2List(Resource.class.getResourceAsStream(resourceName), upperCase));
+	}
+		
+	public static ArrayList<String> readStream2List(InputStream stream, boolean upperCase) {
 		
 		ArrayList<String> fileContent = new ArrayList<String>();
 		
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(new File(filename)));
+			BufferedReader br = new BufferedReader(new InputStreamReader(stream));
 			
 			String line;
 			while ((line = br.readLine()) != null) {
-				fileContent.add(line.trim());
+				if (upperCase) {
+					fileContent.add(line.trim().toUpperCase());
+				} else {
+					fileContent.add(line.trim());
+				}
 			}
 			br.close();
 			
