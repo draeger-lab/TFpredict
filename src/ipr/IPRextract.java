@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import javax.sound.sampled.Line;
-
 /*
  * 
  * This class contains functions for parsing the standard output of InterProScan
@@ -44,7 +42,6 @@ public class IPRextract {
 
 			String[] domain_entry = IPRoutput.get(i);
 			String sequence_id = domain_entry[0].trim();
-			System.out.println(sequence_id);
 			String domain_id = domain_entry[11].trim();
 			
 			// skip domains for which no InterPro-ID is given

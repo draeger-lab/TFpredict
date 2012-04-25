@@ -31,7 +31,6 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import io.FileParser;
 import io.ObjectRW;
 import io.BasicTools;
 import io.UniProtClient;
@@ -60,12 +59,12 @@ public class Predict {
 
 	// static arguments required by TFpredict
 	static String iprpath = "/opt/iprscan/bin/iprscan";
-	static String tfClassifier_file = Resource.class.getResource("ipr.model").getFile();
-	static String superClassifier_file = Resource.class.getResource("super.model").getFile();
-	static String relDomainsTF_file = Resource.class.getResource("ipr.iprs").getFile();
-	static String relDomainsSuper_file = Resource.class.getResource("super.iprs").getFile();
-	static String relGOterms_file = Resource.class.getResource("DNA.go").getFile();
-	static String tfName2class_file = Resource.class.getResource("transHMan").getFile();
+	static String tfClassifier_file = "ipr.model";
+	static String superClassifier_file = "super.model";
+	static String relDomainsTF_file = "ipr.iprs";
+	static String relDomainsSuper_file = "super.iprs";
+	static String relGOterms_file = "DNA.go";
+	static String tfName2class_file = "transHMan";
 	
 	// arguments passed from Galaxy to TFpredict
 	static String basedir = "";
@@ -84,7 +83,6 @@ public class Predict {
 	private ArrayList<String> relDomains_Superclass;
 	private ArrayList<String> relGOterms;
 	private HashMap<String,String> tfName2class;
-	private FileParser fp = new FileParser(true);
 
 	private HashMap<String, IprEntry> seq2domain;
 	private HashMap<String, IprRaw> IPRdomains;
@@ -214,11 +212,11 @@ public class Predict {
 	@SuppressWarnings("unchecked")
 	private void prepareInput() {
 		
-		relDomains_TFclass = (ArrayList<String>) ObjectRW.read(relDomainsTF_file, true);
-		relDomains_Superclass = (ArrayList<String>) ObjectRW.read(relDomainsSuper_file, true);
-		tfName2class = (HashMap<String, String>) ObjectRW.read(tfName2class_file, true);
+		relDomains_TFclass = (ArrayList<String>) ObjectRW.readFromResource(relDomainsTF_file);
+		relDomains_Superclass = (ArrayList<String>) ObjectRW.readFromResource(relDomainsSuper_file);
+		tfName2class = (HashMap<String, String>) ObjectRW.readFromResource(tfName2class_file);
 		
-		relGOterms = fp.parseGO(relGOterms_file);
+		relGOterms = BasicTools.readResource2List(relGOterms_file);
 		
 		// if UniProt ID was given --> retrieve sequence and species from UniProt
 		if (uniprot_id != null) {
@@ -260,8 +258,8 @@ public class Predict {
 
 		// load TF/Non-TF and superclass classifier
 		try {
-			tfClassifier = (Classifier) weka.core.SerializationHelper.read(tfClassifier_file);
-			superClassifier = (Classifier) weka.core.SerializationHelper.read(superClassifier_file);
+			tfClassifier = (Classifier) weka.core.SerializationHelper.read(Resource.class.getResourceAsStream(tfClassifier_file));
+			superClassifier = (Classifier) weka.core.SerializationHelper.read(Resource.class.getResourceAsStream(superClassifier_file));
 		
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -282,12 +280,12 @@ public class Predict {
 		seq2job = InterProScanRunner.getSeq2job();
 		
 		// HACK: line can be included for testing purposes
-		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1667_files";
-		//ArrayList<String[]> IPRoutput = fp.parseIPRout(basedir + "/iprscan-S20120424-154912-0758-43130522-oy.out.txt");
-	
+		//basedir = "/tmp/TFpredict_7963184977214500951_basedir";
+		//ArrayList<String[]> IPRoutput = fp.parseIPRout(basedir + "/iprscan-S20120425-085604-0302-81227913-oy.out.txt");
+		
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
-
+		
 		// generates map of from domain ID to object containing the InterPro ID, description, position, and GO classes
 		IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
 	

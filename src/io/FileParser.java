@@ -106,47 +106,5 @@ public class FileParser {
 		}
 		
 		return IPRentries;
-	}
-	
-	
-	// parse goterms
-	public ArrayList<String> parseGO(String infile) {
-		
-		if (! silent) System.out.println("Parsing: "+infile);
-		
-		ArrayList<String> goterms = new ArrayList<String>();
-		
-		int count = 0;
-		
-		String line = null;
-		
-		try {
-			 
-			 BufferedReader br = new BufferedReader(new FileReader(infile));
-			 line = br.readLine();
-			 
-			 while (line != null) {
-				 
-				 goterms.add(line.trim());
-				 count++;
-				 
-				 line = br.readLine();
-			}
-			 			 
-			 br.close();
-		
-		}
-		
-		catch(IOException ioe) {
-			System.out.println(ioe.getMessage());
-			System.out.println("IOException occurred while parsing...");
-		}
-		
-		if (! silent) System.out.println(count+" goterms parsed.");
-		
-		return goterms;
-	}
-	
-	
-	
+	}	
 }

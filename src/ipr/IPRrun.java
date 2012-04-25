@@ -79,7 +79,7 @@ public class IPRrun {
 		InputStream iprScan_StdOut;
 		
 		if (useWeb) { // SOAP
-			
+
 			// set parameter
 			String[] param = new String[6];
 			
@@ -138,7 +138,7 @@ public class IPRrun {
 				System.setErr(orig_stderr);
 			}
 			IPRoutput = readIPROutput(basedir, jobs);
-	
+
 		} else { // local
 			
 			Runtime rt = Runtime.getRuntime();
