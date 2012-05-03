@@ -19,6 +19,16 @@
 
 package modes;
 
+import io.BasicTools;
+import io.ObjectRW;
+import io.UniProtClient;
+import ipr.IPRextract;
+import ipr.IPRprocess;
+import ipr.IPRrun;
+import ipr.IprEntry;
+import ipr.IprProcessed;
+import ipr.IprRaw;
+
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -30,17 +40,15 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import io.ObjectRW;
-import io.BasicTools;
-import io.UniProtClient;
-
-import ipr.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
 
 import resources.Resource;
-
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -50,6 +58,17 @@ public class Predict {
 	
 	private static final String interproPrefix = "http://www.ebi.ac.uk/interpro/ISearch?query=";
 	private static final String transfacURL = "http://www.gene-regulation.com/pub/databases/transfac/clSM.html";
+	private static final int maxNumSequencesBatchMode = 10;
+	
+	private static final byte DuplicatedHeaderError = 1;
+	private static final byte InvalidUniProtError = 2;
+	private static final byte TooManySequencesError = 3;
+	
+	static Logger logger = Logger.getLogger(Predict.class.getName());
+	static {
+		logger.setLevel(Level.SEVERE);
+	}
+
 	
 	// use webservice version by default (local version is used if argument "iprscanPath" is provided)
 	static boolean useWeb = true;
@@ -133,6 +152,7 @@ public class Predict {
 	    if (standAloneMode) {
 	    	TFpredictor.writeConsoleOutput();
 	    } else {
+
 	    	TFpredictor.writeHTMLoutput();
 	    }
 	    if (sabine_outfile != null) {
@@ -205,6 +225,20 @@ public class Predict {
 		if(cmd.hasOption("standAloneMode")) {
 			standAloneMode = true;
 			silent = true;
+		} else {
+	    	FileHandler logFileHandler;
+			try {
+				logFileHandler = new FileHandler(sabine_outfile);
+				logFileHandler.setFormatter(new Formatter() {
+					@Override
+					public String format(LogRecord record) {
+						return record.getMessage();
+					}
+				});
+				logger.addHandler(logFileHandler);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -221,22 +255,40 @@ public class Predict {
 		if (uniprot_id != null) {
 			UniProtClient uniprot_client = new UniProtClient();
 			String fasta_seq = uniprot_client.getUniProtSequence(uniprot_id.toUpperCase(), true);
+			
+			// Stop, if given UniProt ID is invalid
+			if (fasta_seq == null) {
+				logger.log(Level.SEVERE, "Error. Invalid UniProt ID or Entry name: " + uniprot_id + ".");
+				writeHTMLerrorOutput(InvalidUniProtError);
+				System.exit(0);
+			}
+			
 			String[] splitted_header = fasta_seq.substring(0, fasta_seq.indexOf(" ")).trim().split("\\|");
 			
 			tfName = splitted_header[2];
 			uniprot_id = splitted_header[1];
 			species = fasta_seq.substring(fasta_seq.indexOf("OS=")+3, fasta_seq.indexOf("GN=")-1);
 			sequence = fasta_seq.replaceFirst(">.*\\n", "").replaceAll("\\n", "");
-			
-			if (sequence == null) {
-				System.out.println("Error. Invalid UniProt ID or Entry name given.");
-				System.exit(0);
-			}
 		} 
 		
 		if (batchMode) {
 			// BatchMode --> parse sequences from given FASTA file (and shorten long headers)
 			sequences = BasicTools.readFASTA(fasta_file);
+			
+			// Stop, if FASTA file contains duplicated headers
+			if (sequences.containsKey(BasicTools.duplicatedHeaderKey)) {
+				logger.log(Level.SEVERE, "Error. FASTA file contains duplicated headers.");
+				writeHTMLerrorOutput(DuplicatedHeaderError);
+				System.exit(0);
+			}
+			// Stop, if maximum number of sequences allowed for Batch mode was exceeded
+			if (sequences.size() > maxNumSequencesBatchMode) {
+				logger.log(Level.SEVERE, "Error. Maximum number of sequences allowed in Batch Mode: " + maxNumSequencesBatchMode + 
+						   		   ". FASTA file contains " + sequences.size() + " sequences.");
+				writeHTMLerrorOutput(TooManySequencesError);
+				System.exit(0);
+			}
+			
 			sequence_ids = sequences.keySet().toArray(new String[] {});
 			BasicTools.writeFASTA(sequences, input_file);
 			
@@ -382,12 +434,10 @@ public class Predict {
 		}
 	}
 	
-	private void writeHTMLoutput() {
+	// writes HTML header
+	private static void writeHTMLheader(BufferedWriter bw) {
 		
 		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(html_outfile)));
-			
-			// write HTML header
 			bw.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\n");
 			bw.write("     \"http://www.w3.org/TR/html4/loose.dtd\">\n");
 			bw.write("<html>\n");
@@ -396,6 +446,7 @@ public class Predict {
 			bw.write("<style type=\"text/css\">\n");
 			bw.write("  h1 { font-size: 150%;color: #002780; }\n");
 			bw.write("  h2 { font-size: 135%;color: #002780; }\n");
+			bw.write("  h4 { font-size: 135%;color: #990000; }\n");
 			bw.write("  table { width: 300px; background-color: #E6E8FA; border: 1px solid black; padding: 3px; vertical-align: middle;}\n");
 			bw.write("  th { font-weight: bold; padding-bottom: 4px; padding-top: 4px; text-align: center;}\n");
 			bw.write("  td { padding-bottom: 4px; padding-top: 4px; text-align: center; background-color:#F8F8FF;}\n");
@@ -405,6 +456,49 @@ public class Predict {
 			bw.write("</style>\n");
 			bw.write("</head>\n");
 			bw.write("<body style=\"padding-left: 30px\">\n");
+			
+		} catch(IOException ioe) {
+			ioe.printStackTrace();
+		}
+	}
+	
+	private void writeHTMLerrorOutput(byte errorType) {
+		
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(html_outfile)));
+			
+			writeHTMLheader(bw);
+			bw.write("<h4> Error </h4>\n");
+			
+			if (errorType == InvalidUniProtError) {
+				bw.write("<h3> Invalid UniProt ID or Entry name: " + uniprot_id + ".</h3>\n");
+						
+			} else if (errorType == TooManySequencesError) {
+				bw.write("<h3> Maximum number of sequences allowed in Batch Mode: " + maxNumSequencesBatchMode + "<br>\n" +
+			   		   "Number of sequences in given FASTA file: " + sequences.size() + "</h3>\n");
+				
+			} else if (errorType == DuplicatedHeaderError) {
+				bw.write("<h3>FASTA file contains duplicated headers.</h3>\n");
+			} 
+			
+			// close HTML file
+			bw.write("</body>\n");
+			bw.write("</html>\n");
+			
+			bw.flush();
+			bw.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void writeHTMLoutput() {
+		
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(html_outfile)));
+			
+			writeHTMLheader(bw);
 		
 			for (int i=0; i<sequence_ids.length; i++) {
 				String seq = sequence_ids[i];
@@ -427,9 +521,9 @@ public class Predict {
 					bw.write("</table>\n\n");
 					bw.write("<br>\n\n");
 					    
+					bw.write("<h2>Superclass prediction:</h2>\n");
 					if (seqIsTF.get(seq)) {
 						String[] outcomesSuper = getClassificationOutcomes(BasicTools.Double2double(probDist_Superclass.get(seq)));
-						bw.write("<h2>Superclass prediction:</h2>\n");
 						bw.write("<table>\n");
 						bw.write("  <tr><th></th><th> Probability </th></tr>\n");
 						bw.write("  <tr><th> Basic domain </th><td class=\"" + outcomesSuper[Basic_domain] + "\"> " + df.format(probDist_Superclass.get(seq)[Basic_domain]) + " </td></tr>\n");
@@ -474,9 +568,13 @@ public class Predict {
 					    } else {
 				    		bw.write("<h2>No DNA-binding domain found.</h2>\n");
 				    	}
+					    
+				    // if sequence was classified as Non-TF --> display message 
+					} else {
+						bw.write("<h3>No prediction possible.</h3>");
+				    	bw.write("The given sequence was classified as a Non-TF. As all further classification steps (e.g., superclass and DNA-binding domain prediction) require a TF sequence, these steps were not performed.");
 					}
-			    }
-			    else {
+			    } else {
 			    	bw.write("<h3>No prediction possible.</h3>");
 			    	bw.write("InterProScan did not detect any of the domains relevant for TF-/Non-TF classification in the given sequence. Consequently, TFpredict could not perform the prediction task.");
 			    }
@@ -608,7 +706,11 @@ public class Predict {
 					
 				// Protein was either not classified (no IPR domains found) or classified as Non-TF
 				} else {
-					bw.write("CL  Non-TF\nXX\n");
+					if (predictionPossible.get(seq)) {
+						bw.write("CL  Non-TF\nXX\n");
+					} else {
+						bw.write("CL  Unknown\nXX\n");
+					}
 				}
 			}
 			bw.flush();
