@@ -150,7 +150,6 @@ public class BasicTools {
 					}
 					// read new header
 					header = new StringTokenizer(line.replaceFirst(">\\s*", "")).nextToken();
-					System.out.println(header);
 					if (header.contains("|")) {
 						String[] splitted_header = header.split("\\|");
 						header = splitted_header[splitted_header.length-1].trim();
