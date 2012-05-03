@@ -36,6 +36,8 @@ import resources.Resource;
 
 public class BasicTools {
 	
+	public static final String duplicatedHeaderKey = "duplicated";
+	
 	public static String[] wrapString(String string) {
 		return(wrapString(string, 60));
 	}
@@ -147,7 +149,8 @@ public class BasicTools {
 						sequences.put(header, curr_seq.toString());
 					}
 					// read new header
-					header = new StringTokenizer(line).nextToken().replaceFirst(">", "");
+					header = new StringTokenizer(line.replaceFirst(">\\s*", "")).nextToken();
+					System.out.println(header);
 					if (header.contains("|")) {
 						String[] splitted_header = header.split("\\|");
 						header = splitted_header[splitted_header.length-1].trim();
@@ -157,6 +160,11 @@ public class BasicTools {
 				} else {
 					curr_seq.append(line);
 				}
+			}
+			
+			// If FASTA file contains duplicated headers --> mark HashTable
+			if (sequences.containsKey(header)) {
+				sequences.put(duplicatedHeaderKey, "");
 			}
 			sequences.put(header, curr_seq.toString());
 			
