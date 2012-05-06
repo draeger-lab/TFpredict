@@ -32,11 +32,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
 
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
+import weka.classifiers.lazy.KStar;
 import weka.core.Instances;
 import weka.core.converters.LibSVMLoader;
 import weka.filters.Filter;
@@ -46,83 +50,117 @@ import weka.filters.unsupervised.instance.NonSparseToSparse;
 public class Train {
 
 	private static DecimalFormat df = new DecimalFormat();
-	static int folds = 5;
+	private static final long randomSeed = 1;	
+	
+	private static String classifierType = "KNN";
+	private static String trainingDataFile;
+	private static String modelFile;
+	private static int folds = 5;
+	
+	private static final int[] knnGrid = new int[] {1,2,4,8,16};
+
+	private final static Logger logger = Logger.getLogger(Train.class.getName());
+	static {
+		logger.setLevel(Level.INFO);
+	}
+	
+	
+	private static void parseOptions(CommandLine cmd) {
+		
+		if(cmd.hasOption("trainingData")) {
+			trainingDataFile = cmd.getOptionValue("trainingData");
+		}
+		
+		if(cmd.hasOption("folds")) {
+			folds = Integer.parseInt(cmd.getOptionValue("folds"));
+		}
+		
+	    String modelFile = trainingDataFile + "." + classifierType + ".model";
+	    if(cmd.hasOption("modelFile")) {
+			modelFile = cmd.getOptionValue("modelFile");
+		}
+		
+	    logger.log(Level.INFO, "Training data:   " + trainingDataFile);
+	    logger.log(Level.INFO, "Number of folds: " + folds);
+	    logger.log(Level.INFO, "Model file:      " + modelFile);
+	}
+	
 	
 	public static void main(CommandLine cmd) throws Exception {
 		
-		String trainfile = "";
-		if(cmd.hasOption("i")) {
-			trainfile = cmd.getOptionValue("i");
-		}
-		
-		if(cmd.hasOption("f")) {
-			folds = Integer.parseInt(cmd.getOptionValue("f"));
-		}
+		parseOptions(cmd);
 		
 		// load data
-	    Instances data = readData(trainfile);
+	    Instances data = readTrainingData(trainingDataFile);
+	    Evaluation eval = new Evaluation(data);
+	    Classifier classifier = null;
 	    
-	    System.out.println("Number of folds: "+folds);
+	    if (classifierType.equals("KNN")) {
+		    classifier = new IBk();
+		    
+		    // determine optimal number of neighbors k
+		    int optNumNeighbors = getOptNumNeighbors((IBk) classifier, data);
+			((IBk) classifier).setKNN(optNumNeighbors);
 	    
+	    } else if (classifierType.equals("kStar")) {
+	    	classifier = new KStar();
 	    
-	    //// classifier specific
-	    // initialize classifier
-	    final IBk kNN = new IBk();
+	    } else if (classifierType.equals("SVM")) {
+	    	
+	    } else if (classifierType.equals("randomForest")) {
+	    	
+	    } else {
+	    	logger.log(Level.SEVERE, "Error. Unknown classifier.");
+	    	System.exit(0);
+	    }
 	    
-	    // determine best neighbor
-	    int bestNeighbor = determineBestNeighbor(kNN, data);
-		
-		// train classifier with best neighbor
-		kNN.setKNN(bestNeighbor);
-		kNN.buildClassifier(data);
-		Evaluation eval = new Evaluation(data);
-	    eval.crossValidateModel(kNN, data, folds, new Random(1));
-	    
-	    GenerateROC.plot(eval, trainfile+".roc");
+	    // perform cross-validation
+		classifier.buildClassifier(data);
+	    eval.crossValidateModel(classifier, data, folds, new Random(randomSeed));
+	    GenerateROC.plot(eval, trainingDataFile + ".roc");
+	    logger.log(Level.INFO, eval.toClassDetailsString());
 
-	    System.out.println(eval.toClassDetailsString());
-	    ////
-	    
 	    // serialize model
-	    System.out.println("Writing model: "+trainfile+".model");
-	    weka.core.SerializationHelper.write(trainfile+".model", kNN);
+	    logger.log(Level.INFO, "Writing model: " + modelFile);
+	    weka.core.SerializationHelper.write(trainingDataFile + ".model", classifier);
 	}
 	
 	
-	private static int determineBestNeighbor(IBk kNN, Instances data) throws Exception {
+	private static int getOptNumNeighbors(IBk kNN, Instances data) throws Exception {
 		
-		System.out.println("Determining best neighbor ...");
-		int bestNeighbor = 1;
+		logger.log(Level.INFO, "Determining best neighbor.");
+		int optNumNeighbors = 1;
 		double bestAUC = 0.0;
 		
-		for (int neigbor = 1; neigbor <= 16; neigbor = neigbor * 2) {
+		for (int numNeighbors: knnGrid) {
 			
-			kNN.setKNN(neigbor);
+			kNN.setKNN(numNeighbors);
 			Evaluation eval = new Evaluation(data);
 			kNN.buildClassifier(data);
-			eval.crossValidateModel(kNN, data, folds, new Random(1));
+			eval.crossValidateModel(kNN, data, folds, new Random(randomSeed));
 		
 			double auc = eval.weightedAreaUnderROC();
 			if (auc > bestAUC) {
-				System.out.println("score=" + df.format(auc) + " @k=" + neigbor);
 				bestAUC = auc;
-				bestNeighbor = neigbor;
+				optNumNeighbors = numNeighbors;
+				
+				logger.log(Level.INFO, "ROC score=" + df.format(auc) + " @k=" + numNeighbors);
 			}
 		}
-		System.out.println("Best Neighbor: "+bestNeighbor);
-		return bestNeighbor;
+		logger.log(Level.INFO, "Best Neighbor: " + optNumNeighbors);
+		return optNumNeighbors;
 	}
 	
 	
-	private static Instances readData(String strFile) {
+	private static Instances readTrainingData(String trainFile) {
 		
-		System.out.println("Reading: "+strFile);
+		logger.log(Level.INFO, "Reading training data: " + trainFile);
 		
-		if (!strFile.contains("libsvm")) {
-			return readDataFromARFF(strFile);
-		}
-		else {
-			return readDataFromLibsvm(strFile);
+		if (!trainFile.contains("libsvm")) {
+			return readDataFromARFF(trainFile);
+		
+		} else {
+			return readDataFromLibsvm(trainFile);
 		}
 	}
 	
@@ -141,16 +179,16 @@ public class Train {
 		}
 		trainInsts.setClassIndex(trainInsts.numAttributes() - 1);
 		trainInsts = arffToSparse(trainInsts);
-		trainInsts.randomize(new Random(1));
+		trainInsts.randomize(new Random(randomSeed));
 		trainInsts.stratify(folds);
 		return trainInsts;
 	}
 	
-	private static Instances readDataFromLibsvm(String strFile) {
+	private static Instances readDataFromLibsvm(String trainFile) {
 		Instances trainInsts = null;
 		try {
 			LibSVMLoader lsl = new LibSVMLoader();
-			lsl.setSource(new File(strFile));
+			lsl.setSource(new File(trainFile));
 			trainInsts = lsl.getDataSet();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -184,7 +222,6 @@ public class Train {
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
-
 		return source;
 	}
 }
