@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.StringTokenizer;
@@ -67,6 +68,25 @@ public class BasicTools {
 			res[idx++] = string[i];
 		}
 		return(res);
+	}
+	
+	public static void writeSplittedArrayListToFile(ArrayList<String[]> arraylist, String outfile) {
+		
+		ArrayList<String> collapsedList = new ArrayList<String>();
+		for (int i=1; i<arraylist.size(); i++) {
+			StringBuffer currLine = new StringBuffer();
+			for (String token: arraylist.get(i)) {
+				currLine.append(token + "\t");
+			}
+			collapsedList.add(currLine.toString().trim());
+		}
+		writeArrayListToFile(collapsedList, outfile);
+	}
+	
+	public static void writeArrayListToFile(ArrayList<String> arraylist, String outfile) {
+		
+		String[] array = arraylist.toArray(new String[] {});
+		writeArrayToFile(array, outfile);
 	}
 	
 	public static void writeArrayToFile(String[] array, String outfile) {
@@ -227,6 +247,26 @@ public class BasicTools {
 		return(fileContent);
 	}
 	
+	
+	public static HashMap<String, String> readFile2Map(String infile) {
+		
+		ArrayList<String[]> keyValueList = readFile2ListSplitLines(infile);
+		HashMap<String, String> keyValueMap= new HashMap<String,String>();
+		
+		for (String[] pair: keyValueList) {
+			
+			if (pair.length >= 2) {
+				keyValueMap.put(pair[0], pair[1]);
+			
+			} else {
+				System.out.println("Error. File does not contain tab-separated key value pairs.");
+				System.exit(1);
+			}
+		}
+		return (keyValueMap);
+	}
+	
+	
 	public static ArrayList<String[]> readFile2ListSplitLines(String infile) {
 		
 		ArrayList<String[]> splittedLines = new ArrayList<String[]>();
@@ -253,6 +293,25 @@ public class BasicTools {
 		return splittedLines;
 	}	
 	
+	public static ArrayList<String> union(ArrayList<String> list1, ArrayList<String> list2) {
+		
+		HashSet<String> unionSet = new HashSet<String>();
+		for (String element: list1) {
+			unionSet.add(element);
+		}
+		for (String element: list2) {
+			unionSet.add(element);
+		}
+		ArrayList<String> union = new ArrayList<String>();
+		union.addAll(unionSet);
+		
+		return(union);
+	}
+	
+	public static ArrayList<String> union(String[] list1, String[] list2) {
+		return(union(new ArrayList<String>(Arrays.asList(list1)), new ArrayList<String>(Arrays.asList(list2))));
+	}
+	
 	public static ArrayList<String> intersect(ArrayList<String> list1, ArrayList<String> list2) {
 		
 		HashSet<String> intersectionSet = new HashSet<String>();
@@ -267,6 +326,36 @@ public class BasicTools {
 		return(intersection);
 	}
 	
+	public static ArrayList<String> setDiff(String[] list1, String[] list2) {
+		return(setDiff(new ArrayList<String>(Arrays.asList(list1)), new ArrayList<String>(Arrays.asList(list2))));
+	}
+	
+	public static ArrayList<String> setDiff(ArrayList<String> list1, ArrayList<String> list2) {
+		HashSet<String> diffSet = new HashSet<String>();
+		for (String element: list1) {
+			if (!list2.contains(element)) {
+				diffSet.add(element);
+			}
+		}
+		ArrayList<String> diff = new ArrayList<String>();
+		diff.addAll(diffSet);
+		
+		return(diff);
+	}
+	
+	public static ArrayList<String[]> combineLists(ArrayList<String> ids, ArrayList<Double> values) {
+		
+		if (ids.size() != values.size()) {
+			System.out.println("Error. Lists have unequal sizes.");
+			System.out.println(1);
+		}
+		
+		ArrayList<String[]> mergedList = new ArrayList<String[]>();
+		for (int i=0; i<ids.size(); i++) {
+			mergedList.add(new String[] {ids.get(i), values.get(i).toString()});
+		}
+		return(mergedList);
+	}
 	
 	public static void main(String args[]) {
 		
