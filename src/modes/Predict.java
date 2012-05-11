@@ -19,6 +19,7 @@
 
 package modes;
 
+import io.AnimatedChar;
 import io.BasicTools;
 import io.ObjectRW;
 import io.UniProtClient;
@@ -326,9 +327,21 @@ public class Predict {
 	private void runInterproScan() {
 
 		// HACK: line can be excluded for testing purposes
-		IPRrun InterProScanRunner = new IPRrun(silent); 
+		IPRrun InterProScanRunner = new IPRrun(silent);
+		AnimatedChar an = null;
+		if (standAloneMode) {
+			System.out.print("\n  Fetching domains from InterProScan. This may take several minutes... ");
+			
+			an = new AnimatedChar();
+			an.setOutputStream(System.out);
+			an.showAnimatedChar();
+		}
 		ArrayList<String[]> IPRoutput = InterProScanRunner.run(input_file, iprpath, basedir, useWeb, standAloneMode);
 		seq2job = InterProScanRunner.getSeq2job();
+		if (standAloneMode) {
+			an.hideAnimatedChar();
+			System.out.println();
+		}
 		
 		// HACK: line can be included for testing purposes
 		//basedir = "/tmp/TFpredict_4215575705942655684_basedir";
