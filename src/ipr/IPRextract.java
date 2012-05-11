@@ -35,6 +35,10 @@ import java.util.HashSet;
 public class IPRextract {
 	
 	public static HashMap<String, IprEntry> getSeq2DomainMap(ArrayList<String[]> IPRoutput) {
+		return(getSeq2DomainMap(IPRoutput, null));
+	}
+	
+	public static HashMap<String, IprEntry> getSeq2DomainMap(ArrayList<String[]> IPRoutput, Boolean label) {
 
 		HashMap<String, IprEntry> seq2domain = new HashMap<String, IprEntry>();
 		
@@ -59,12 +63,50 @@ public class IPRextract {
 				seq2domain.put(sequence_id, curr_entry);
 			}
 			else {
-				curr_entry = new IprEntry(sequence_id, domain_id);
+				if (label == null) {
+					curr_entry = new IprEntry(sequence_id, domain_id);
+				} else {
+					curr_entry = new IprEntry(sequence_id, label, domain_id);
+				}
 				seq2domain.put(sequence_id, curr_entry);
 			}
 		}
 		return seq2domain;
 	}
+	
+	
+	public static HashMap<String, ArrayList<String>> getDomain2SeqMap(ArrayList<String[]> IPRoutput) {
+		
+		HashMap<String, ArrayList<String>> domain2seq = new HashMap<String, ArrayList<String>>();
+		
+		for (int i = 0; i < IPRoutput.size(); i++) {
+			
+			String[] domain_entry = IPRoutput.get(i);
+			String sequence_id = domain_entry[0].trim();
+			String domain_id = domain_entry[11].trim();
+			
+			// skip domains for which no InterPro-ID is given
+			if (domain_id.equals("NULL")) {
+				continue;
+			}
+
+			ArrayList<String> currSeqIDs;
+			if (domain2seq.containsKey(domain_id)) {
+				currSeqIDs = domain2seq.get(domain_id);
+				if (!currSeqIDs.contains(sequence_id)) {
+					currSeqIDs.add(sequence_id);
+					domain2seq.put(domain_id, currSeqIDs);
+				}
+			}
+			else {
+				currSeqIDs = new ArrayList<String>();
+				currSeqIDs.add(sequence_id);
+				domain2seq.put(domain_id, currSeqIDs);
+			}
+		}
+		return domain2seq;
+	}
+	
 	
 	public static HashMap<String, IprRaw> parseIPRoutput(ArrayList<String[]> IPRoutput) {
 		
@@ -118,4 +160,7 @@ public class IPRextract {
 		}
 		return ipr_domains;
 	}
+	
+	
+
 }

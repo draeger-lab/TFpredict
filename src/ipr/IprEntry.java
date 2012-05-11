@@ -35,7 +35,7 @@ public class IprEntry implements Serializable{
 	public boolean label;
 	public ArrayList<String> domain_ids = new ArrayList<String>();
 	
-	public boolean isLabel() {
+	public boolean isTF() {
 		return label;
 	}
 	

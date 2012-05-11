@@ -28,6 +28,8 @@ import io.NoExitSecurityManager;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.ByteArrayInputStream;
@@ -188,6 +190,19 @@ public class IPRrun {
 		return IPRoutput;
 	}
 
+	// used by FeatureFileGenerator
+	public static ArrayList<String[]> readIPRoutput(String outputFile) {
+		
+		InputStream IPRoutputStream = null;
+		try {
+			IPRoutputStream = new FileInputStream(new File(outputFile));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		return(readIPRoutput(IPRoutputStream, null));
+	}
+	
 	// reads the standard output from InterProScan
 	private static ArrayList<String[]> readIPRoutput(InputStream IPRoutputStream, String outputFile) {
 		

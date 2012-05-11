@@ -785,7 +785,7 @@ public class Predict {
 	}
 
 	
-	private static String createIPRvector(ArrayList<String> predIPRdomains, ArrayList<String> relIPRdomains, int start) {
+	public static String createIPRvector(ArrayList<String> predIPRdomains, ArrayList<String> relIPRdomains, int start) {
 		String fvector = "";
 		
 		for (int i = 0; i < relIPRdomains.size(); i++) {
