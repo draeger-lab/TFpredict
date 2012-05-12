@@ -20,7 +20,6 @@ import java.util.TreeSet;
 
 public class BenjaminiHochberg {
 
-	@SuppressWarnings("unchecked")
 	public ArrayList<Double> correct(Collection<Double> pvalues) {
 		int size = pvalues.size();
 		ArrayList<Double> ret = new ArrayList<Double>();

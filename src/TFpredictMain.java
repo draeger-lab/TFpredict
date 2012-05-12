@@ -266,8 +266,8 @@ public class TFpredictMain {
 		System.out.println("TFpredict - Identification and structural characterization of transcription factors");
 		System.out.println("-----------------------------------------------------------------------------------");
 		System.out.println("(version 1.0)\n");
-		System.out.println("Copyright (C) 2012 Center for Bioinformatics T\u00fcbingen (ZBIT),");
-        System.out.println("University of T\u00fcbingen, Florian Topf und Johannes Eichner.\n");
+		System.out.println("Copyright (C) 2012 Center for Bioinformatics Tuebingen (ZBIT),");
+        System.out.println("University of Tuebingen, Florian Topf and Johannes Eichner.\n");
         System.out.println("This program comes with ABSOLUTELY NO WARRANTY.");
         System.out.println("This is free software, and you are welcome to redistribute it under certain conditions.");
         System.out.print("For details see: ");
