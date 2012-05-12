@@ -413,7 +413,7 @@ public class Predict {
 					double[] currProbDistTF = tfClassifier.distributionForInstance(featVectorTF);
 					probDist_TFclass.put(seq, BasicTools.double2Double(currProbDistTF));
 					
-					if (currProbDistTF[TF] > currProbDistTF[Non_TF] && seq2feat_Superclass.containsKey(seq)) {
+					if (currProbDistTF[TF] >= currProbDistTF[Non_TF] && seq2feat_Superclass.containsKey(seq)) {
 						seqIsTF.put(seq, true);
 					}
 		    		
