@@ -78,7 +78,7 @@ public class Predict {
 	static boolean silent = false;
 
 	// static arguments required by TFpredict
-	static String iprpath = "/opt/iprscan/bin/iprscan";
+	static String iprpath = "";
 	static String tfClassifier_file = "ipr.model";
 	static String superClassifier_file = "super.model";
 	static String relDomainsTF_file = "ipr.iprs";
@@ -283,7 +283,7 @@ public class Predict {
 				System.exit(0);
 			}
 			// Stop, if maximum number of sequences allowed for Batch mode was exceeded
-			if (sequences.size() > maxNumSequencesBatchMode) {
+			if ((sequences.size() > maxNumSequencesBatchMode )&& (iprpath.isEmpty())) {
 				logger.log(Level.SEVERE, "Error. Maximum number of sequences allowed in Batch Mode: " + maxNumSequencesBatchMode + 
 						   		   ". FASTA file contains " + sequences.size() + " sequences.");
 				writeHTMLerrorOutput(TooManySequencesError);
