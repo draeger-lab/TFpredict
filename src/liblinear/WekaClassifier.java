@@ -1,0 +1,1220 @@
+package liblinear;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Random;
+
+import liblinear.LibLINEARWekaAdapter;
+
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.math.stat.descriptive.moment.Mean;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.functions.GaussianProcesses;
+import weka.classifiers.functions.LibLINEAR;
+import weka.classifiers.functions.LibSVM;
+import weka.classifiers.lazy.IBk;
+import weka.classifiers.lazy.KStar;
+import weka.classifiers.trees.J48;
+import weka.classifiers.trees.RandomForest;
+import weka.core.Instances;
+import weka.core.converters.LibSVMLoader;
+import weka.filters.Filter;
+import weka.filters.unsupervised.instance.NonSparseToSparse;
+import weka.filters.unsupervised.instance.Normalize;
+
+public class WekaClassifier {
+
+	public boolean silent = true;
+	
+	private boolean hideLibsvmDebugOutput = true;
+	private PrintStream stdOut = System.out;
+	
+	private boolean showEstimatedDuration = false;
+	private boolean performNestedCV = true;
+	private String mainPerformanceMeasure = "ROC";
+	private String modelFile = null;
+	private boolean writeModelFile = false;
+	
+	private static int folds = 2;
+	private static int repetitions = 1;
+	private final static int innerRepetitions = 1;
+	private static DecimalFormat df = new DecimalFormat();
+	private int selectedClassifier = 0;
+	private static String strFile;
+
+	public static String[] classifierNames = new String[] { "Random Forest", "Decision Tree", 
+		"SVM rbf kernel", "SVM linear kernel", "Naive Bayes", "K*", "KNN", "Gaussian Processes"};
+	
+	public static final int RandomForest = 0;
+	public static final int DecisionTree = 1;
+	public static final int SVM_rbf = 2;
+	public static final int SVM_linear = 3;
+	public static final int NaiveBayes = 4;
+	public static final int Kstar = 5;
+	public static final int KNN = 6;
+	public static final int GaussianProcesses = 7;
+	
+	/**
+	 * @param args
+	 * @throws IOException
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws IOException {
+		java.util.Locale.setDefault(java.util.Locale.ENGLISH);
+		df = new DecimalFormat();
+		final WekaClassifier classRunner = new WekaClassifier();
+		Options options = classRunner.buildCommandLine();
+		classRunner.parseCommandLine(args, options);
+		if (!classRunner.silent) classRunner.printConfiguration();
+		
+		// to support libsvm-format
+		Instances samples = classRunner.readData();
+		classRunner.normalizeData(samples);
+
+		// create a new classifier
+		Evaluation[] evaluation = null;
+		if (classRunner.selectedClassifier == RandomForest) {
+			evaluation = classRunner.runNestedCVRandomForest(samples, repetitions);
+			
+		} else if (classRunner.selectedClassifier == DecisionTree) {
+			evaluation = classRunner.runNestedCVJ48(samples, repetitions);
+		
+		} else if (classRunner.selectedClassifier == SVM_rbf) {
+			evaluation = classRunner.runNestedCVLIBSVM(samples, repetitions);
+		
+		} else if (classRunner.selectedClassifier == SVM_linear) {
+			evaluation = classRunner.runNestedCVLIBLINEAR(samples, repetitions);
+		
+		} else if (classRunner.selectedClassifier == NaiveBayes) {
+			evaluation = classRunner.runNestedCVNaiveBayes(samples, repetitions);
+
+		} else if (classRunner.selectedClassifier == Kstar) {
+			evaluation = classRunner.runNestedCVKStar(samples, repetitions);
+		
+		} else if (classRunner.selectedClassifier == KNN) {
+			evaluation = classRunner.runNestedCVkNN(samples, repetitions);
+		
+		} else if (classRunner.selectedClassifier == GaussianProcesses) {
+			evaluation = classRunner.runNestedCVGaussianProcesses(samples, repetitions);
+		
+		} else if (classRunner.selectedClassifier > 7 || classRunner.selectedClassifier < 0) {
+			System.out.println("Please select a valid classifier (0-7)");
+			System.exit(1);
+		}
+		classRunner.printSummary(evaluation, classifierNames[classRunner.selectedClassifier], samples);
+	}
+
+	private void printConfiguration() {
+		System.out.println("repetitions: " + repetitions + ", inner repetitions: " + innerRepetitions + ", classifier: " + selectedClassifier + ", InFile: " + strFile + ", folds: " + folds);
+	}
+
+	/**
+	 * read file
+	 * @author Florian Topf
+	 * @return
+	 */
+	private Instances readData() {
+		
+		if (!strFile.contains("libsvm")) {
+			return readDataFromARFF();
+		}
+		else {
+			return readDataFromLibsvm();
+		}
+	}
+	
+	/**
+	 * read ARFF file
+	 * 
+	 * @return
+	 */
+	private Instances readDataFromARFF() {
+		BufferedReader dataReader = null;
+		try {
+			dataReader = new BufferedReader(new FileReader(new File(strFile)));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		Instances trainInsts = null;
+		try {
+			trainInsts = new Instances(dataReader);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		trainInsts.setClassIndex(trainInsts.numAttributes() - 1);
+		trainInsts = arffToSparse(trainInsts);
+		trainInsts.randomize(new Random(1));
+		trainInsts.stratify(folds);
+		return trainInsts;
+	}
+	
+	/**
+	 * read LibSVM file
+	 * @author Florian Topf
+	 * 
+	 * @return
+	 */
+	private Instances readDataFromLibsvm() {
+		Instances trainInsts = null;
+		try {
+			LibSVMLoader lsl = new LibSVMLoader();
+			lsl.setSource(new File(strFile));
+			trainInsts = lsl.getDataSet();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		trainInsts.setClassIndex(trainInsts.numAttributes() - 1);
+		
+		// convert class label only
+		NumericToNominal ntm = new NumericToNominal(); 
+		Instances Insts_filtered = null;
+		String[] options = new String[2];
+		options[0] = "-R";
+		options[1] = "last";
+		try {
+			ntm.setOptions(options);
+			ntm.setInputFormat(trainInsts); 
+			Insts_filtered = Filter.useFilter(trainInsts, ntm);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Insts_filtered.randomize(new Random(1));
+		Insts_filtered.stratify(folds);
+		return Insts_filtered;
+	}
+
+	/**
+	 * normalizes the attribute value in 0,1
+	 * 
+	 * @param trainInsts
+	 */
+	private void normalizeData(Instances trainInsts) {
+		// normalize input data
+		if (!silent) System.out.println("Normalizing data ...");
+		Normalize normalize = new Normalize();
+		try {
+			normalize.setInputFormat(trainInsts);
+			for (int i = 0, n = trainInsts.numInstances(); i < n; i++) {
+				normalize.input(trainInsts.get(i));
+			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+	}
+
+	private void parseCommandLine(String[] args, Options options) {
+		CommandLine lvCmd = null;
+		final HelpFormatter lvFormater = new HelpFormatter();
+		final CommandLineParser lvParser = new BasicParser();
+		/**
+		 * parse command line
+		 */
+		try {
+			lvCmd = lvParser.parse(options, args);
+			if (lvCmd.hasOption('h')) {
+				lvFormater.printHelp("java -jar jCMapper.jar", options);
+				System.exit(1);
+			}
+		} catch (final ParseException pvException) {
+			lvFormater.printHelp("jCMapper", options);
+			System.out.println("Parse error: " + pvException.getMessage());
+			System.exit(1);
+		}
+
+		try {
+			if (lvCmd.hasOption("c")) {
+				try {
+					selectedClassifier = new Integer(lvCmd.getOptionValue("c"));
+				} catch (Exception e) {
+					System.exit(1);
+				}
+			}
+			if (lvCmd.hasOption("f")) {
+				try {
+					strFile = new String(lvCmd.getOptionValue("f"));
+				} catch (Exception e) {
+					System.exit(1);
+				}
+			}
+			if (lvCmd.hasOption("r")) {
+				try {
+					repetitions = new Integer(lvCmd.getOptionValue("r"));
+				} catch (Exception e) {
+					System.exit(1);
+				}
+			}
+			if (lvCmd.hasOption("v")) {
+				try {
+					folds = new Integer(lvCmd.getOptionValue("v"));
+				} catch (Exception e) {
+					System.exit(1);
+				}
+			}
+			if (lvCmd.hasOption("m")) {
+				try {
+					modelFile = new String(lvCmd.getOptionValue("m"));
+					writeModelFile = true;
+				} catch (Exception e) {
+					System.exit(1);
+				}
+			}
+			if (lvCmd.hasOption("n")) {
+				try {
+					performNestedCV = new Boolean(lvCmd.getOptionValue("n"));
+				} catch (Exception e) {
+					System.exit(1);
+				}
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+			System.err.println("Please check your input.");
+			System.exit(1);
+		}
+	}
+
+	private void printSummary(Evaluation[] evaluation, String classifier, Instances data) {
+		System.out.println("#" + classifier);
+		System.out.println("#AvgAreaUnderROC" + "\tAvgFMeasure" + "\tAvgMatthewsCorrelation" + "\tAvgAccuracy" + "\tAvgBalancedAccuracy");
+		for (Evaluation eval : evaluation) {
+			System.out.println(df.format(getAvgROCAUC(eval, data)) + "\t" + df.format(getAvgFMeasure(eval, data)) + "\t" + df.format(getMatthewsCorrelation(eval, data)) + "\t" + df.format(getAvgAccuracy(eval, data)) + "\t" + df.format(getBalancedAccuracy(eval, data)));
+		}
+	}
+
+	/**
+	 * computes the mean balanced accuracy
+	 * 
+	 * @param eval
+	 * @param data
+	 * @return
+	 */
+	private double getBalancedAccuracy(Evaluation eval, Instances data) {
+		int classes = data.numClasses();
+		double bAUC = 0;
+		for (int i = 0; i < classes; i++) {
+			bAUC = bAUC + (eval.precision(i) + eval.precision(i)) / 2;
+		}
+		return bAUC / (double) classes;
+	}
+
+	/**
+	 * computes the mean balanced accuracy
+	 * 
+	 * @param eval
+	 * @param data
+	 * @return
+	 */
+	private double getAvgROCAUC(Evaluation eval, Instances data) {
+		int classes = data.numClasses();
+		double auc = 0;
+		for (int i = 0; i < classes; i++) {
+			auc = auc + eval.areaUnderROC(i);
+		}
+		return auc / (double) classes;
+	}
+
+	/**
+	 * computes the mean FMeasure accuracy
+	 * 
+	 * @param eval
+	 * @param data
+	 * @return
+	 */
+	private double getAvgFMeasure(Evaluation eval, Instances data) {
+		int classes = data.numClasses();
+		double fmeasure = 0;
+		for (int i = 0; i < classes; i++) {
+			fmeasure = fmeasure + eval.fMeasure(i);
+		}
+		return fmeasure / (double) classes;
+	}
+
+	/**
+	 * computes the mean balanced accuracy
+	 * 
+	 * @param eval
+	 * @param data
+	 * @return
+	 */
+	private double getAvgAccuracy(Evaluation eval, Instances data) {
+		int classes = data.numClasses();
+
+		double acc = 0;
+		for (int i = 0; i < classes; i++) {
+			double tp = eval.numTruePositives(i);
+			double tn = eval.numTrueNegatives(i);
+			double fp = eval.numFalsePositives(i);
+			double fn = eval.numFalseNegatives(i);
+			double acc_i = (tp + tn) / (tp + tn + fp + fn);
+
+			if (Double.isNaN(acc_i))
+				acc_i = 0;
+
+			acc = acc + acc_i;
+		}
+		return acc / (double) classes;
+	}
+
+	/**
+	 * computes the mean balanced accuracy
+	 * 
+	 * @param eval
+	 * @param data
+	 * @return
+	 */
+	private double getMatthewsCorrelation(Evaluation eval, Instances data) {
+		int classes = data.numClasses();
+
+		double mcc = 0;
+		for (int i = 0; i < classes; i++) {
+			double tp = eval.numTruePositives(i);
+			double tn = eval.numTrueNegatives(i);
+			double fp = eval.numFalsePositives(i);
+			double fn = eval.numFalseNegatives(i);
+			double mcc_i = (tp * tn - fp * fn) / Math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn));
+
+			if (Double.isNaN(mcc_i))
+				mcc_i = 0;
+
+			mcc = mcc + mcc_i;
+		}
+		return mcc / (double) classes;
+	}
+
+	@SuppressWarnings("static-access")
+	private Options buildCommandLine() {
+		final Options options = new Options();
+		final Option optSDF = (OptionBuilder.isRequired(true).withDescription("Classifier (0: Random Decision Forest, 1: J48 Decision Tree, 2: LIBSVM+RBF Kernel, 3: LIBLINEAR, 4: Naive Bayes, 5: K* NN, 6: kNN, 7: GaussianProcesses)").hasArg(true).create("c"));
+		final Option optFile = (OptionBuilder.isRequired(true).withDescription("InFile").hasArg(true).create("f"));
+		final Option optRepetitions = (OptionBuilder.isRequired(false).withDescription("Repetitions").hasArg(true).create("r"));
+		final Option optFolds = (OptionBuilder.isRequired(false).withDescription("Folds (default = 2)").hasArg(true).create("v"));
+		final Option optModelFile = (OptionBuilder.isRequired(false).withDescription("Model file)").hasArg(true).create("m"));
+		final Option optNestedCV = (OptionBuilder.isRequired(false).withDescription("Nested cross-validation (default = true)").hasArg(true).create("n"));
+		options.addOption(optSDF);
+		options.addOption(optFile);
+		options.addOption(optFolds);
+		options.addOption(optRepetitions);
+		options.addOption(optModelFile);
+		options.addOption(optNestedCV);
+		return options;
+	}
+
+	private void writeModelFile(Classifier model) {
+		if (modelFile != null) {
+			try {
+			weka.core.SerializationHelper.write(modelFile, model);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param randomForest
+	 * @param data
+	 */
+	private Evaluation[] runNestedCVRandomForest(Instances data, int repetitions) {
+		final RandomForest randomForest = new RandomForest();
+		final int maxFeatures = ((int) Math.sqrt(data.numAttributes()));
+		randomForest.setNumTrees(10);
+		randomForest.setNumFeatures(maxFeatures);
+		randomForest.setSeed(1);
+
+		final long systemMillisBegin = System.currentTimeMillis();
+		final Evaluation[] externalEvals = new Evaluation[folds * repetitions];
+		int run = 0;
+
+		if (! silent) System.out.println("Nested CV for Random forests ...");
+
+		for (int rep = 0; rep < repetitions; rep++) {
+
+			// generate new splits for cross-validation
+			Instances[] splits = getSplits(data, folds, rep);
+
+			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
+				Instances instancesTraining = new Instances(data, 1);
+				for (int trainingSplitIndex = 0; trainingSplitIndex < splits.length; trainingSplitIndex++) {
+					if (trainingSplitIndex != splitIndex) {
+						instancesTraining = addInstances(instancesTraining, splits[trainingSplitIndex]);
+					}
+				}
+				
+				if (performNestedCV) {
+					if (! silent) System.out.println("Model selection ...");
+					//cross-validate on n-1 folds
+					int bestN = 4;
+					double bestAUC = 0.0;
+					for (int numFeat = bestN; numFeat <= maxFeatures * 2; numFeat
+							= numFeat * 2) {
+						randomForest.setNumFeatures(numFeat);
+						Evaluation[] evaluation =
+								performCrossvalidation(randomForest, instancesTraining,
+										folds, innerRepetitions);
+						double auc = getMeanQuality(evaluation, instancesTraining);
+						if (auc > bestAUC) {
+							if (!silent) System.out.println("score=" + df.format(auc) + ", @numFeatures=" + numFeat);
+							bestAUC = auc;
+							bestN = numFeat;
+						}
+					}
+					//predict external data
+					randomForest.setNumFeatures(bestN);
+				}
+				
+				buildClassifier(randomForest, instancesTraining);
+
+				externalEvals[run] = predictData(randomForest, splits[splitIndex]);
+				if (!silent) System.out.println("\nExternal prediction at fold = " + splitIndex);
+				try {
+					if (!silent) System.out.println(externalEvals[run].toClassDetailsString());
+				} catch (Exception e) {
+					if (!silent) System.out.println("could not create summary");
+				}
+				
+				if (showEstimatedDuration) {
+					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
+					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
+					System.out.println("time remaining = " + df.format(estimatedTime) + "s");
+				}
+				run++;
+			}
+			if (writeModelFile) {
+				buildClassifier(randomForest, data);
+				writeModelFile(randomForest);
+			}
+		}
+		return externalEvals;
+	}
+
+	/**
+	 * 
+	 * @param randomForest
+	 * @param data
+	 */
+	private Evaluation[] runNestedCVJ48(Instances data, int repetitions) {
+		final J48 decisionTree = new J48();
+		final long systemMillisBegin = System.currentTimeMillis();
+		final Evaluation[] externalEvals = new Evaluation[folds * repetitions];
+
+		int run = 0;
+
+		if (!silent) System.out.println("Nested CV for J48 tree ...");
+
+		for (int rep = 0; rep < repetitions; rep++) {
+
+			// generate new splits for cross-validation
+			Instances[] splits = getSplits(data, folds, rep);
+
+			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
+				Instances instancesTraining = new Instances(data, 1);
+				for (int trainingSplitIndex = 0; trainingSplitIndex < splits.length; trainingSplitIndex++) {
+					if (trainingSplitIndex != splitIndex) {
+						instancesTraining = addInstances(instancesTraining, splits[trainingSplitIndex]);
+					}
+				}
+				
+				if (performNestedCV) {
+					if (!silent) System.out.println("Model selection ...");
+					// cross-validate on n-1 folds
+					double bestPruningConfidence = 0.05;
+					int bestNumFeatures = 2;
+					double bestAUC = 0.0;
+					for (double pruningC = 0.05; pruningC <= 0.5; pruningC = pruningC * 2) {
+						for (int numFeat = 2; numFeat <= 10; numFeat = numFeat * 2) {
+							decisionTree.setConfidenceFactor((float) pruningC);
+							decisionTree.setMinNumObj(numFeat);
+							Evaluation[] evaluation = performCrossvalidation(decisionTree, instancesTraining, folds, innerRepetitions);
+							double auc = getMeanQuality(evaluation, instancesTraining);
+							if (auc > bestAUC) {
+								if (!silent) System.out.println("score=" + df.format(auc) + " @pruningC=" + pruningC + ", @numObj=" + numFeat);
+								bestPruningConfidence = pruningC;
+								bestAUC = auc;
+								bestNumFeatures = numFeat;
+							}
+						}
+					}
+	
+					// predict external data
+					decisionTree.setConfidenceFactor((float) bestPruningConfidence);
+					decisionTree.setMinNumObj(bestNumFeatures);
+				}
+				
+				buildClassifier(decisionTree, instancesTraining);
+
+				externalEvals[run] = predictData(decisionTree, splits[splitIndex]);
+				if (!silent) System.out.println("\nExternal prediction at fold = " + splitIndex);
+				// System.out.println(externalEvals[run].toSummaryString());
+				try {
+					if (!silent) System.out.println(externalEvals[run].toClassDetailsString());
+				} catch (Exception e) {
+					if (!silent) System.out.println("could not create summary");
+				}
+
+				if (showEstimatedDuration) {
+					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
+					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
+					System.out.println("time remaining = " + df.format(estimatedTime) + "s");
+				}
+				run++;
+			}
+		}
+		if (writeModelFile) {
+			buildClassifier(decisionTree, data);
+			writeModelFile(decisionTree);
+		}
+		return externalEvals;
+	}
+
+	/**
+	 * 
+	 * @param randomForest
+	 * @param data
+	 */
+	private Evaluation[] runNestedCVLIBSVM(Instances data, int repetitions) {
+		final LibSVM libsvm = new LibSVM();
+		final long systemMillisBegin = System.currentTimeMillis();
+		final Evaluation[] externalEvals = new Evaluation[folds * repetitions];
+
+		int run = 0;
+
+		if (!silent) System.out.println("Nested CV for LIBSVM ...");
+
+		for (int rep = 0; rep < repetitions; rep++) {
+
+			// generate new splits for cross-validation
+			Instances[] splits = getSplits(data, folds, rep);
+
+			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
+				Instances instancesTraining = new Instances(data, 1);
+				for (int trainingSplitIndex = 0; trainingSplitIndex < splits.length; trainingSplitIndex++) {
+					if (trainingSplitIndex != splitIndex) {
+						instancesTraining = addInstances(instancesTraining, splits[trainingSplitIndex]);
+					}
+				}
+				
+				if (performNestedCV) {
+					
+					if (!silent) System.out.println("Model selection ...");
+					// cross-validate on n-1 folds
+					double bestGamma = 0.005;
+					double bestC = 1;
+					// double bestWeight = 1.0;
+					double bestAUC = 0.0;
+					for (double gamma = 0.005; gamma <= 0.1; gamma = gamma * 2) {
+						for (double C = Math.pow(2, -5); C <= Math.pow(2, 4); C = C * 2) {
+							// for (double weight = 1.0; weight <= 4.0; weight =
+							// weight * 2) {
+	
+							libsvm.setGamma(gamma);
+							libsvm.setCost(C);
+							// libsvm.setWeights((1.0 / weight) + " " + 1.0);
+							
+							if (hideLibsvmDebugOutput) {
+								String debugOutputFile = WekaLauncher.redirectSystemOut2TempFile();
+								if (!silent) System.out.println("Redirecting LibSVM debug output to temporary file: " + debugOutputFile);
+							}
+							Evaluation[] evaluation = performCrossvalidation(libsvm, instancesTraining, folds, innerRepetitions);
+							if (hideLibsvmDebugOutput) {
+								System.setOut(stdOut);
+							}
+							double auc = getMeanQuality(evaluation, instancesTraining);
+							if (auc > bestAUC) {
+								if (!silent) System.out.println("score=" + df.format(auc) + " @C=" + C + ", @gamma=" + gamma);
+								bestC = C;
+								bestGamma = gamma;
+								bestAUC = auc;
+								// bestWeight = weight;
+							}
+							// }
+						}
+					}
+	
+					// predict external data
+					libsvm.setGamma(bestGamma);
+					libsvm.setCost(bestC);
+					// libsvm.setWeights((1.0 / bestWeight) + " " + 1.0);
+				}
+				
+				if (hideLibsvmDebugOutput) {
+					String debugOutputFile = WekaLauncher.redirectSystemOut2TempFile();
+					if (!silent) System.out.println("Redirecting LibSVM debug output to temporary file: " + debugOutputFile);
+				}
+				buildClassifier(libsvm, instancesTraining);
+				if (hideLibsvmDebugOutput) {
+					System.setOut(stdOut);
+				}
+				
+				externalEvals[run] = predictData(libsvm, splits[splitIndex]);
+				if (!silent) System.out.println("\nExternal prediction at fold = " + splitIndex);
+				try {
+					if (!silent) System.out.println(externalEvals[run].toClassDetailsString());
+				} catch (Exception e) {
+					if (!silent) System.out.println("could not create summary");
+				}
+				
+				if (showEstimatedDuration) {
+					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
+					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
+					System.out.println("time remaining = " + df.format(estimatedTime) + "s");
+				}
+				run++;
+			}
+		}
+		if (writeModelFile) {
+			if (hideLibsvmDebugOutput) {
+				String debugOutputFile = WekaLauncher.redirectSystemOut2TempFile();
+				if (!silent) System.out.println("Redirecting LibSVM debug output to temporary file: " + debugOutputFile);
+			}
+			buildClassifier(libsvm, data);
+			if (hideLibsvmDebugOutput) {
+				System.setOut(stdOut);
+			}
+			writeModelFile(libsvm);
+		}
+		return externalEvals;
+	}
+
+	/**
+	 * 
+	 * @param randomForest
+	 * @param data
+	 */
+	private Evaluation[] runNestedCVLIBLINEAR(Instances data, int repetitions) {
+		final LibLINEAR libsvm = new LibLINEAR();
+		final long systemMillisBegin = System.currentTimeMillis();
+		final Evaluation[] externalEvals = new Evaluation[folds * repetitions];
+
+		int run = 0;
+
+		if (!silent) System.out.println("Nested CV for LIBLINEAR ...");
+
+		for (int rep = 0; rep < repetitions; rep++) {
+
+			// generate new splits for cross-validation
+			Instances[] splits = getSplits(data, folds, rep);
+
+			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
+				Instances instancesTraining = new Instances(data, 1);
+				for (int trainingSplitIndex = 0; trainingSplitIndex < splits.length; trainingSplitIndex++) {
+					if (trainingSplitIndex != splitIndex) {
+						instancesTraining = addInstances(instancesTraining, splits[trainingSplitIndex]);
+					}
+				}
+				
+				if (performNestedCV) {
+					if (!silent) System.out.println("Model selection ...");
+					// cross-validate on n-1 folds
+					double bestC = 1;
+					double bestAUC = 0.0;
+					double bestWeight = 1.0;
+	
+					for (double C = Math.pow(2, -5); C <= 2; C = C * 2) {
+						for (double weight = 1.0; weight <= 8.0; weight = weight * 2) {
+							libsvm.setCost(C);
+							libsvm.setWeights((1.0 / weight) + " " + 1.0);
+							
+							Evaluation[] evaluation = performCrossvalidation(libsvm, instancesTraining, folds, innerRepetitions);
+							
+							double auc = getMeanQuality(evaluation, instancesTraining);
+							if (auc > bestAUC) {
+								if (!silent) System.out.println("score=" + df.format(auc) + " @C=" + C + " @weight=" + weight);
+								bestAUC = auc;
+								bestWeight = weight;
+								bestC = C;
+							}
+						}
+					}
+
+					// predict external data
+					libsvm.setCost(bestC);
+					libsvm.setWeights((1.0 / bestWeight) + " " + 1.0);
+				}
+				
+				instancesTraining.sort(instancesTraining.get(0).numAttributes() - 1);
+				buildClassifier(libsvm, instancesTraining);
+
+				externalEvals[run] = predictData(libsvm, splits[splitIndex]);
+				if (!silent) System.out.println("\nExternal prediction at fold = " + splitIndex);
+				// System.out.println(externalEvals[run].toSummaryString());
+				try {
+					if (!silent) System.out.println(externalEvals[run].toClassDetailsString());
+				} catch (Exception e) {
+					if (!silent) System.out.println("could not create summary");
+				}
+
+				if (showEstimatedDuration) {
+					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
+					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
+					System.out.println("time remaining = " + df.format(estimatedTime) + "s");
+				}
+				run++;
+			}
+		}
+		if (writeModelFile) {
+			buildClassifier(libsvm, data);
+			writeModelFile(libsvm);
+		}
+		return externalEvals;
+	}
+
+	/**
+	 * tunes GaussianProcesses
+	 * 
+	 * @param data
+	 * @param repetitions
+	 * @return
+	 */
+	private Evaluation[] runNestedCVGaussianProcesses(Instances data, int repetitions) {
+		final GaussianProcesses gaussianProcesses = new GaussianProcesses();
+		final long systemMillisBegin = System.currentTimeMillis();
+		final Evaluation[] externalEvals = new Evaluation[folds * repetitions];
+
+		int run = 0;
+
+		if (!silent) System.out.println("Nested CV for Gaussian Processes ...");
+
+		for (int rep = 0; rep < repetitions; rep++) {
+
+			// generate new splits for cross-validation
+			Instances[] splits = getSplits(data, folds, rep);
+
+			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
+				Instances instancesTraining = new Instances(data, 1);
+				for (int trainingSplitIndex = 0; trainingSplitIndex < splits.length; trainingSplitIndex++) {
+					if (trainingSplitIndex != splitIndex) {
+						instancesTraining = addInstances(instancesTraining, splits[trainingSplitIndex]);
+					}
+				}
+
+				if (performNestedCV) {
+					if (!silent) System.out.println("Model selection ...");
+					// cross-validate on n-1 folds
+					double bestNoise = -12;
+					double bestMSE = 0.0;
+	
+					for (double C = -12; C <= -1; C++) {
+						gaussianProcesses.setNoise(Math.pow(2, C));
+						Evaluation[] evaluation = performCrossvalidation(gaussianProcesses, instancesTraining, folds, innerRepetitions);
+						double mse = getMSEforRegression(evaluation, instancesTraining);
+						if (mse > bestMSE) {
+							if (!silent) System.out.println("score=" + df.format(mse) + " @noise=" + Math.pow(2, C));
+							bestMSE = mse;
+							bestNoise = C;
+						}
+					}
+	
+					// predict external data
+					gaussianProcesses.setNoise(Math.pow(2, bestNoise));
+				}
+				instancesTraining.sort(instancesTraining.get(0).numAttributes() - 1);
+				buildClassifier(gaussianProcesses, instancesTraining);
+
+				externalEvals[run] = predictData(gaussianProcesses, splits[splitIndex]);
+				if (!silent) System.out.println("\nExternal prediction at fold = " + splitIndex);
+				// System.out.println(externalEvals[run].toSummaryString());
+				try {
+					if (!silent) System.out.println(externalEvals[run].toClassDetailsString());
+				} catch (Exception e) {
+					if (!silent) System.out.println("could not create summary");
+				}
+
+				if (showEstimatedDuration) {
+					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
+					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
+					System.out.println("time remaining = " + df.format(estimatedTime) + "s");
+				}
+				run++;
+			}
+		}
+		if (writeModelFile) {
+			buildClassifier(gaussianProcesses, data);
+			writeModelFile(gaussianProcesses);
+		}
+		return externalEvals;
+	}
+
+	/**
+	 * 
+	 * @param randomForest
+	 * @param data
+	 */
+	private Evaluation[] runNestedCVkNN(Instances data, int repetitions) {
+		final IBk kNN = new IBk();
+		final long systemMillisBegin = System.currentTimeMillis();
+		final Evaluation[] externalEvals = new Evaluation[folds * repetitions];
+
+		int run = 0;
+
+		if (!silent) System.out.println("Nested CV for kNN ...");
+
+		for (int rep = 0; rep < repetitions; rep++) {
+
+			// generate new splits for cross-validation
+			Instances[] splits = getSplits(data, folds, rep);
+
+			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
+				Instances instancesTraining = new Instances(data, 1);
+				for (int trainingSplitIndex = 0; trainingSplitIndex < splits.length; trainingSplitIndex++) {
+					if (trainingSplitIndex != splitIndex) {
+						instancesTraining = addInstances(instancesTraining, splits[trainingSplitIndex]);
+					}
+				}
+				
+				if (performNestedCV) {
+					if (!silent) System.out.println("Model selection ...");
+					// cross-validate on n-1 folds
+					int bestNeigbor = 1;
+					double bestAUC = 0.0;
+					for (int neigbor = 1; neigbor <= 16; neigbor = neigbor * 2) {
+						kNN.setKNN(neigbor);
+						Evaluation[] evaluation = performCrossvalidation(kNN, instancesTraining, folds, innerRepetitions);
+						double auc = getMeanQuality(evaluation, instancesTraining);
+						if (auc > bestAUC) {
+							if (!silent) System.out.println("score=" + df.format(auc) + " @k=" + neigbor);
+							bestAUC = auc;
+							bestNeigbor = neigbor;
+						}
+					}
+	
+					// predict external data
+					kNN.setKNN(bestNeigbor);
+				}
+				buildClassifier(kNN, instancesTraining);
+
+				externalEvals[run] = predictData(kNN, splits[splitIndex]);
+				if (!silent) System.out.println("\nExternal prediction at fold = " + splitIndex);
+				// System.out.println(externalEvals[run].toSummaryString());
+				try {
+					if (!silent) System.out.println(externalEvals[run].toClassDetailsString());
+				} catch (Exception e) {
+					if (!silent) System.out.println("could not create summary");
+				}
+				
+				if (showEstimatedDuration) {
+					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
+					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
+					System.out.println("time remaining = " + df.format(estimatedTime) + "s");
+				}
+				run++;
+			}
+		}
+		if (writeModelFile) {
+			buildClassifier(kNN, data);
+			writeModelFile(kNN);
+		}
+		return externalEvals;
+	}
+
+	/**
+	 * 
+	 * @param randomForest
+	 * @param data
+	 */
+	private Evaluation[] runNestedCVNaiveBayes(Instances data, int repetitions) {
+		final NaiveBayes naiveBayes = new NaiveBayes();
+		final long systemMillisBegin = System.currentTimeMillis();
+		final Evaluation[] externalEvals = new Evaluation[folds * repetitions];
+
+		int run = 0;
+
+		if (!silent) System.out.println("Nested CV for Naive Bayes ...");
+
+		for (int rep = 0; rep < repetitions; rep++) {
+
+			// generate new splits for cross-validation
+			Instances[] splits = getSplits(data, folds, rep);
+
+			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
+				Instances instancesTraining = new Instances(data, 1);
+				for (int trainingSplitIndex = 0; trainingSplitIndex < splits.length; trainingSplitIndex++) {
+					if (trainingSplitIndex != splitIndex) {
+						instancesTraining = addInstances(instancesTraining, splits[trainingSplitIndex]);
+					}
+				}
+
+				// predict external data
+				buildClassifier(naiveBayes, instancesTraining);
+				externalEvals[run] = predictData(naiveBayes, splits[splitIndex]);
+				if (!silent) System.out.println("\nExternal prediction at fold = " + splitIndex);
+				// System.out.println(externalEvals[run].toSummaryString());
+				try {
+					if (!silent) System.out.println(externalEvals[run].toClassDetailsString());
+				} catch (Exception e) {
+					if (!silent) System.out.println("could not create summary");
+				}
+				
+				if (showEstimatedDuration) {
+					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
+					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
+					System.out.println("time remaining = " + df.format(estimatedTime) + "s");
+				}
+				run++;
+			}
+		}
+		if (writeModelFile) {
+			buildClassifier(naiveBayes, data);
+			writeModelFile(naiveBayes);
+		}
+		return externalEvals;
+	}
+
+	/**
+	 * 
+	 * @param randomForest
+	 * @param data
+	 */
+	private Evaluation[] runNestedCVKStar(Instances data, int repetitions) {
+		final KStar pls = new KStar();
+		final long systemMillisBegin = System.currentTimeMillis();
+		final Evaluation[] externalEvals = new Evaluation[folds * repetitions];
+
+		int run = 0;
+
+		if (!silent) System.out.println("Nested CV for K Star ...");
+
+		for (int rep = 0; rep < repetitions; rep++) {
+
+			// generate new splits for cross-validation
+			Instances[] splits = getSplits(data, folds, rep);
+
+			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
+				Instances instancesTraining = new Instances(data, 1);
+				for (int trainingSplitIndex = 0; trainingSplitIndex < splits.length; trainingSplitIndex++) {
+					if (trainingSplitIndex != splitIndex) {
+						instancesTraining = addInstances(instancesTraining, splits[trainingSplitIndex]);
+					}
+				}
+
+				// predict external data
+				buildClassifier(pls, instancesTraining);
+				externalEvals[run] = predictData(pls, splits[splitIndex]);
+				if (!silent) System.out.println("\nExternal prediction at fold = " + splitIndex);
+				try {
+					if (!silent) System.out.println(externalEvals[run].toClassDetailsString());
+				} catch (Exception e) {
+					if (!silent) System.out.println("could not create summary");
+				}
+				
+				if (showEstimatedDuration) {
+					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
+					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
+					if (!silent) System.out.println("time remaining = " + df.format(estimatedTime) + "s");
+				}
+				run++;
+			}
+		}
+		if (writeModelFile) {
+			buildClassifier(pls, data);
+			writeModelFile(pls);
+		}
+		return externalEvals;
+	}
+
+	/**
+	 * returns the estimated time
+	 * 
+	 * @param systemMillisBegin
+	 * @param systemMillisCurrent
+	 * @param percentDone
+	 *            in 0,1
+	 * @return
+	 */
+	private double getEstimatedTimeInseconds(long systemMillisBegin, long systemMillisCurrent, double percentDone) {
+		long diff = systemMillisCurrent - systemMillisBegin;
+		double SecondsElapsed = (diff / 1000.0);
+		double estimatedTime = (((1.0 / percentDone) * SecondsElapsed) - SecondsElapsed);
+		return estimatedTime;
+	}
+
+	/**
+	 * 
+	 * @param eval
+	 * @return
+	 */
+	private double getMeanQuality(Evaluation[] eval, Instances data) {
+		Mean mean = new Mean();
+		double[] aucs = new double[eval.length];
+		for (int i = 0; i < eval.length; i++) {
+			if (mainPerformanceMeasure.equals("ROC")) {
+				aucs[i] = getAvgROCAUC(eval[i], data);
+			} else if (mainPerformanceMeasure.equals("MCC")){
+				aucs[i] = getMatthewsCorrelation(eval[i], data);
+			} else {
+				System.out.println("Error. Unknown performance measure. Only \"ROC\" or \"MCC\" can be used as main performance measure.");
+				System.exit(1);
+			}
+		}
+		return mean.evaluate(aucs);
+	}
+
+	/**
+	 * 
+	 * @param eval
+	 * @return
+	 */
+	private double getMSEforRegression(Evaluation[] eval, Instances data) {
+		Mean mean = new Mean();
+		double[] aucs = new double[eval.length];
+		for (int i = 0; i < eval.length; i++) {
+			try {
+				aucs[i] = eval[i].correlationCoefficient();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return mean.evaluate(aucs);
+	}
+
+	/**
+	 * trains a classifier on the given data
+	 * 
+	 * @param classifier
+	 * @param trainingData
+	 */
+	private void buildClassifier(Classifier classifier, Instances trainingData) {
+		try {
+			if (classifier instanceof LibLINEARWekaAdapter)
+				trainingData.sort(trainingData.numAttributes() - 1);
+
+			classifier.buildClassifier(trainingData);
+		} catch (final Exception e2) {
+			e2.printStackTrace();
+		}
+	}
+
+	/**
+	 * read sparse
+	 * 
+	 * @param source
+	 */
+	private Instances arffToSparse(Instances source) {
+		final NonSparseToSparse sp = new NonSparseToSparse();
+		try {
+			sp.setInputFormat(source);
+			final Instances newData = Filter.useFilter(source, sp);
+			return newData;
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+
+		return source;
+	}
+
+	/**
+	 * returns the score for this fold
+	 * 
+	 * @param testSamples
+	 * @return
+	 */
+	public Evaluation predictData(Classifier classifier, Instances testSamples) {
+		// Test the model
+		Evaluation eTest = null;
+		try {
+			eTest = new Evaluation(testSamples);
+		} catch (final Exception e1) {
+			e1.printStackTrace();
+		}
+		try {
+			eTest.evaluateModel(classifier, testSamples);
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+		return eTest;
+	}
+
+	/**
+	 * splits an array of instances into n folds of equal size
+	 * 
+	 * @param data
+	 * @param folds
+	 * @param seed
+	 * @return
+	 */
+	private Instances[] getSplits(Instances data, int folds, int seed) {
+
+		Instances[] splits = new Instances[folds];
+		for (int i = 0; i < splits.length; i++) {
+			// copy header information
+			splits[i] = new Instances(data, 1);
+		}
+
+		// set seed according to the repetition run
+		data.randomize(new Random(seed));
+		data.stratify(folds);
+
+		int foldIndex = 0;
+		for (int i = 0, n = data.numInstances(); i < n; i++) {
+			splits[foldIndex].add(data.instance(i));
+			foldIndex++;
+			if (foldIndex > folds - 1)
+				foldIndex = 0;
+		}
+		return splits;
+	}
+
+	/**
+	 * 
+	 * @param classifier
+	 * @param data
+	 * @param folds
+	 * @param repetitions
+	 * @return
+	 * @throws Exception
+	 */
+	private Evaluation[] performCrossvalidation(Classifier classifier, Instances data, int folds, int repetitions) {
+
+		ArrayList<Evaluation> results = new ArrayList<Evaluation>();
+		for (int rep = 0; rep < repetitions; rep++) {
+			Instances[] splits = getSplits(data, folds, rep);
+
+			for (int i = 0; i < folds; i++) {
+				Instances trainingSetTemporary = new Instances(data, 1);
+				for (int j = 0; j < folds; j++) {
+					if (j != i)
+						trainingSetTemporary = this.addInstances(trainingSetTemporary, splits[j]);
+				}
+				// train classifier
+				this.buildClassifier(classifier, trainingSetTemporary);
+				// predict the jth fold
+				Evaluation screeningResult = this.predictData(classifier, splits[i]);
+				results.add(screeningResult);
+			}
+		}
+		Evaluation[] resultArray = new Evaluation[results.size()];
+		for (int i = 0; i < resultArray.length; i++) {
+			resultArray[i] = results.get(i);
+		}
+		return resultArray;
+	}
+
+	/**
+	 * returns join list of references of a and b
+	 * 
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	private Instances addInstances(Instances a, Instances b) {
+		Instances instancesA = new Instances(a);
+		for (int i = 0, n = b.numInstances(); i < n; i++) {
+			instancesA.add(b.instance(i));
+		}
+		return instancesA;
+	}
+}
