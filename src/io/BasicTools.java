@@ -148,7 +148,12 @@ public class BasicTools {
 	    }
 	}
 
+	
 	public static HashMap<String, String> readFASTA(String fasta_file) {
+		return readFASTA(fasta_file, false);
+	}
+	
+	public static HashMap<String, String> readFASTA(String fasta_file, boolean readFullHeader) {
 		
 		HashMap<String, String> sequences = new HashMap<String, String>();
 		
@@ -169,10 +174,17 @@ public class BasicTools {
 						sequences.put(header, curr_seq.toString());
 					}
 					// read new header
-					header = new StringTokenizer(line.replaceFirst(">\\s*", "")).nextToken();
-					if (header.contains("|")) {
-						String[] splitted_header = header.split("\\|");
-						header = splitted_header[splitted_header.length-1].trim();
+					if (readFullHeader) {
+						header = line.trim();
+					
+					// generate headers as done by InterProScan 
+					// ">sp|P04637|P53_HUMAN Cellular tumor..." --> "P53_HUMAN" 
+					} else {
+						header = new StringTokenizer(line.replaceFirst(">\\s*", "")).nextToken();
+						if (header.contains("|")) {
+							String[] splitted_header = header.split("\\|");
+							header = splitted_header[splitted_header.length-1].trim();
+						}
 					}
 					curr_seq = new StringBuffer();
 					first = false;
@@ -355,6 +367,27 @@ public class BasicTools {
 			mergedList.add(new String[] {ids.get(i), values.get(i).toString()});
 		}
 		return(mergedList);
+	}
+	
+	public static double[] getColMeans(double[][] matrix) {
+		
+		double[] colMeans = new double[matrix[0].length];
+		for (int i=0; i<matrix[0].length; i++) {
+			double colSum = 0;
+			for (int j=0; j<matrix.length; j++) {
+				colSum += matrix[j][i];
+			}
+			colMeans[i] = colSum / matrix.length;
+		}
+		return(colMeans);
+	}
+	
+	public static String padRight(String s, int n) {
+	     return String.format("%1$-" + n + "s", s);  
+	}
+
+	public static String padLeft(String s, int n) {
+	    return String.format("%1$#" + n + "s", s);  
 	}
 	
 	public static void main(String args[]) {

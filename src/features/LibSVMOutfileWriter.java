@@ -4,7 +4,7 @@
  * ===============================================
  */
 
-package train;
+package features;
 
 
 import java.io.BufferedWriter;
@@ -26,20 +26,43 @@ public class LibSVMOutfileWriter {
 	public int[] write(ArrayList<String> domainIDs, HashMap<String, IprEntry> seq2domain, String outfile) {
 		
 		ArrayList<String> libsvmFeatureTable = new ArrayList<String>();
+
+		// check if feature file for superclass prediction shall be generated
+		boolean superclassFeatures = false;
+		String firstKey = seq2domain.keySet().iterator().next();
+		if (seq2domain.get(firstKey).superclass != null) {
+			superclassFeatures = true;
+		}
 		
-		int numFeatureVectors = 0;
-		int numTFfeatureVectors = 0;
-		int numNonTFfeatureVectors = 0;
+		int[] numFeatureVectors = null;
+		if (superclassFeatures) {
+			numFeatureVectors = new int[] {0,0,0,0,0};
+		} else {
+			numFeatureVectors = new int[] {0,0};
+		}
+		
+		String label;
 		
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
 			
 			for (String currSeq : seq2domain.keySet()) {
 				
-				String label = "-1";
 				IprEntry curr_entry = seq2domain.get(currSeq);
-				if (curr_entry.label) {
-					label = "+1";
+				if (curr_entry.isTF) {
+					
+					// Superclass prediction
+					if (superclassFeatures) {
+						label = Integer.toString(curr_entry.superclass);
+
+					// TF prediction (TF)
+					} else {
+						label = "+1";
+					}
+					
+				// TF prediction (non-TF)
+				} else {
+					label = "-1";
 				}
 				
 				String fvector = Predict.createIPRvector(curr_entry.domain_ids, domainIDs, 10);
@@ -48,15 +71,17 @@ public class LibSVMOutfileWriter {
 					libsvmFeatureTable.add(line);
 					bw.write(line);
 					
-					numFeatureVectors++;
-					if (curr_entry.label) {
-						numTFfeatureVectors++;
+					if (curr_entry.isTF) {
+						if (superclassFeatures) {
+							numFeatureVectors[curr_entry.superclass]++;
+						} else {
+							numFeatureVectors[0]++;
+						}
 					} else {
-						numNonTFfeatureVectors++;
+						numFeatureVectors[1]++;
 					}
 				}
 			}
-			    
 			bw.flush();
 			bw.close();
 		}
@@ -64,6 +89,6 @@ public class LibSVMOutfileWriter {
 			System.out.println(ioe.getMessage());
 			System.out.println("IOException occurred while writing output file");
 		}
-		return new int[] {numFeatureVectors, numTFfeatureVectors, numNonTFfeatureVectors};
+		return numFeatureVectors;
 	}
 }

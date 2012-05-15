@@ -86,7 +86,7 @@ public class TFpredictMain {
 		
 		} else if (trainMode) {
 			try {
-				Train.main(cmd);
+				//Train.main(cmd);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

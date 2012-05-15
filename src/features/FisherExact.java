@@ -1,4 +1,4 @@
-package train;
+package features;
 // ContigencyTable.java
 //
 // (c) 1999-2001 PAL Development Core Team

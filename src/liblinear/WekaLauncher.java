@@ -6,6 +6,8 @@
 
 package liblinear;
 
+import io.BasicTools;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -16,6 +18,19 @@ import java.util.ArrayList;
 
 public class WekaLauncher {
 	
+	public WekaLauncher(String featureFile, String resultsFile, String modelFileDir) {
+		this(featureFile, resultsFile);
+		this.modelFileDir = modelFileDir;
+	}
+	
+	public WekaLauncher(String featureFile, String resultsFile) {
+		this(featureFile);
+		this.resultsFile = resultsFile;
+	}
+	
+	public WekaLauncher(String featureFile) {
+		libsvmFeatureFile = featureFile;
+	}
 	
 	private static Integer[] classificationMethods = new Integer[] {
 		WekaClassifier.RandomForest,
@@ -39,48 +54,42 @@ public class WekaLauncher {
 	};
 	
 	static boolean silent = false;
-	
-	static String libsvmFeatureFile;
-	static String wekaOutputFile;
-    static String resultsFile = null;
-    static String modelFileDir = null;
-    static boolean performNestedCV = true;
-	static int multiruns = 1;
-	static int folds = 4;
-	
 	static PrintStream defaultOutstream = System.out;
+	
+	private String libsvmFeatureFile;
+    private String resultsFile = null;
+    private String modelFileDir = null;
+    
+    private boolean nestedCV = true;
+	private int multiruns = 1;
+    private int folds = 4;
+	
+
+	public void setNestedCV(boolean performNestedCV) {
+		this.nestedCV = performNestedCV;
+	}
+
+	public void setMultiruns(int multiruns) {
+		this.multiruns = multiruns;
+	}
+
+	public void setFolds(int folds) {
+		this.folds = folds;
+	}
+
 	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 
-		parseArguments(args);
-		printConfiguration();
-		runWekaClassifier();
-	}
-	
-	
-	private static void parseArguments(String[] args) {
+		WekaLauncher launcher = new WekaLauncher(args[0], args[1]);
 		
-		if (args.length == 0) {
-			System.out.println("Error. Please specify libsvm feature file as first argument.");
-			System.out.println("Optionally, an output file can be specified as second argument.");
-			System.exit(0);
-		}
-		libsvmFeatureFile = args[0];
-		if (args.length > 1) {
-			resultsFile = args[1];
-		}
-		if (args.length > 2) {
-			modelFileDir = args[2];
-			if (!modelFileDir.endsWith(File.separator)) {
-				modelFileDir = modelFileDir + File.separator;
-			}
-		}
+		launcher.printConfiguration();
+		launcher.runWekaClassifier();
 	}
 	
-	private static void printConfiguration() {
+	private void printConfiguration() {
 		System.out.println("Input File:    " + libsvmFeatureFile);
 		if (resultsFile != null) {
 			System.out.println("Output File:   " + resultsFile);
@@ -90,10 +99,10 @@ public class WekaLauncher {
 		}
 		System.out.println("Multiruns:     " + multiruns);
 		System.out.println("Folds:         " + folds);
-		System.out.println(performNestedCV ? "Nested CV:     yes" : "Nested CV:     no");
+		System.out.println(nestedCV ? "Nested CV:     yes" : "Nested CV:     no");
 	}
 	
-	private static String[] getClassifierArguments(int classifierID) {
+	private String[] getClassifierArguments(int classifierID) {
 		
 		ArrayList<String> argsClassifier = new ArrayList<String>();
 		
@@ -109,7 +118,7 @@ public class WekaLauncher {
 			argsClassifier.add("-m");
 			argsClassifier.add(modelFileDir + modelFileNames[classifierID]);
 		}
-		if (performNestedCV) {
+		if (nestedCV) {
 			argsClassifier.add("-n");
 			argsClassifier.add("true");
 		} else {
@@ -120,16 +129,17 @@ public class WekaLauncher {
 		return argsClassifier.toArray(new String[]{});
 	}
 	
-	private static void runWekaClassifier() {
+	public double[][] runWekaClassifier() {
 		
 		// redirect standard output of classifier to file (if desired)
-		//if (resultsFile != null) {
-		//	redirectSystemOut(resultsFile);
-		//}
+		if (resultsFile != null) {
+			redirectSystemOut(resultsFile);
+		}
 		
 		// run all Weka classifiers on given feature file
-		for (Integer classifierID: classificationMethods) {
-			String[] argsClassifier = getClassifierArguments(classifierID);
+		double[][] classResults = null;
+		for (int i=0; i<classificationMethods.length; i++) {
+			String[] argsClassifier = getClassifierArguments(classificationMethods[i]);
 			try {
 				System.out.println();
 				WekaClassifier.main(argsClassifier);
@@ -141,9 +151,30 @@ public class WekaLauncher {
 		// reset output stream
 		if (resultsFile != null) {
 			System.setOut(defaultOutstream);
+			classResults = parseResultsFile();
 		} 
+		
+		return(classResults);
 	}
-				
+	
+	private double[][] parseResultsFile() {
+		
+		int numScores = folds * multiruns;
+		int numMethods = classificationMethods.length;
+		double[][] classResults = new double[numScores][numMethods];
+		ArrayList<String[]> resultsTable = BasicTools.readFile2ListSplitLines(resultsFile);
+		int lineIdx = 0;
+		for (int i=0; i<numMethods; i++) {
+			lineIdx += 2; // skip classifier name and table header
+			for (int j=0; j<numScores; j++) {
+				classResults[j][i] = Double.parseDouble(resultsTable.get(lineIdx++)[0]);
+			}
+		}
+		return(classResults);
+	}
+	
+	
+	
 
 	public static String redirectSystemOut2TempFile() {
 		String tempFile = "";

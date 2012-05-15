@@ -28,19 +28,18 @@ import java.util.ArrayList;
 
 
 public class IprEntry implements Serializable{
-	
+
+
 	private static final long serialVersionUID = 1L;
 	
 	public String sequence_id;
-	public boolean label;
+	public boolean isTF;
+	public Integer superclass = null;
 	public ArrayList<String> domain_ids = new ArrayList<String>();
-	
-	public boolean isTF() {
-		return label;
-	}
 	
 	public IprEntry() {
 	}
+	
 	
 	public IprEntry(String id) {
 		this.sequence_id = id;
@@ -48,18 +47,18 @@ public class IprEntry implements Serializable{
 	
 	public IprEntry(String id, boolean label) {
 		this.sequence_id = id;
-		this.label = label;
+		this.isTF = label;
 	}
 	
 	public IprEntry(String id, boolean label, ArrayList<String> iprs) {
 		this.sequence_id = id;
-		this.label = label;
+		this.isTF = label;
 		this.domain_ids = iprs;
 	}
 	
 	public IprEntry(String id, boolean label, String ipr) {
 		this.sequence_id = id;
-		this.label = label;
+		this.isTF = label;
 		domain_ids.add(ipr);
 	}
 	
@@ -67,5 +66,4 @@ public class IprEntry implements Serializable{
 		this.sequence_id = id;
 		domain_ids.add(ipr);
 	}
-
 }
