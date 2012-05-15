@@ -217,6 +217,24 @@ public class WekaClassifier {
 			e1.printStackTrace();
 		}
 	}
+	
+	@SuppressWarnings("static-access")
+	private Options buildCommandLine() {
+		final Options options = new Options();
+		final Option optSDF = (OptionBuilder.isRequired(true).withDescription("Classifier (0: Random Decision Forest, 1: J48 Decision Tree, 2: LIBSVM+RBF Kernel, 3: LIBLINEAR, 4: Naive Bayes, 5: K* NN, 6: kNN, 7: GaussianProcesses)").hasArg(true).create("c"));
+		final Option optFile = (OptionBuilder.isRequired(true).withDescription("InFile").hasArg(true).create("f"));
+		final Option optRepetitions = (OptionBuilder.isRequired(false).withDescription("Repetitions").hasArg(true).create("r"));
+		final Option optFolds = (OptionBuilder.isRequired(false).withDescription("Folds (default = 2)").hasArg(true).create("v"));
+		final Option optModelFile = (OptionBuilder.isRequired(false).withDescription("Model file)").hasArg(true).create("m"));
+		final Option optNestedCV = (OptionBuilder.isRequired(false).withDescription("Nested cross-validation (default = true)").hasArg(true).create("n"));
+		options.addOption(optSDF);
+		options.addOption(optFile);
+		options.addOption(optFolds);
+		options.addOption(optRepetitions);
+		options.addOption(optModelFile);
+		options.addOption(optNestedCV);
+		return options;
+	}
 
 	private void parseCommandLine(String[] args, Options options) {
 		CommandLine lvCmd = null;
@@ -396,23 +414,6 @@ public class WekaClassifier {
 		return mcc / (double) classes;
 	}
 
-	@SuppressWarnings("static-access")
-	private Options buildCommandLine() {
-		final Options options = new Options();
-		final Option optSDF = (OptionBuilder.isRequired(true).withDescription("Classifier (0: Random Decision Forest, 1: J48 Decision Tree, 2: LIBSVM+RBF Kernel, 3: LIBLINEAR, 4: Naive Bayes, 5: K* NN, 6: kNN, 7: GaussianProcesses)").hasArg(true).create("c"));
-		final Option optFile = (OptionBuilder.isRequired(true).withDescription("InFile").hasArg(true).create("f"));
-		final Option optRepetitions = (OptionBuilder.isRequired(false).withDescription("Repetitions").hasArg(true).create("r"));
-		final Option optFolds = (OptionBuilder.isRequired(false).withDescription("Folds (default = 2)").hasArg(true).create("v"));
-		final Option optModelFile = (OptionBuilder.isRequired(false).withDescription("Model file)").hasArg(true).create("m"));
-		final Option optNestedCV = (OptionBuilder.isRequired(false).withDescription("Nested cross-validation (default = true)").hasArg(true).create("n"));
-		options.addOption(optSDF);
-		options.addOption(optFile);
-		options.addOption(optFolds);
-		options.addOption(optRepetitions);
-		options.addOption(optModelFile);
-		options.addOption(optNestedCV);
-		return options;
-	}
 
 	private void writeModelFile(Classifier model) {
 		if (modelFile != null) {
