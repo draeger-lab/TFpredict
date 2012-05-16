@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
+import liblinear.WekaClassifier.ClassificationMethod;
+
 
 public class WekaLauncher {
 	
@@ -31,28 +33,7 @@ public class WekaLauncher {
 	public WekaLauncher(String featureFile) {
 		libsvmFeatureFile = featureFile;
 	}
-	
-	private static Integer[] classificationMethods = new Integer[] {
-		WekaClassifier.RandomForest,
-		WekaClassifier.DecisionTree,
-		WekaClassifier.SVM_rbf,
-		WekaClassifier.SVM_linear,
-		WekaClassifier.NaiveBayes,
-		WekaClassifier.Kstar,
-		WekaClassifier.KNN,
-	};
-	
-	/*
-	private static Integer[] classificationMethods = new Integer[] {
-		WekaClassifier.SVM_rbf
-	};
-	*/
-	
-	private static final String[] modelFileNames = new String[] {
-		"randomForest.model", "decisionTree.model", "svmRBF.model",
-		"svmLinear.model", "naiveBayes.model", "kStar.model", "knn.model"
-	};
-	
+
 	static boolean silent = false;
 	static PrintStream defaultOutstream = System.out;
 	
@@ -102,12 +83,12 @@ public class WekaLauncher {
 		System.out.println(nestedCV ? "Nested CV:     yes" : "Nested CV:     no");
 	}
 	
-	private String[] getClassifierArguments(int classifierID) {
+	private String[] getClassifierArguments(String classifierName) {
 		
 		ArrayList<String> argsClassifier = new ArrayList<String>();
 		
 		argsClassifier.add("-c");
-		argsClassifier.add(Integer.toString(classifierID));
+		argsClassifier.add(classifierName);
 		argsClassifier.add("-f");
 		argsClassifier.add(libsvmFeatureFile);
 		argsClassifier.add("-r");
@@ -116,7 +97,7 @@ public class WekaLauncher {
 		argsClassifier.add(Integer.toString(folds));
 		if (modelFileDir != null) {
 			argsClassifier.add("-m");
-			argsClassifier.add(modelFileDir + modelFileNames[classifierID]);
+			argsClassifier.add(modelFileDir + ClassificationMethod.valueOf(classifierName));
 		}
 		if (nestedCV) {
 			argsClassifier.add("-n");
@@ -138,8 +119,8 @@ public class WekaLauncher {
 		
 		// run all Weka classifiers on given feature file
 		double[][] classResults = null;
-		for (int i=0; i<classificationMethods.length; i++) {
-			String[] argsClassifier = getClassifierArguments(classificationMethods[i]);
+		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
+			String[] argsClassifier = getClassifierArguments(classMethod.name());
 			try {
 				System.out.println();
 				WekaClassifier.main(argsClassifier);
@@ -160,7 +141,7 @@ public class WekaLauncher {
 	private double[][] parseResultsFile() {
 		
 		int numScores = folds * multiruns;
-		int numMethods = classificationMethods.length;
+		int numMethods = ClassificationMethod.values().length;
 		double[][] classResults = new double[numScores][numMethods];
 		ArrayList<String[]> resultsTable = BasicTools.readFile2ListSplitLines(resultsFile);
 		int lineIdx = 0;
