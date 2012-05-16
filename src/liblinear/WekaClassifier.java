@@ -55,20 +55,41 @@ public class WekaClassifier {
 	private static int repetitions = 1;
 	private final static int innerRepetitions = 1;
 	private static DecimalFormat df = new DecimalFormat();
-	private int selectedClassifier = 0;
+	private String selectedClassifier;
 	private static String strFile;
 
-	public static String[] classifierNames = new String[] { "Random Forest", "Decision Tree", 
-		"SVM rbf kernel", "SVM linear kernel", "Naive Bayes", "K*", "KNN", "Gaussian Processes"};
 	
-	public static final int RandomForest = 0;
-	public static final int DecisionTree = 1;
-	public static final int SVM_rbf = 2;
-	public static final int SVM_linear = 3;
-	public static final int NaiveBayes = 4;
-	public static final int Kstar = 5;
-	public static final int KNN = 6;
-	public static final int GaussianProcesses = 7;
+	public enum ClassificationMethod {
+		RandomForest("Random Forest", "randomForest.model"),
+		DecisionTree("Decision Tree", "decisionTree.model"),
+		SVM_rbf("SVM rbf kernel", "svmRBF.model"),
+		SVM_linear("SVM linear kernel", "svmLinear.model"),
+		NaiveBayes("Naive Bayes", "naiveBayes.model"),
+		Kstar("K*", "kStar.model"),
+		KNN("kNN", "knn.model");
+		
+		public String printName;
+		public String modelFileName;
+		
+		private ClassificationMethod(String printName, String modelFileName) {
+			this.printName = printName;
+			this.modelFileName = modelFileName;
+		}
+	}
+	
+	
+	public enum RegressionMethod {
+		GaussianProcesses("Gaussian Processes", "gaussianProcesses.model");
+	
+		public String printName;
+		public String modelFileName;
+		
+		private RegressionMethod(String printName, String modelFileName) {
+			this.printName = printName;
+			this.modelFileName = modelFileName;
+		}
+	}
+	
 	
 	/**
 	 * @param args
@@ -89,35 +110,35 @@ public class WekaClassifier {
 
 		// create a new classifier
 		Evaluation[] evaluation = null;
-		if (classRunner.selectedClassifier == RandomForest) {
+		if (classRunner.selectedClassifier == ClassificationMethod.RandomForest.name()) {
 			evaluation = classRunner.runNestedCVRandomForest(samples, repetitions);
 			
-		} else if (classRunner.selectedClassifier == DecisionTree) {
+		} else if (classRunner.selectedClassifier == ClassificationMethod.DecisionTree.name()) {
 			evaluation = classRunner.runNestedCVJ48(samples, repetitions);
 		
-		} else if (classRunner.selectedClassifier == SVM_rbf) {
+		} else if (classRunner.selectedClassifier == ClassificationMethod.SVM_rbf.name()) {
 			evaluation = classRunner.runNestedCVLIBSVM(samples, repetitions);
 		
-		} else if (classRunner.selectedClassifier == SVM_linear) {
+		} else if (classRunner.selectedClassifier == ClassificationMethod.SVM_linear.name()) {
 			evaluation = classRunner.runNestedCVLIBLINEAR(samples, repetitions);
 		
-		} else if (classRunner.selectedClassifier == NaiveBayes) {
+		} else if (classRunner.selectedClassifier == ClassificationMethod.NaiveBayes.name()) {
 			evaluation = classRunner.runNestedCVNaiveBayes(samples, repetitions);
 
-		} else if (classRunner.selectedClassifier == Kstar) {
+		} else if (classRunner.selectedClassifier == ClassificationMethod.Kstar.name()) {
 			evaluation = classRunner.runNestedCVKStar(samples, repetitions);
 		
-		} else if (classRunner.selectedClassifier == KNN) {
+		} else if (classRunner.selectedClassifier == ClassificationMethod.KNN.name()) {
 			evaluation = classRunner.runNestedCVkNN(samples, repetitions);
 		
-		} else if (classRunner.selectedClassifier == GaussianProcesses) {
+		} else if (classRunner.selectedClassifier == RegressionMethod.GaussianProcesses.name()) {
 			evaluation = classRunner.runNestedCVGaussianProcesses(samples, repetitions);
 		
-		} else if (classRunner.selectedClassifier > 7 || classRunner.selectedClassifier < 0) {
-			System.out.println("Please select a valid classifier (0-7)");
+		} else {
+			System.out.println("Please select a valid classifier.");
 			System.exit(1);
 		}
-		classRunner.printSummary(evaluation, classifierNames[classRunner.selectedClassifier], samples);
+		classRunner.printSummary(evaluation, ClassificationMethod.valueOf(classRunner.selectedClassifier).printName, samples);
 	}
 
 	private void printConfiguration() {
@@ -221,7 +242,7 @@ public class WekaClassifier {
 	@SuppressWarnings("static-access")
 	private Options buildCommandLine() {
 		final Options options = new Options();
-		final Option optSDF = (OptionBuilder.isRequired(true).withDescription("Classifier (0: Random Decision Forest, 1: J48 Decision Tree, 2: LIBSVM+RBF Kernel, 3: LIBLINEAR, 4: Naive Bayes, 5: K* NN, 6: kNN, 7: GaussianProcesses)").hasArg(true).create("c"));
+		final Option optSDF = (OptionBuilder.isRequired(true).withDescription("Classifier").hasArg(true).create("c"));
 		final Option optFile = (OptionBuilder.isRequired(true).withDescription("InFile").hasArg(true).create("f"));
 		final Option optRepetitions = (OptionBuilder.isRequired(false).withDescription("Repetitions").hasArg(true).create("r"));
 		final Option optFolds = (OptionBuilder.isRequired(false).withDescription("Folds (default = 2)").hasArg(true).create("v"));
@@ -258,7 +279,7 @@ public class WekaClassifier {
 		try {
 			if (lvCmd.hasOption("c")) {
 				try {
-					selectedClassifier = new Integer(lvCmd.getOptionValue("c"));
+					selectedClassifier = lvCmd.getOptionValue("c");
 				} catch (Exception e) {
 					System.exit(1);
 				}

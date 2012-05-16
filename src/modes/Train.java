@@ -42,10 +42,10 @@ public class Train {
 			System.out.println("=======================");
 			int paddingLength = 25;
 			DecimalFormat df = new DecimalFormat();
-			System.out.println(BasicTools.padRight("  Best classifier:", paddingLength) + WekaClassifier.classifierNames[winIdx] + "\n");
+			System.out.println(BasicTools.padRight("  Best classifier:", paddingLength) + WekaClassifier.ClassificationMethod.values()[winIdx].printName + "\n");
 			System.out.println(BasicTools.padRight("  Classifier", paddingLength) + "ROC score");
 			for (int i=0; i<meanROC.length; i++) {
-				System.out.println("    " + BasicTools.padRight(WekaClassifier.classifierNames[i] + ":", paddingLength-2)  + df.format(meanROC[i]));
+				System.out.println("    " + BasicTools.padRight(WekaClassifier.ClassificationMethod.values()[i].printName + ":", paddingLength-2)  + df.format(meanROC[i]));
 			}
 		}
 	}
@@ -59,7 +59,6 @@ public class Train {
 		 */
 		
 		// generate feature file for TF prediction
-		/*
 		String iprscanResultFileTF =  dataDir + "tf_pred/interpro_files/TF.fasta.out"; 
 		String iprscanResultsFileNonTF = dataDir + "tf_pred/interpro_files/NonTF.fasta.out";
 		String tfFeatureFile = dataDir + "tf_pred/libsvm_files/libsvm_featurefile.txt";
@@ -72,10 +71,10 @@ public class Train {
 		String superFeatureFile = dataDir + "super_pred/libsvm_files/libsvm_featurefile.txt";
 		SuperPredFeatureFileGenerator superFeatFileGenerator = new SuperPredFeatureFileGenerator(fastaFileSuper, iprscanResultFileSuper, superFeatureFile);
 		superFeatFileGenerator.writeFeatureFile();
-		*/
+		
 		
 		// compare classifiers and generate model files for TF prediction
-		String tfFeatureFile = dataDir + "tf_pred/libsvm_files/libsvm_featurefile.txt";
+		tfFeatureFile = dataDir + "tf_pred/libsvm_files/libsvm_featurefile.txt";
 		String tfResultsFile = dataDir + "tf_pred/classifier_comparison.txt";
 		String tfModelDir = dataDir + "tf_pred/model_files/";
 		
@@ -83,12 +82,11 @@ public class Train {
 		
 		
 		// compare classifiers and generate model files for superclass prediction
-		/*
-		String superFeatureFile = dataDir + "super_pred/libsvm_files/libsvm_featurefile.txt";
+		superFeatureFile = dataDir + "super_pred/libsvm_files/libsvm_featurefile.txt";
 		String superResultsFile = dataDir + "super_pred/classifier_comparison.txt";
 		String superModelDir = dataDir + "super_pred/model_files/";
 		 
 		compareClassifiers(superFeatureFile, superResultsFile, superModelDir);
-		*/
+		
 	}
 } 
