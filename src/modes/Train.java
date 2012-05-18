@@ -5,6 +5,11 @@ import features.TFpredFeatureFileGenerator;
 import io.BasicTools;
 
 import java.text.DecimalFormat;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
+
+import org.apache.commons.cli.CommandLine;
 
 import liblinear.WekaClassifier;
 import liblinear.WekaLauncher;
@@ -13,16 +18,50 @@ public class Train {
 
 	private static boolean silent = false;
 
-	private static final int multiruns = 1;
-	private static final int folds = 4;
-	private static final boolean nestedCV = true;
+	private static String featureFile;
+	private static String classResultsFile;
+	private static String modelFileDir;
+	
+	private static int multiruns = 1;
+	private static int folds = 4;
+	private static boolean nestedCV = false;
 
+	
+	private static void parseArguments(CommandLine cmd) {
+		
+		if(cmd.hasOption("featureFile")) {
+			featureFile = new String(cmd.getOptionValue("featureFile"));
+		}
+		
+		if(cmd.hasOption("resultsFile")) {
+			classResultsFile = new String(cmd.getOptionValue("resultsFile"));
+		}
+		
+		if(cmd.hasOption("modelFileDir")) {
+			modelFileDir = new String(cmd.getOptionValue("modelFileDir"));;
+		}
+		
+		if(cmd.hasOption("multiruns")) {
+			multiruns = new Integer(cmd.getOptionValue("multiruns"));
+		}
+		
+		if(cmd.hasOption("folds")) {
+			folds = new Integer(cmd.getOptionValue("folds"));
+		}
+		
+		if(cmd.hasOption("nestedCV")) {
+			nestedCV = true;
+		} else {
+			nestedCV = false;
+		}
+	}
+	
+	
 	private static void compareClassifiers(String featureFile, String resultsFile, String modelFileDir) {
 		compareClassifiers(featureFile, resultsFile, modelFileDir, multiruns, folds, nestedCV);
 	}
 	
-	private static void compareClassifiers(String featureFile, String resultsFile, String modelFileDir, int numMultiruns, int numFolds, boolean nestedCV) {
-		
+	private static void compareClassifiers(String featureFile, String resultsFile, String modelFileDir, int numMultiruns, int numFolds, boolean nestedCV) {	
 		WekaLauncher launcher = new WekaLauncher(featureFile, resultsFile, modelFileDir);
 		launcher.setFolds(numFolds);
 		launcher.setMultiruns(numMultiruns);
@@ -37,7 +76,7 @@ public class Train {
 		// write short report of classification
 		if (!silent) {
 			
-			System.out.println("=======================");
+			System.out.println("\n=======================");
 			System.out.println("Classification results:");
 			System.out.println("=======================");
 			int paddingLength = 25;
@@ -50,14 +89,18 @@ public class Train {
 		}
 	}
 	
-	public static void main(String[] args) {
+	public static void main(CommandLine cmd) {
 	
-		String dataDir = "/rahome/eichner/projects/tfpredict/data/";
+		parseArguments(cmd);
+		compareClassifiers(featureFile, classResultsFile, modelFileDir, multiruns, folds, nestedCV);
+		
+		//String dataDir = "/rahome/eichner/projects/tfpredict/data/";
 		
 		/*
 		 *  Generation of feature files
 		 */
 		
+		/*
 		// generate feature file for TF prediction
 		String iprscanResultFileTF =  dataDir + "tf_pred/interpro_files/TF.fasta.out"; 
 		String iprscanResultsFileNonTF = dataDir + "tf_pred/interpro_files/NonTF.fasta.out";
@@ -71,22 +114,26 @@ public class Train {
 		String superFeatureFile = dataDir + "super_pred/libsvm_files/libsvm_featurefile.txt";
 		SuperPredFeatureFileGenerator superFeatFileGenerator = new SuperPredFeatureFileGenerator(fastaFileSuper, iprscanResultFileSuper, superFeatureFile);
 		superFeatFileGenerator.writeFeatureFile();
+		*/
 		
+		/*
+		 *  Training and comparison of classifiers
+		 */
 		
+		/*
 		// compare classifiers and generate model files for TF prediction
-		tfFeatureFile = dataDir + "tf_pred/libsvm_files/libsvm_featurefile.txt";
+		String tfFeatureFile = dataDir + "tf_pred/libsvm_files/libsvm_featurefile.txt";
 		String tfResultsFile = dataDir + "tf_pred/classifier_comparison.txt";
 		String tfModelDir = dataDir + "tf_pred/model_files/";
 		
 		compareClassifiers(tfFeatureFile, tfResultsFile, tfModelDir);
 		
-		
 		// compare classifiers and generate model files for superclass prediction
-		superFeatureFile = dataDir + "super_pred/libsvm_files/libsvm_featurefile.txt";
+		String superFeatureFile = dataDir + "super_pred/libsvm_files/libsvm_featurefile.txt";
 		String superResultsFile = dataDir + "super_pred/classifier_comparison.txt";
 		String superModelDir = dataDir + "super_pred/model_files/";
 		 
 		compareClassifiers(superFeatureFile, superResultsFile, superModelDir);
-		
+		*/
 	}
 } 

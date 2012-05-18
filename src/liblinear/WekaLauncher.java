@@ -106,6 +106,10 @@ public class WekaLauncher {
 			argsClassifier.add("-n");
 			argsClassifier.add("false");
 		}
+		if (resultsFile != null) {
+			argsClassifier.add("-s");
+			argsClassifier.add(resultsFile);
+		}
 		
 		return argsClassifier.toArray(new String[]{});
 	}
@@ -114,7 +118,10 @@ public class WekaLauncher {
 		
 		// redirect standard output of classifier to file (if desired)
 		if (resultsFile != null) {
-			redirectSystemOut(resultsFile);
+			File classResultsFile = new File(resultsFile); 
+			if (classResultsFile.exists()) {
+				classResultsFile.delete();
+			}
 		}
 		
 		// run all Weka classifiers on given feature file
@@ -122,7 +129,6 @@ public class WekaLauncher {
 		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
 			String[] argsClassifier = getClassifierArguments(classMethod.name());
 			try {
-				System.out.println();
 				WekaClassifier.main(argsClassifier);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -131,7 +137,6 @@ public class WekaLauncher {
 
 		// reset output stream
 		if (resultsFile != null) {
-			System.setOut(defaultOutstream);
 			classResults = parseResultsFile();
 		} 
 		
