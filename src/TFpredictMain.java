@@ -61,7 +61,8 @@ public class TFpredictMain {
 		
 		if (standAloneMode) {
 			args = prepareStandAloneMode(args);
-		} else {
+		
+		} else if (galaxyMode) {
 			args = prepareOnlineMode(args);
 		}
 		
@@ -86,7 +87,7 @@ public class TFpredictMain {
 		
 		} else if (trainMode) {
 			try {
-				//Train.main(cmd);
+				Train.main(cmd);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -198,14 +199,16 @@ public class TFpredictMain {
 			options.addOption("tfName2ClassFile", true, "file containing mapping from TF names to TransFac classes");
 		
 		// TRAINING MODE
-		//TODO: @Florian: Trainingsmode ueberarbeiten
 		} else if (trainMode) {
 				
 			// options not needed for web-tool version of TFpredict
-			options.addOption("train", false, "train classifier");
-			options.addOption("super", false, "train super classifier");
-			options.addOption("predict", true, "predict this sequence file");
-			options.addOption("f", true, "number of folds");	
+			options.addOption("train", false, "switch for training mode");
+			options.addOption("featureFile", true, "feature file in libsvm format");	
+			options.addOption("resultsFile", true, "text file containing performance assessed for classifiers");	
+			options.addOption("modelFileDir", true, "directory where model files shall be saved");	
+			options.addOption("multiruns", true, "number of repetitions of cross-validation");	
+			options.addOption("folds", true, "number of folds");	
+			options.addOption("nestedCV", false, "switch to run nested cross-validation with model selection");	
 			
 	    // STAND-ALONE-MODE
 		} else if (standAloneMode) {
