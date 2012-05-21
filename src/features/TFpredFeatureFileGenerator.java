@@ -209,7 +209,7 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 	}
 	
 	
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) {
 		
 		TFpredFeatureFileGenerator featureFileGenerator = new TFpredFeatureFileGenerator();
 		featureFileGenerator.parseArguments(args);

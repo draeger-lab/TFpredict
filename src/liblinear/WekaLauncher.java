@@ -20,6 +20,11 @@ import liblinear.WekaClassifier.ClassificationMethod;
 
 public class WekaLauncher {
 	
+	public WekaLauncher(String featureFile, String resultsFile, String modelFileDir, String classProbFileDir) {
+		this(featureFile, resultsFile, modelFileDir);
+		this.classProbFileDir = classProbFileDir;
+	}
+	
 	public WekaLauncher(String featureFile, String resultsFile, String modelFileDir) {
 		this(featureFile, resultsFile);
 		this.modelFileDir = modelFileDir;
@@ -40,8 +45,9 @@ public class WekaLauncher {
 	private String libsvmFeatureFile;
     private String resultsFile = null;
     private String modelFileDir = null;
+    private String classProbFileDir = null;
     
-    private boolean nestedCV = true;
+    private boolean nestedCV = false;
 	private int multiruns = 1;
     private int folds = 4;
 	
@@ -63,24 +69,32 @@ public class WekaLauncher {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
-		WekaLauncher launcher = new WekaLauncher(args[0], args[1]);
+		
+		WekaLauncher launcher;
+		if (args.length == 1) {
+			launcher = new WekaLauncher(args[0]);
+		} else {
+			launcher = new WekaLauncher(args[0], args[1]);
+		}
 		
 		launcher.printConfiguration();
 		launcher.runWekaClassifier();
 	}
 	
 	private void printConfiguration() {
-		System.out.println("Input File:    " + libsvmFeatureFile);
+		System.out.println("Input File:                " + libsvmFeatureFile);
 		if (resultsFile != null) {
-			System.out.println("Output File:   " + resultsFile);
+			System.out.println("Output File:               " + resultsFile);
 		}
 		if (modelFileDir != null) {
-			System.out.println("Model File(s): " + modelFileDir);
+			System.out.println("Model File(s):             " + modelFileDir);
 		}
-		System.out.println("Multiruns:     " + multiruns);
-		System.out.println("Folds:         " + folds);
-		System.out.println(nestedCV ? "Nested CV:     yes" : "Nested CV:     no");
+		if (classProbFileDir != null) {
+			System.out.println("Class Probability File(s): " + classProbFileDir);
+		}
+		System.out.println("Multiruns:                " + multiruns);
+		System.out.println("Folds:            	      " + folds);
+		System.out.println(nestedCV ? "Nested CV:             yes" : "Nested CV:             no");
 	}
 	
 	private String[] getClassifierArguments(String classifierName) {
@@ -95,9 +109,13 @@ public class WekaLauncher {
 		argsClassifier.add(Integer.toString(multiruns));
 		argsClassifier.add("-v");
 		argsClassifier.add(Integer.toString(folds));
+		if (classProbFileDir != null) {
+			argsClassifier.add("-p");
+			argsClassifier.add(classProbFileDir + ClassificationMethod.valueOf(classifierName).modelFileName.replace(".model", ".prob"));
+		}
 		if (modelFileDir != null) {
 			argsClassifier.add("-m");
-			argsClassifier.add(modelFileDir + ClassificationMethod.valueOf(classifierName));
+			argsClassifier.add(modelFileDir + ClassificationMethod.valueOf(classifierName).modelFileName);
 		}
 		if (nestedCV) {
 			argsClassifier.add("-n");
