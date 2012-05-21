@@ -204,7 +204,7 @@ public class TFpredictMain {
 			// options not needed for web-tool version of TFpredict
 			options.addOption("train", false, "switch for training mode");
 			options.addOption("featureFile", true, "feature file in libsvm format");	
-			options.addOption("resultsFile", true, "text file containing performance assessed for classifiers");	
+			options.addOption("resultsFileDir", true, "directory containing class probabilities and evaluation results");	
 			options.addOption("modelFileDir", true, "directory where model files shall be saved");	
 			options.addOption("multiruns", true, "number of repetitions of cross-validation");	
 			options.addOption("folds", true, "number of folds");	

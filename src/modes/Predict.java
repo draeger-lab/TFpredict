@@ -47,6 +47,8 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import liblinear.WekaClassifier;
+
 import org.apache.commons.cli.CommandLine;
 
 import resources.Resource;
@@ -192,6 +194,18 @@ public class Predict {
             basedir = cmd.getOptionValue("basedir");
             if (!basedir.endsWith("/")) basedir += "/" ;
             input_file = basedir + "query.fasta";
+        }
+        
+        if (cmd.hasOption("tfClassifier")) {
+        	String tfClassifier = cmd.getOptionValue("tfClassifier");
+        	String modelFileName = WekaClassifier.ClassificationMethod.valueOf(tfClassifier).modelFileName;
+        	tfClassifier_file = "models/tfPred/" + modelFileName;
+        }
+        
+        if (cmd.hasOption("superClassifier")) {
+        	String superClassifier = cmd.getOptionValue("superClassifier");
+        	String modelFileName = WekaClassifier.ClassificationMethod.valueOf(superClassifier).modelFileName;
+        	superClassifier_file = "models/superPred/" + modelFileName;
         }
         
 		if(cmd.hasOption("tfClassifierFile")) {
