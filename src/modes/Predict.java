@@ -297,11 +297,11 @@ public class Predict {
 				System.exit(0);
 			}
 			// Stop, if maximum number of sequences allowed for Batch mode was exceeded
-			if ((sequences.size() > maxNumSequencesBatchMode )&& (iprpath.isEmpty())) {
-				logger.log(Level.SEVERE, "Error. Maximum number of sequences allowed in Batch Mode: " + maxNumSequencesBatchMode + 
+			if ((sequences.size() > maxNumSequencesBatchMode) && !standAloneMode) {
+			logger.log(Level.SEVERE, "Error. Maximum number of sequences allowed in Batch Mode: " + maxNumSequencesBatchMode + 
 						   		   ". FASTA file contains " + sequences.size() + " sequences.");
-				writeHTMLerrorOutput(TooManySequencesError);
-				System.exit(0);
+					writeHTMLerrorOutput(TooManySequencesError);
+					System.exit(0);
 			}
 			
 			sequence_ids = sequences.keySet().toArray(new String[] {});
@@ -516,7 +516,8 @@ public class Predict {
 			bw.close();
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.exit(0);
+			//e.printStackTrace();
 		}
 	}
 	
