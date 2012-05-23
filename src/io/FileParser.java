@@ -27,6 +27,7 @@ package io;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 /*
  * File Parser
@@ -45,7 +46,7 @@ public class FileParser {
 	
 	public String parseSeq(String infile) {
 		
-		if (! silent) System.out.println("Parsing: " +infile);
+		//if (! silent) System.out.println("Parsing: " +infile);
 		
 		
 		String seq = "";
@@ -77,6 +78,26 @@ public class FileParser {
 			
 	return seq;
 			
+	}
+	
+	public static String read2String(String infile) {
+		
+		String out = "";
+		String line = null;
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(infile));
+			line = br.readLine();
+			while (line != null) {
+				 out += (line+"\n");
+				 line = br.readLine();
+			}
+		}
+		catch (IOException ioe)
+		{
+			
+		}
+				
+		return out;
 	}
 	
 	

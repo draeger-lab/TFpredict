@@ -7,6 +7,7 @@
 package liblinear;
 
 import io.BasicTools;
+import io.FileParser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,25 +15,34 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import org.apache.commons.io.FileUtils;
 
 import liblinear.WekaClassifier.ClassificationMethod;
 
 
 public class WekaLauncher {
 	
-	public WekaLauncher(String featureFile, String resultsFile, String modelFileDir, String classProbFileDir) {
-		this(featureFile, resultsFile, modelFileDir);
+	public WekaLauncher(String featureFile, String resultsDir, String modelFileDir, String classProbFileDir) {
+		this(featureFile, resultsDir, modelFileDir);
 		this.classProbFileDir = classProbFileDir;
 	}
 	
-	public WekaLauncher(String featureFile, String resultsFile, String modelFileDir) {
-		this(featureFile, resultsFile);
+	public WekaLauncher(String featureFile, String resultsDir, String modelFileDir) {
+		this(featureFile, resultsDir);
 		this.modelFileDir = modelFileDir;
 	}
 	
-	public WekaLauncher(String featureFile, String resultsFile) {
+	public WekaLauncher(String featureFile, String resultsDir) {
 		this(featureFile);
-		this.resultsFile = resultsFile;
+		this.resultsDir = resultsDir;
 	}
 	
 	public WekaLauncher(String featureFile) {
@@ -43,7 +53,7 @@ public class WekaLauncher {
 	static PrintStream defaultOutstream = System.out;
 	
 	private String libsvmFeatureFile;
-    private String resultsFile = null;
+    private String resultsDir = null;
     private String modelFileDir = null;
     private String classProbFileDir = null;
     
@@ -68,6 +78,7 @@ public class WekaLauncher {
 	/**
 	 * @param args
 	 */
+	/*
 	public static void main(String[] args) {
 		
 		WekaLauncher launcher;
@@ -78,13 +89,14 @@ public class WekaLauncher {
 		}
 		
 		launcher.printConfiguration();
-		launcher.runWekaClassifier();
+		launcher.runWekaClassifierSingle();
+
 	}
 	
 	private void printConfiguration() {
 		System.out.println("Input File:                " + libsvmFeatureFile);
-		if (resultsFile != null) {
-			System.out.println("Output File:               " + resultsFile);
+		if (resultsDir != null) {
+			System.out.println("Output File:               " + resultsDir);
 		}
 		if (modelFileDir != null) {
 			System.out.println("Model File(s):             " + modelFileDir);
@@ -96,6 +108,7 @@ public class WekaLauncher {
 		System.out.println("Folds:            	      " + folds);
 		System.out.println(nestedCV ? "Nested CV:             yes" : "Nested CV:             no");
 	}
+	*/
 	
 	private String[] getClassifierArguments(String classifierName) {
 		
@@ -124,49 +137,113 @@ public class WekaLauncher {
 			argsClassifier.add("-n");
 			argsClassifier.add("false");
 		}
-		if (resultsFile != null) {
+		if (resultsDir != null) {
 			argsClassifier.add("-s");
-			argsClassifier.add(resultsFile);
+			argsClassifier.add(resultsDir+classifierName);
 		}
 		
 		return argsClassifier.toArray(new String[]{});
 	}
 	
-	public double[][] runWekaClassifier() {
+	public double[][] runWekaClassifier(Boolean multi) {
 		
+		resultsDir += "/evaluationResults";
 		// redirect standard output of classifier to file (if desired)
-		if (resultsFile != null) {
-			File classResultsFile = new File(resultsFile); 
+		if (resultsDir != null) {
+			File classResultsFile = new File(resultsDir); 
 			if (classResultsFile.exists()) {
 				classResultsFile.delete();
 			}
-		}
+			for (ClassificationMethod classMethod: ClassificationMethod.values()) {
+				classResultsFile = new File(resultsDir+classMethod.name()); 
+				if (new File(resultsDir+classMethod.name()).exists()) {
+					classResultsFile.delete();
+				}	
+			}
+		}		
 		
-		// run all Weka classifiers on given feature file
-		double[][] classResults = null;
-		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
-			String[] argsClassifier = getClassifierArguments(classMethod.name());
+		if (multi) {
+			Collection<Job> queue = new ArrayList<Job>();
+			
+			for (ClassificationMethod classMethod: ClassificationMethod.values()) {
+				String[] argsClassifier = getClassifierArguments(classMethod.name());
+				queue.add(new Job(argsClassifier));
+			}
+			
+			ExecutorService exec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 			try {
-				WekaClassifier.main(argsClassifier);
-			} catch (IOException e) {
+				exec.invokeAll(queue);
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			exec.shutdown();
+			while (!exec.isTerminated());
 		}
+		else {
+			// run all Weka classifiers on given feature file
+			for (ClassificationMethod classMethod: ClassificationMethod.values()) {
+				String[] argsClassifier = getClassifierArguments(classMethod.name());
+				try {
+					WekaClassifier.main(argsClassifier);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		mergeResultsFiles();
 
 		// reset output stream
-		if (resultsFile != null) {
+		double[][] classResults = null;
+		if (resultsDir != null) {
 			classResults = parseResultsFile();
 		} 
 		
 		return(classResults);
 	}
 	
+	
+	private void mergeResultsFiles() {
+		String merged = "";
+		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
+			merged = merged.concat(FileParser.read2String(resultsDir+classMethod.name()));
+			}
+		try {
+			FileUtils.writeStringToFile(new File(resultsDir), merged);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	
+	class Job implements Callable<String>{
+		
+		String[] argsClassifier;
+		
+		public Job(String[] argsClassifier) {
+			this.argsClassifier = argsClassifier;
+
+		}
+
+		@Override
+		public String call() throws Exception {
+			try {
+				WekaClassifier.main(argsClassifier);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return "Done.";
+		}
+	}
+
+	
 	private double[][] parseResultsFile() {
 		
 		int numScores = folds * multiruns;
 		int numMethods = ClassificationMethod.values().length;
 		double[][] classResults = new double[numScores][numMethods];
-		ArrayList<String[]> resultsTable = BasicTools.readFile2ListSplitLines(resultsFile);
+		ArrayList<String[]> resultsTable = BasicTools.readFile2ListSplitLines(resultsDir);
 		int lineIdx = 0;
 		for (int i=0; i<numMethods; i++) {
 			lineIdx += 2; // skip classifier name and table header
@@ -176,9 +253,7 @@ public class WekaLauncher {
 		}
 		return(classResults);
 	}
-	
-	
-	
+		
 
 	public static String redirectSystemOut2TempFile() {
 		String tempFile = "";
