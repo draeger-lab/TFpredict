@@ -25,7 +25,8 @@ public class Train {
 	private static int multiruns = 1;
 	private static int folds = 4;
 	private static boolean nestedCV = false;
-
+	
+	private static boolean multi = true;
 	
 	private static void parseArguments(CommandLine cmd) {
 		
@@ -54,6 +55,10 @@ public class Train {
 		} else {
 			nestedCV = false;
 		}
+		
+		if(cmd.hasOption("single")) {
+			multi = false;
+		}		
 	}
 	
 	
@@ -62,13 +67,18 @@ public class Train {
 	}
 	
 	private static void compareClassifiers(String featureFile, String resultsDir, String modelFileDir, int numMultiruns, int numFolds, boolean nestedCV) {	
-		WekaLauncher launcher = new WekaLauncher(featureFile, resultsDir + "/evaluationResults.txt", modelFileDir, resultsDir);
+		//WekaLauncher launcher = new WekaLauncher(featureFile, resultsDir + "/evaluationResults.txt", modelFileDir, resultsDir);
+		WekaLauncher launcher = new WekaLauncher(featureFile, resultsDir, modelFileDir, resultsDir);
 		launcher.setFolds(numFolds);
 		launcher.setMultiruns(numMultiruns);
 		launcher.setNestedCV(nestedCV);
 		
-		double[][] classResults = launcher.runWekaClassifier();
+		long start = System.currentTimeMillis();
 		
+		double[][] classResults = launcher.runWekaClassifier(true);
+			
+		long end = System.currentTimeMillis();
+				
 		// determine best classifier
 		double[] meanROC = BasicTools.getColMeans(classResults);
 		int winIdx = BasicTools.getMaxIndex(meanROC);
@@ -86,6 +96,7 @@ public class Train {
 			for (int i=0; i<meanROC.length; i++) {
 				System.out.println("    " + BasicTools.padRight(WekaClassifier.ClassificationMethod.values()[i].printName + ":", paddingLength-2)  + df.format(meanROC[i]));
 			}
+			System.out.println("Runtime of training: "+(end-start)+" ms.");
 		}
 	}
 	
