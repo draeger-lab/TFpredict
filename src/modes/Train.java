@@ -9,10 +9,10 @@ import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
-import org.apache.commons.cli.CommandLine;
-
 import liblinear.WekaClassifier;
 import liblinear.WekaLauncher;
+
+import org.apache.commons.cli.CommandLine;
 
 public class Train {
 

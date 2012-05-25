@@ -28,7 +28,9 @@ import io.BasicTools;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
+import liblinear.WekaClassifier.ClassificationMethod;
 import modes.Predict;
 import modes.Train;
 
@@ -43,6 +45,9 @@ public class TFpredictMain {
 	private static boolean galaxyMode = false;
 	private static boolean standAloneMode = false;
 	private static boolean trainMode = false;
+	
+	private static final int[] validClassifierIdx = new int[] {3,4,5,6}; 
+	private static final String version = "1.0";
 	
 	private static final String sabineSpeciesList = "organism_list.txt"; 
 	
@@ -190,13 +195,8 @@ public class TFpredictMain {
 			options.addOption("useWeb", false, "use InterProScan webservice");
 			
 			// optional arguments
-			options.addOption("iprscanPath", true, "path to InterProScan");
-			options.addOption("tfClassifierFile", true, "file containing TF/Non-TF classifier");
-			options.addOption("superClassifierFile", true, "file containing Superclass classifier");
-			options.addOption("tfClassFeatureFile", true, "file containing features used by TF/Non-TF classifier");
-			options.addOption("superClassFeatureFile", true, "file containing features used by Superclass classifier");
-			options.addOption("relGOtermsFile", true, "file containing GO terms relevant for DNA-binding domain prediction");
-			options.addOption("tfName2ClassFile", true, "file containing mapping from TF names to TransFac classes");
+			options.addOption("tfClassifier", true, "file containing TF/Non-TF classifier");
+			options.addOption("superClassifier", true, "file containing Superclass classifier");
 		
 		// TRAINING MODE
 		} else if (trainMode) {
@@ -216,6 +216,8 @@ public class TFpredictMain {
 			options.addOption("fasta", true, "input FASTA file for batch mode");
 			options.addOption("sabineOutfile", true, "output file in SABINE format");
 			options.addOption("species", true, "organism (e.g. Homo sapiens)");
+			options.addOption("tfClassifier", true, "file containing TF/Non-TF classifier");
+			options.addOption("superClassifier", true, "file containing Superclass classifier");
 			options.addOption("iprscanPath", true, "path to InterProScan");
 			options.addOption("basedir", true, "directory for temporary files");
 			options.addOption("standAloneMode", false, "directory for temporary files");
@@ -248,6 +250,14 @@ public class TFpredictMain {
 				usage();
 			}
 		}
+		
+		// check classifiers
+		if (cmd.hasOption("tfClassifier")) {
+			checkClassifier("tfClassifer", cmd.getOptionValue("tfClassifier"));
+		}
+		if (cmd.hasOption("superClassifier")) {
+			checkClassifier("superClassifier", cmd.getOptionValue("superClassifier"));
+		}
 			
 		// print values of provided arguments 
 		System.out.println("  Input FASTA file:       " + cmd.getOptionValue("fasta"));
@@ -259,24 +269,45 @@ public class TFpredictMain {
 		} 
 	}
 	
+ 	public static void checkClassifier(String classifierType, String givenClassifier) {
+
+ 		ArrayList<String> classificationMethods = new ArrayList<String>();
+ 		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
+ 			classificationMethods.add(classMethod.name());
+ 		}
+
+ 		if (!classificationMethods.contains(givenClassifier)) {
+ 			System.out.println("  Error. Unknown classifier: \"" + givenClassifier + "\". The following values are possible for the argument \"" + classifierType + "\":");
+ 			System.out.print("  " + classificationMethods.get(validClassifierIdx[0]));
+ 			for (int i=1; i<validClassifierIdx.length; i++) {
+ 				System.out.print(", " + classificationMethods.get(validClassifierIdx[i]));
+ 			}
+ 			System.out.println("\n"); 
+ 			usage();
+ 		}
+ 	}
+	
 	/*
 	 *  print copyright message
 	 */
 	
 	public static void printCopyright() {
 
-		System.out.println("\n-----------------------------------------------------------------------------------");
-		System.out.println("TFpredict - Identification and structural characterization of transcription factors");
-		System.out.println("-----------------------------------------------------------------------------------");
-		System.out.println("(version 1.0)\n");
+		System.out.println("\n-----------------------------------------------------------------------");
+		System.out.println("TFpredict");
+		System.out.println("Identification and structural characterization of transcription factors");
+		System.out.println("-----------------------------------------------------------------------");
+		System.out.println("(version " + version + ")\n");
 		System.out.println("Copyright (C) 2012 Center for Bioinformatics Tuebingen (ZBIT),");
         System.out.println("University of Tuebingen, Florian Topf and Johannes Eichner.\n");
         System.out.println("This program comes with ABSOLUTELY NO WARRANTY.");
-        System.out.println("This is free software, and you are welcome to redistribute it under certain conditions.");
+        System.out.println("This is free software, and you are welcome to redistribute it under certain");
+        System.out.println("conditions.");
         System.out.print("For details see: ");
         System.out.println("http://www.gnu.org/licenses/gpl-3.0.html\n");
         System.out.println("Third-party software used by this program:");
-        System.out.println("  WEKA. Copyright (C) 1998, 1999 Eibe Frank, Leonard Trigg, Mark Hall. All rights reserved.");
+        System.out.println("  WEKA. Copyright (C) 1998, 1999 Eibe Frank, Leonard Trigg, Mark Hall.");
+        System.out.println("  All rights reserved.");
         System.out.println("  InterProScan. Copyright (C) 2011 Sarah Hunter, EMBL-EBI. All rights reserved.");
         System.out.println();  
 	}
@@ -291,8 +322,10 @@ public class TFpredictMain {
 		
 		System.out.println("  Usage   : java -jar TFpredict.jar <fasta_file> [OPTIONS]\n");
 		System.out.println("  OPTIONS : -sabineOutfile <output_file_name>");
-		System.out.println("            -species <organism_name>          (e.g., \"Homo sapiens\")");		
-		System.out.println("            -iprscanPath <path_to_iprscan>    (e.g., \"/opt/iprscan/bin/iprscan\")\n");
+		System.out.println("            -species <organism_name>            (e.g., \"Homo sapiens\")");
+		System.out.println("            -tfClassifier <classifier_name>     (possible values: SVM_linear, NaiveBayes, KNN, Kstar)");
+		System.out.println("            -superClassifier <classifier_name>  (possible values: SVM_linear, NaiveBayes, KNN, Kstar)");	
+		System.out.println("            -iprscanPath <path_to_iprscan>      (e.g., \"/opt/iprscan/bin/iprscan\")\n");
 		System.exit(0);
 		
 	}

@@ -40,6 +40,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
@@ -48,6 +49,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import liblinear.WekaClassifier;
+import liblinear.WekaClassifier.ClassificationMethod;
 
 import org.apache.commons.cli.CommandLine;
 
@@ -58,6 +60,8 @@ import weka.core.Instances;
 import weka.core.converters.LibSVMLoader;
 
 public class Predict {
+	
+	public static final int featureOffset = 10;
 	
 	private static final String interproPrefix = "http://www.ebi.ac.uk/interpro/ISearch?query=";
 	private static final String transfacURL = "http://www.gene-regulation.com/pub/databases/transfac/clSM.html";
@@ -81,10 +85,10 @@ public class Predict {
 
 	// static arguments required by TFpredict
 	static String iprpath = "";
-	static String tfClassifier_file = "ipr.model";
-	static String superClassifier_file = "super.model";
-	static String relDomainsTF_file = "ipr.iprs";
-	static String relDomainsSuper_file = "super.iprs";
+	static String tfClassifier_file = "models/tfPred/knn.model";
+	static String superClassifier_file = "models/superPred/svmLinear.model";
+	static String relDomainsTF_file = "domainsTFpred.txt";
+	static String relDomainsSuper_file = "domainsSuperPred.txt";
 	static String relGOterms_file = "DNA.go";
 	static String tfName2class_file = "transHMan";
 	
@@ -163,6 +167,54 @@ public class Predict {
 	    }
 	}
 	
+	/*
+	public static void main(String[] args){
+		testModelFiles();
+	}
+	*/
+	
+	public static void testModelFiles() {
+		
+		// read relevant domains for TF/non-TF classification
+		ArrayList<String> relDomains = BasicTools.readResource2List("domainsTFpred.txt");
+		//ArrayList<String> relDomains = BasicTools.readResource2List("domainsSuperPred.txt");
+		
+		String[] domains = new String[] {"IPR001646", "IPR004065", "IPR015310", "IPR000510", "IPR020956"};
+		//String[] domains = new String[] {"IPR003604", "IPR008288", "IPR017970", "IPR010588", "IPR002546"};
+		ArrayList<String> currDomains = new ArrayList<String>();
+		currDomains.addAll(Arrays.asList(domains));
+		
+		String fvector = createIPRvector(currDomains, relDomains, featureOffset);
+		int lastFeatureIdx = relDomains.size() + featureOffset;
+		if (!fvector.endsWith(lastFeatureIdx + ":1")) {
+			fvector += " " + lastFeatureIdx + ":0";
+		}
+		System.out.println("Feature vector: " + fvector);
+	    Instance currInstance = getInst("0 " + fvector);
+	    
+		ArrayList<String> tfPredModelFiles = new ArrayList<String>();
+		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
+			tfPredModelFiles.add("models/tfPred/" + classMethod.modelFileName);
+			//tfPredModelFiles.add("models/superPred/" + classMethod.modelFileName);
+		}
+		
+		for (int i=3; i<tfPredModelFiles.size(); i++) {
+			try {
+				Classifier tfPredictor = (Classifier) weka.core.SerializationHelper.read(Resource.class.getResourceAsStream(tfPredModelFiles.get(i)));
+				double[] tfProb = tfPredictor.distributionForInstance(currInstance);
+				
+				System.out.print(tfPredModelFiles.get(i).replaceAll(".*/", "").replace(".model", "") + ": \t(" + tfProb[0]);
+				for (int p=1; p<tfProb.length; p++) {
+					System.out.print(",  " + df.format(tfProb[p]));
+				}
+				System.out.println(")");
+	
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	private void parseArguments(CommandLine cmd) {
 		
 		if(cmd.hasOption("sequence")) {
@@ -207,30 +259,6 @@ public class Predict {
         	String modelFileName = WekaClassifier.ClassificationMethod.valueOf(superClassifier).modelFileName;
         	superClassifier_file = "models/superPred/" + modelFileName;
         }
-        
-		if(cmd.hasOption("tfClassifierFile")) {
-			tfClassifier_file = cmd.getOptionValue("tfClassifierFile");
-		}
-
-		if(cmd.hasOption("superClassifierFile")) {
-			superClassifier_file = cmd.getOptionValue("superClassifierFile");
-		}
-		
-		if(cmd.hasOption("tfClassFeatureFile")) {
-			relDomainsTF_file = cmd.getOptionValue("tfClassFeatureFile");
-		}
-	
-		if(cmd.hasOption("superClassFeatureFile")) {
-			relDomainsSuper_file = cmd.getOptionValue("superClassFeatureFile");
-		}
-		
-		if(cmd.hasOption("relGOtermsFile")) {
-			relGOterms_file = cmd.getOptionValue("relGOtermsFile");
-		}
-
-		if(cmd.hasOption("tfName2ClassFile")) {
-			tfName2class_file = cmd.getOptionValue("tfName2ClassFile");
-		}
 		
 		if(cmd.hasOption("iprscanPath")) {
 			iprpath = cmd.getOptionValue("iprscanPath");
@@ -260,8 +288,8 @@ public class Predict {
 	@SuppressWarnings("unchecked")
 	private void prepareInput() {
 		
-		relDomains_TFclass = (ArrayList<String>) ObjectRW.readFromResource(relDomainsTF_file);
-		relDomains_Superclass = (ArrayList<String>) ObjectRW.readFromResource(relDomainsSuper_file);
+		relDomains_TFclass = BasicTools.readResource2List(relDomainsTF_file);
+		relDomains_Superclass = BasicTools.readResource2List(relDomainsSuper_file);
 		tfName2class = (HashMap<String, String>) ObjectRW.readFromResource(tfName2class_file);
 		
 		relGOterms = BasicTools.readResource2List(relGOterms_file);
@@ -298,10 +326,10 @@ public class Predict {
 			}
 			// Stop, if maximum number of sequences allowed for Batch mode was exceeded
 			if ((sequences.size() > maxNumSequencesBatchMode) && !standAloneMode) {
-			logger.log(Level.SEVERE, "Error. Maximum number of sequences allowed in Batch Mode: " + maxNumSequencesBatchMode + 
+				logger.log(Level.SEVERE, "Error. Maximum number of sequences allowed in Batch Mode: " + maxNumSequencesBatchMode + 
 						   		   ". FASTA file contains " + sequences.size() + " sequences.");
-					writeHTMLerrorOutput(TooManySequencesError);
-					System.exit(0);
+				writeHTMLerrorOutput(TooManySequencesError);
+				System.exit(0);
 			}
 			
 			sequence_ids = sequences.keySet().toArray(new String[] {});
@@ -324,9 +352,9 @@ public class Predict {
 
 		// load TF/Non-TF and superclass classifier
 		try {
-			tfClassifier = (Classifier) weka.core.SerializationHelper.read(Resource.class.getResourceAsStream(tfClassifier_file));
+			tfClassifier = (Classifier) weka.core.SerializationHelper.read(Resource.class.getResourceAsStream(tfClassifier_file));			 
 			superClassifier = (Classifier) weka.core.SerializationHelper.read(Resource.class.getResourceAsStream(superClassifier_file));
-		
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -358,8 +386,8 @@ public class Predict {
 		}
 		
 		// HACK: line can be included for testing purposes
-		//basedir = "/tmp/TFpredict_4215575705942655684_basedir";
-		//ArrayList<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(basedir + "/iprscan-S20120425-145757-0037-1931185-pg.out.txt");
+		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1771_files/";
+		//ArrayList<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(basedir + "/iprscan-S20120523-165354-0573-55042068-pg.out.txt");
 		
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
@@ -417,7 +445,7 @@ public class Predict {
 		try {
 			for (String seq: seq2feat_TFclass.keySet()) {
 				if (predictionPossible.get(seq)) {
-					
+											
 					seqIsTF.put(seq, false);
 					annotatedClassAvailable.put(seq, false);
 					domainsPredicted.put(seq, false);
@@ -803,7 +831,13 @@ public class Predict {
 	    	
 	    	IprEntry entry = seq2domain.get(seq);
 	    	
-	    	String fvector = createIPRvector(entry.domain_ids, relIPRdomains, 10);
+	    	String fvector = createIPRvector(entry.domain_ids, relIPRdomains, featureOffset);
+	    	
+	    	// append last feature to avoid bug in WEKA libsvm wrapper
+			int lastFeatureIdx = relIPRdomains.size() + featureOffset;
+			if (!fvector.endsWith(lastFeatureIdx + ":1")) {
+				fvector += " " + lastFeatureIdx + ":0";
+			}
 	    	
 	    	if (!fvector.isEmpty()) {
 	    		seq2fvector.put(entry.sequence_id, getInst("0 " + fvector));
