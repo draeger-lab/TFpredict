@@ -21,7 +21,6 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.math.stat.descriptive.moment.Mean;
-import org.biojava.stats.svm.SVMTarget;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;

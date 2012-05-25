@@ -65,7 +65,7 @@ public class LibSVMOutfileWriter {
 					label = "-1";
 				}
 				
-				String fvector = Predict.createIPRvector(curr_entry.domain_ids, domainIDs, 10);
+				String fvector = Predict.createIPRvector(curr_entry.domain_ids, domainIDs, Predict.featureOffset);
 				String line = label + " " + fvector + "\n";
 				if (!fvector.isEmpty() && !libsvmFeatureTable.contains(line)) {
 					libsvmFeatureTable.add(line);

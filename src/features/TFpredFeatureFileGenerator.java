@@ -34,6 +34,7 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 	private static final String specificDomainsNonTFfile = "domains_NonTFonly.txt";
 	private static final String domain2pvalueFile = "domains2pvalues.txt";
 	private static final String domain2pvalueCorrectedFile = "domains2correctedPvalues.txt"; 
+	private static final String filteredDomainsFile = "filtered_domains.txt";
 
 	private String iprscanResultFileNonTF = ""; 
 	private boolean useBonferroniHolm = false;
@@ -45,6 +46,7 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 		this.iprscanResultFileTF = iprscanResultFileTF;
 		this.iprscanResultFileNonTF = iprscanResultFileNonTF;
 		this.libsvmOutfile = libsvmOutfile;
+		this.basedir = new File(libsvmOutfile).getParent() + "/";
 	}
 	
 	public TFpredFeatureFileGenerator() {
@@ -184,6 +186,9 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 		
 		// remove domains which are not contained in current version of InterPro
 		filterCurrentDomainsInSeq2DomMap();
+		
+		BasicTools.writeArrayListToFile(relevantDomainIDs, basedir + relevantDomainsFile);
+		BasicTools.writeArrayListToFile(filteredDomainIDs, basedir + filteredDomainsFile);
 		
 		LibSVMOutfileWriter libsvmwriter = new LibSVMOutfileWriter();
 		int[] numFeatVecRelevant = libsvmwriter.write(relevantDomainIDs, seq2domain, libsvmOutfile);

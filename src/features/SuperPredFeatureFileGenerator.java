@@ -23,6 +23,7 @@ public class SuperPredFeatureFileGenerator extends FeatureFileGenerator {
 		this.fastaFileTF = fastaFileTF;
 		this.iprscanResultFileTF = iprscanResultFileTF;
 		this.libsvmOutfile = libsvmOutfile;
+		this.basedir = new File(libsvmOutfile).getParent() + "/";
 	}
 	
 	public SuperPredFeatureFileGenerator() {
@@ -119,6 +120,7 @@ public class SuperPredFeatureFileGenerator extends FeatureFileGenerator {
 			seq2domain.put(seqID, currEntry);
 		}
 		
+		BasicTools.writeArrayListToFile(relevantDomainIDs, basedir + relevantDomainsFile);
 		LibSVMOutfileWriter libsvmwriter = new LibSVMOutfileWriter();
 		int[] numFeatVecRelevant = libsvmwriter.write(relevantDomainIDs, seq2domain, libsvmOutfile);
 		int numFeatVec = numFeatVecRelevant[0] + numFeatVecRelevant[1] + numFeatVecRelevant[2] + numFeatVecRelevant[3] + numFeatVecRelevant[4];
