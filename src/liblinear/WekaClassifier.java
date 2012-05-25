@@ -214,8 +214,7 @@ public class WekaClassifier {
 			classResult = runNestedCVNaiveBayes();
 	
 		} else if (selectedClassifier == ClassificationMethod.Kstar.name()) {
-			//classResult = classRunner.runNestedCVKStar(samples);
-			classResult = runNestedCVkNN();
+			classResult = runNestedCVKStar();
 		
 		} else if (selectedClassifier == ClassificationMethod.KNN.name()) {
 			classResult = runNestedCVkNN();
