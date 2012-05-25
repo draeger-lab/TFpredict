@@ -1,17 +1,9 @@
 package modes;
 
-import features.SuperPredFeatureFileGenerator;
-import features.TFpredFeatureFileGenerator;
 import io.BasicTools;
-
 import java.text.DecimalFormat;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-
 import liblinear.WekaClassifier;
 import liblinear.WekaLauncher;
-
 import org.apache.commons.cli.CommandLine;
 
 public class Train {
@@ -26,7 +18,7 @@ public class Train {
 	private static int folds = 4;
 	private static boolean nestedCV = false;
 	
-	private static boolean multi = true;
+	private static boolean multithreading = false;
 	
 	private static void parseArguments(CommandLine cmd) {
 		
@@ -56,26 +48,21 @@ public class Train {
 			nestedCV = false;
 		}
 		
-		if(cmd.hasOption("single")) {
-			multi = false;
-		}		
-	}
-	
-	
-	private static void compareClassifiers(String featureFile, String resultsDir, String modelFileDir) {
-		compareClassifiers(featureFile, resultsDir, modelFileDir, multiruns, folds, nestedCV);
+		if(cmd.hasOption("multiThreading")) {
+			multithreading = true;
+		}	
 	}
 	
 	private static void compareClassifiers(String featureFile, String resultsDir, String modelFileDir, int numMultiruns, int numFolds, boolean nestedCV) {	
-		//WekaLauncher launcher = new WekaLauncher(featureFile, resultsDir + "/evaluationResults.txt", modelFileDir, resultsDir);
-		WekaLauncher launcher = new WekaLauncher(featureFile, resultsDir, modelFileDir, resultsDir);
+		
+		WekaLauncher launcher = new WekaLauncher(featureFile, resultsDir, modelFileDir, true);
 		launcher.setFolds(numFolds);
 		launcher.setMultiruns(numMultiruns);
 		launcher.setNestedCV(nestedCV);
 		
 		long start = System.currentTimeMillis();
 		
-		double[][] classResults = launcher.runWekaClassifier(true);
+		double[][] classResults = launcher.runWekaClassifier(multithreading);
 			
 		long end = System.currentTimeMillis();
 				
@@ -96,7 +83,7 @@ public class Train {
 			for (int i=0; i<meanROC.length; i++) {
 				System.out.println("    " + BasicTools.padRight(WekaClassifier.ClassificationMethod.values()[i].printName + ":", paddingLength-2)  + df.format(meanROC[i]));
 			}
-			System.out.println("Runtime of training: "+(end-start)+" ms.");
+			System.out.println("  \nRuntime of training: " + Math.round((end-start)/1000) + " sec.");
 		}
 	}
 	

@@ -28,7 +28,6 @@ import io.BasicTools;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import liblinear.WekaClassifier.ClassificationMethod;
 import modes.Predict;
@@ -209,6 +208,7 @@ public class TFpredictMain {
 			options.addOption("multiruns", true, "number of repetitions of cross-validation");	
 			options.addOption("folds", true, "number of folds");	
 			options.addOption("nestedCV", false, "switch to run nested cross-validation with model selection");	
+			options.addOption("multiThreading", false, "switch to enables multi-threading");	
 			
 	    // STAND-ALONE-MODE
 		} else if (standAloneMode) {
