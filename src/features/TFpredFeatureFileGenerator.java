@@ -121,7 +121,7 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 		ArrayList<Double> pvalues = fourFieldTest.getPvalues();
 
 		// write InterPro Domain IDs and corresponding p-values to file 
-		BasicTools.writeSplittedArrayListToFile(BasicTools.combineLists(filteredDomainIDs, pvalues), basedir + domain2pvalueFile);
+		BasicTools.writeSplittedArrayList2File(BasicTools.combineLists(filteredDomainIDs, pvalues), basedir + domain2pvalueFile);
 
 		// correct pvalues using Holm-Bonferroni method
 		if(useBonferroniHolm) {
@@ -142,7 +142,7 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 		}
 		
 		// write InterPro Domain IDs and corresponding p-values to file 
-		BasicTools.writeSplittedArrayListToFile(BasicTools.combineLists(filteredDomainIDs, pvalues), basedir + domain2pvalueCorrectedFile);
+		BasicTools.writeSplittedArrayList2File(BasicTools.combineLists(filteredDomainIDs, pvalues), basedir + domain2pvalueCorrectedFile);
 	}
 
 	public void writeFeatureFile() {
@@ -172,8 +172,8 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 	    ArrayList<String> specificDomainsTF = BasicTools.setDiff(domainsTF, domainsNonTF);
 	    ArrayList<String> specificDomainsNonTF = BasicTools.setDiff(domainsNonTF, domainsTF);
 	    
-		BasicTools.writeArrayListToFile(specificDomainsTF, basedir + specificDomainsTFfile);
-		BasicTools.writeArrayListToFile(specificDomainsNonTF, basedir + specificDomainsNonTFfile);
+		BasicTools.writeArrayList2File(specificDomainsTF, basedir + specificDomainsTFfile);
+		BasicTools.writeArrayList2File(specificDomainsNonTF, basedir + specificDomainsNonTFfile);
 
 		// use four-field test to filter domains significantly correlated with class labels
 		filterDomainIDs(domain2seqTF, domain2seqNonTF);
@@ -187,8 +187,8 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 		// remove domains which are not contained in current version of InterPro
 		filterCurrentDomainsInSeq2DomMap();
 		
-		BasicTools.writeArrayListToFile(relevantDomainIDs, basedir + relevantDomainsFile);
-		BasicTools.writeArrayListToFile(filteredDomainIDs, basedir + filteredDomainsFile);
+		BasicTools.writeArrayList2File(relevantDomainIDs, basedir + relevantDomainsFile);
+		BasicTools.writeArrayList2File(filteredDomainIDs, basedir + filteredDomainsFile);
 		
 		LibSVMOutfileWriter libsvmwriter = new LibSVMOutfileWriter();
 		int[] numFeatVecRelevant = libsvmwriter.write(relevantDomainIDs, seq2domain, libsvmOutfile);

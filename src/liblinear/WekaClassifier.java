@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -42,27 +43,71 @@ import weka.filters.unsupervised.instance.Normalize;
 
 public class WekaClassifier {
 
+	public void setMultithreading(boolean multithreading) {
+		this.multithreading = multithreading;
+	}
+
+	WekaClassifier(String classifierType, String featureFile, int multiruns, int folds, boolean nestedCV, 
+				   String modelFile, String summaryFile, String classProbabilityFile) {
+	
+		this(classifierType, featureFile, multiruns, folds, nestedCV);
+		this.modelFile = modelFile;
+		this.writeModelFile = true;
+		this.summaryFile = summaryFile;
+		this.classProbabilityFile = classProbabilityFile;
+	}
+	
+	WekaClassifier(String classifierType, String featureFile, int multiruns, int folds, boolean nestedCV) {
+		this(classifierType, featureFile, multiruns, folds);
+		this.performNestedCV = nestedCV;
+	}
+		
+	WekaClassifier(String classifierType, String featureFile, int multiruns, int folds) {
+		this(classifierType, featureFile);
+		this.repetitions = multiruns;
+		this.folds = folds;
+	}
+	
+	WekaClassifier(String classifierType, String featureFile) {
+		this.selectedClassifier = classifierType;
+		this.featureFile = featureFile;
+	}
+	
+	WekaClassifier(){};
+	
 	public boolean silent = true;
+	private boolean multithreading = false;
 	
-	private static String summaryFile = null;
-	private static String classProbabilityFile = null;
-	private boolean hideLibsvmDebugOutput = true;
-	private PrintStream stdOut = System.out;
-	
-	private boolean showProgress = true;
-	private boolean showEstimatedDuration = true;
-	private boolean performNestedCV = true;
-	private String mainPerformanceMeasure = "ROC";
+	private String featureFile;
+	private String selectedClassifier;
 	private String modelFile = null;
 	private boolean writeModelFile = false;
+	private int folds = 2;
+	private int repetitions = 1;
+	private boolean performNestedCV = true;
 	
-	private static int folds = 2;
-	private static int repetitions = 1;
-	private final static int innerRepetitions = 1;
-	private static DecimalFormat df = new DecimalFormat();
-	private String selectedClassifier;
-	private static String strFile;
+	private String summaryFile = null;
+	private String classProbabilityFile = null;
 
+	private boolean hideLibsvmDebugOutput = true;
+    boolean showProgress = true;
+	boolean showEstimatedDuration = true;
+	private PrintStream stdOut = System.out;
+	private String mainPerformanceMeasure = "ROC";
+
+	private final static int innerRepetitions = 1;
+	
+	private static DecimalFormat df = new DecimalFormat();
+	static {
+		java.util.Locale.setDefault(java.util.Locale.ENGLISH);
+		DecimalFormatSymbols symb = new DecimalFormatSymbols();
+		symb.setDecimalSeparator('.');
+		df.setDecimalFormatSymbols(symb);
+	}
+
+	private Instances data;
+	WekaClassifierResult[] classResult = null;
+	String classifierPrintName;
 	
 	public enum ClassificationMethod {
 		RandomForest("Random Forest", "randomForest.model"),
@@ -102,75 +147,102 @@ public class WekaClassifier {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws IOException {
-		java.util.Locale.setDefault(java.util.Locale.ENGLISH);
-		df = new DecimalFormat();
+
 		final WekaClassifier classRunner = new WekaClassifier();
+
+		// parse arguments
 		Options options = classRunner.buildCommandLine();
 		classRunner.parseCommandLine(args, options);
 		if (!classRunner.silent) classRunner.printConfiguration();
 		
-		// to support libsvm-format
-		Instances samples = classRunner.readData();
-		classRunner.normalizeData(samples);
+		// run nested cross-validation
+		classRunner.run();
+	}
+	
+	private void printConfiguration() {
+		System.out.println("repetitions: " + repetitions + ", inner repetitions: " + innerRepetitions + ", classifier: " + selectedClassifier + ", InFile: " + featureFile + ", folds: " + folds);
+	}
+
+	public void run() {
+
+		prepareNestedCV();
+		runNestedCV();
+		writeEvaluationResults();
+	}
+	
+	private void prepareNestedCV() {
+		
+		// read data from libsvm format
+		data = readData();
+		normalizeData(data);
 
 		// no model selection possible for Kstar and Naive Bayes
-		if (ClassificationMethod.valueOf(classRunner.selectedClassifier).equals(ClassificationMethod.Kstar.name()) ||
-			ClassificationMethod.valueOf(classRunner.selectedClassifier).equals(ClassificationMethod.NaiveBayes.name())) {
-				classRunner.performNestedCV = false;
+		if (ClassificationMethod.valueOf(selectedClassifier).equals(ClassificationMethod.Kstar.name()) ||
+				ClassificationMethod.valueOf(selectedClassifier).equals(ClassificationMethod.NaiveBayes.name())) {
+			performNestedCV = false;
 		}
-		
-		// show progress
-		if (classRunner.showProgress) {
-			System.out.println("\nClassifier: " + ClassificationMethod.valueOf(classRunner.selectedClassifier).printName);
-			System.out.println("  Multiruns: " + repetitions + "  Folds: " + folds + "  Model selection: " + classRunner.performNestedCV + "\n");
-			
-		}
-		
-		// create a new classifier
-		WekaClassifierResult[] classResult = null;
-		if (classRunner.selectedClassifier == ClassificationMethod.RandomForest.name()) {
-			classResult = classRunner.runNestedCVRandomForest(samples, repetitions);
-			
-		} else if (classRunner.selectedClassifier == ClassificationMethod.DecisionTree.name()) {
-			classResult = classRunner.runNestedCVJ48(samples, repetitions);
-		
-		} else if (classRunner.selectedClassifier == ClassificationMethod.SVM_rbf.name()) {
-			classResult = classRunner.runNestedCVLIBSVM(samples, repetitions);
-		
-		} else if (classRunner.selectedClassifier == ClassificationMethod.SVM_linear.name()) {
-			classResult = classRunner.runNestedCVLIBLINEAR(samples, repetitions);
-		
-		} else if (classRunner.selectedClassifier == ClassificationMethod.NaiveBayes.name()) {
-			classResult = classRunner.runNestedCVNaiveBayes(samples, repetitions);
 
-		} else if (classRunner.selectedClassifier == ClassificationMethod.Kstar.name()) {
-			classResult = classRunner.runNestedCVKStar(samples, repetitions);
+		// multithreading --> adjust output
+		if (multithreading) {
+			showProgress = false;
+		}
+
+		// show progress
+		if (showProgress) {
+			System.out.println("\nClassifier: " + ClassificationMethod.valueOf(selectedClassifier).printName);
+			System.out.println("  Multiruns: " + repetitions + "  Folds: " + folds + "  Model selection: " + performNestedCV + "\n");
+		}
+		classifierPrintName = ClassificationMethod.valueOf(selectedClassifier).printName;
+	}
+	
+	
+	private void runNestedCV() {
 		
-		} else if (classRunner.selectedClassifier == ClassificationMethod.KNN.name()) {
-			classResult = classRunner.runNestedCVkNN(samples, repetitions);
+		if (selectedClassifier == ClassificationMethod.RandomForest.name()) {
+			classResult = runNestedCVRandomForest();
+			
+		} else if (selectedClassifier == ClassificationMethod.DecisionTree.name()) {
+			classResult = runNestedCVJ48();
 		
-		} else if (classRunner.selectedClassifier == RegressionMethod.GaussianProcesses.name()) {
-			classResult = classRunner.runNestedCVGaussianProcesses(samples, repetitions);
+		} else if (selectedClassifier == ClassificationMethod.SVM_rbf.name()) {
+			classResult = runNestedCVLIBSVM();
+		
+		} else if (selectedClassifier == ClassificationMethod.SVM_linear.name()) {
+			classResult = runNestedCVLIBLINEAR();
+		
+		} else if (selectedClassifier == ClassificationMethod.NaiveBayes.name()) {
+			classResult = runNestedCVNaiveBayes();
+	
+		} else if (selectedClassifier == ClassificationMethod.Kstar.name()) {
+			//classResult = classRunner.runNestedCVKStar(samples);
+			classResult = runNestedCVkNN();
+		
+		} else if (selectedClassifier == ClassificationMethod.KNN.name()) {
+			classResult = runNestedCVkNN();
+		
+		} else if (selectedClassifier == RegressionMethod.GaussianProcesses.name()) {
+			classResult = runNestedCVGaussianProcesses();
 		
 		} else {
 			System.out.println("Please select a valid classifier.");
 			System.exit(1);
 		}
-		String classifierName = ClassificationMethod.valueOf(classRunner.selectedClassifier).printName;
+	}
+	
+	private synchronized void writeEvaluationResults() {
+		
 		if (summaryFile == null) {
-			classRunner.printSummary2Console(classResult, classifierName, samples);
+			printSummary2Console();
+			
 		} else {
-			classRunner.printSummary2File(classResult, classifierName, samples, new File(summaryFile));
+			printSummary2File();
 		}
+		
 		if (classProbabilityFile != null) {
-			classRunner.writeClassProbabilityFile(classResult, classifierName, samples);
+			writeClassProbabilityFile();
 		}
 	}
-
-	private void printConfiguration() {
-		System.out.println("repetitions: " + repetitions + ", inner repetitions: " + innerRepetitions + ", classifier: " + selectedClassifier + ", InFile: " + strFile + ", folds: " + folds);
-	}
-
+	
 	/**
 	 * read file
 	 * @author Florian Topf
@@ -178,7 +250,7 @@ public class WekaClassifier {
 	 */
 	private Instances readData() {
 		
-		if (!strFile.contains("libsvm")) {
+		if (!featureFile.contains("libsvm")) {
 			return readDataFromARFF();
 		}
 		else {
@@ -194,7 +266,7 @@ public class WekaClassifier {
 	private Instances readDataFromARFF() {
 		BufferedReader dataReader = null;
 		try {
-			dataReader = new BufferedReader(new FileReader(new File(strFile)));
+			dataReader = new BufferedReader(new FileReader(new File(featureFile)));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -221,7 +293,7 @@ public class WekaClassifier {
 		Instances trainInsts = null;
 		try {
 			LibSVMLoader lsl = new LibSVMLoader();
-			lsl.setSource(new File(strFile));
+			lsl.setSource(new File(featureFile));
 			trainInsts = lsl.getDataSet();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -276,6 +348,7 @@ public class WekaClassifier {
 		final Option optNestedCV = (OptionBuilder.isRequired(false).withDescription("Nested cross-validation (default = true)").hasArg(true).create("n"));
 		final Option optSummaryFile = (OptionBuilder.isRequired(false).withDescription("Results file").hasArg(true).create("s"));
 		final Option optClassProbFile = (OptionBuilder.isRequired(false).withDescription("Class probability file").hasArg(true).create("p"));
+		final Option optMultithreading = (OptionBuilder.isRequired(false).withDescription("Enable multithreading").hasArg(true).create("t"));
 		options.addOption(optSDF);
 		options.addOption(optFile);
 		options.addOption(optFolds);
@@ -284,6 +357,7 @@ public class WekaClassifier {
 		options.addOption(optNestedCV);
 		options.addOption(optSummaryFile);
 		options.addOption(optClassProbFile);
+		options.addOption(optMultithreading);
 		return options;
 	}
 
@@ -316,7 +390,7 @@ public class WekaClassifier {
 			}
 			if (lvCmd.hasOption("f")) {
 				try {
-					strFile = new String(lvCmd.getOptionValue("f"));
+					featureFile = new String(lvCmd.getOptionValue("f"));
 				} catch (Exception e) {
 					System.exit(1);
 				}
@@ -364,6 +438,13 @@ public class WekaClassifier {
 					System.exit(1);
 				}
 			}
+			if (lvCmd.hasOption("t")) {
+				try {
+					multithreading = new Boolean(lvCmd.getOptionValue("t"));
+				} catch (Exception e) {
+					System.exit(1);
+				}
+			}
 		} catch (final Exception e) {
 			e.printStackTrace();
 			System.err.println("Please check your input.");
@@ -371,7 +452,7 @@ public class WekaClassifier {
 		}
 	}
 	
-	private static void write2FileOrConsole (String line, BufferedWriter bw) {
+	private synchronized void write2FileOrConsole (String line, BufferedWriter bw) {
 		if (bw == null) {
 			System.out.println(line);
 		} else {
@@ -383,11 +464,11 @@ public class WekaClassifier {
 		}
 	}
 	
-	private void printSummary2File(WekaClassifierResult[] classResult, String classifier, Instances data, File summaryFile) {
+	private synchronized void printSummary2File() {
 		
 		try {
-			BufferedWriter summaryWriter = new BufferedWriter(new FileWriter(summaryFile, true));
-			printSummary(classResult, classifier, data, summaryWriter);
+			BufferedWriter summaryWriter = new BufferedWriter(new FileWriter(new File(summaryFile)));
+			printSummary(summaryWriter);
 			summaryWriter.flush();
 			summaryWriter.close();
 		} catch (IOException e) {
@@ -395,12 +476,12 @@ public class WekaClassifier {
 		}
 	}
 	
-	private void printSummary2Console(WekaClassifierResult[] classResult, String classifier, Instances data) {
-		printSummary(classResult, classifier, data, null);
+	private synchronized void printSummary2Console() {
+		printSummary(null);
 	}
 
-	private void printSummary(WekaClassifierResult[] classResult, String classifier, Instances data, BufferedWriter summaryWriter) {
-		write2FileOrConsole("#" + classifier, summaryWriter);
+	private void printSummary(BufferedWriter summaryWriter) {
+		write2FileOrConsole("#" + classifierPrintName, summaryWriter);
 		write2FileOrConsole("#AvgAreaUnderROC" + "\tAvgFMeasure" + "\tAvgMatthewsCorrelation" + "\tAvgAccuracy" + "\tAvgBalancedAccuracy", summaryWriter);
 
 		for (int i=0; i<classResult.length; i++) {
@@ -410,7 +491,7 @@ public class WekaClassifier {
 		write2FileOrConsole("", summaryWriter);
 	}
 	
-	private void writeClassProbabilityFile(WekaClassifierResult[] classResult, String classifier, Instances data) {
+	private void writeClassProbabilityFile() {
 		
 		// write only the class probabilities from first multirun
 		int numClasses = classResult[0].classProbabilities[0].length;
@@ -419,7 +500,7 @@ public class WekaClassifier {
 		
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(classProbabilityFile)));
-			bw.write("#" + classifier + "\n");
+			bw.write("#" + classifierPrintName + "\n");
 			
 			for (int i=0; i<classResult.length; i++) {
 				
@@ -560,7 +641,8 @@ public class WekaClassifier {
 	 * @param randomForest
 	 * @param data
 	 */
-	private WekaClassifierResult[] runNestedCVRandomForest(Instances data, int repetitions) {
+	private WekaClassifierResult[] runNestedCVRandomForest() {
+		
 		final RandomForest randomForest = new RandomForest();
 		final int maxFeatures = ((int) Math.sqrt(data.numAttributes()));
 		randomForest.setNumTrees(10);
@@ -618,12 +700,7 @@ public class WekaClassifier {
 					if (!silent) System.out.println("could not create summary");
 				}
 				
-				if (showEstimatedDuration) {
-					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
-					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
-					System.out.println("  time remaining: " + df.format(estimatedTime) + "s");
-				}
-				run++;
+				run = showEstimatedDuration(systemMillisBegin, run);
 			}
 			if (writeModelFile) {
 				buildClassifier(randomForest, data);
@@ -638,7 +715,7 @@ public class WekaClassifier {
 	 * @param randomForest
 	 * @param data
 	 */
-	private WekaClassifierResult[] runNestedCVJ48(Instances data, int repetitions) {
+	private WekaClassifierResult[] runNestedCVJ48() {
 		final J48 decisionTree = new J48();
 		final long systemMillisBegin = System.currentTimeMillis();
 		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
@@ -697,12 +774,7 @@ public class WekaClassifier {
 					if (!silent) System.out.println("could not create summary");
 				}
 
-				if (showEstimatedDuration) {
-					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
-					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
-					System.out.println("  time remaining: " + df.format(estimatedTime) + "s");
-				}
-				run++;
+				run = showEstimatedDuration(systemMillisBegin, run);
 			}
 		}
 		if (writeModelFile) {
@@ -717,7 +789,7 @@ public class WekaClassifier {
 	 * @param randomForest
 	 * @param data
 	 */
-	private WekaClassifierResult[] runNestedCVLIBSVM(Instances data, int repetitions) {
+	private WekaClassifierResult[] runNestedCVLIBSVM() {
 		final LibSVM libsvm = new LibSVM();
 		
 		// enable conversion of decision values to probability estimates
@@ -803,12 +875,7 @@ public class WekaClassifier {
 					if (!silent) System.out.println("could not create summary");
 				}
 				
-				if (showEstimatedDuration) {
-					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
-					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
-					System.out.println("  time remaining: " + df.format(estimatedTime) + "s");
-				}
-				run++;
+				run = showEstimatedDuration(systemMillisBegin, run);
 			}
 		}
 		if (writeModelFile) {
@@ -830,7 +897,7 @@ public class WekaClassifier {
 	 * @param randomForest
 	 * @param data
 	 */
-	private WekaClassifierResult[] runNestedCVLIBLINEAR(Instances data, int repetitions) {
+	private WekaClassifierResult[] runNestedCVLIBLINEAR() {
 		final LibLINEAR libsvm = new LibLINEAR();
 		
 		// enable conversion of decision values to probability estimates (requires L2-regularized logistic regression SVM)
@@ -898,12 +965,7 @@ public class WekaClassifier {
 					if (!silent) System.out.println("could not create summary");
 				}
 
-				if (showEstimatedDuration) {
-					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
-					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
-					System.out.println("  time remaining: " + df.format(estimatedTime) + "s");
-				}
-				run++;
+				run = showEstimatedDuration(systemMillisBegin, run);
 			}
 		}
 		if (writeModelFile) {
@@ -920,7 +982,7 @@ public class WekaClassifier {
 	 * @param repetitions
 	 * @return
 	 */
-	private WekaClassifierResult[] runNestedCVGaussianProcesses(Instances data, int repetitions) {
+	private WekaClassifierResult[] runNestedCVGaussianProcesses() {
 		final GaussianProcesses gaussianProcesses = new GaussianProcesses();
 		final long systemMillisBegin = System.currentTimeMillis();
 		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
@@ -974,12 +1036,7 @@ public class WekaClassifier {
 					if (!silent) System.out.println("could not create summary");
 				}
 
-				if (showEstimatedDuration) {
-					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
-					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
-					System.out.println("  time remaining: " + df.format(estimatedTime) + "s");
-				}
-				run++;
+				run = showEstimatedDuration(systemMillisBegin, run);
 			}
 		}
 		if (writeModelFile) {
@@ -994,7 +1051,7 @@ public class WekaClassifier {
 	 * @param randomForest
 	 * @param data
 	 */
-	private WekaClassifierResult[] runNestedCVkNN(Instances data, int repetitions) {
+	private WekaClassifierResult[] runNestedCVkNN() {
 		final IBk kNN = new IBk();
 		final long systemMillisBegin = System.currentTimeMillis();
 		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
@@ -1046,12 +1103,7 @@ public class WekaClassifier {
 					if (!silent) System.out.println("could not create summary");
 				}
 				
-				if (showEstimatedDuration) {
-					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
-					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
-					System.out.println("  time remaining: " + df.format(estimatedTime) + "s");
-				}
-				run++;
+				run = showEstimatedDuration(systemMillisBegin, run);
 			}
 		}
 		if (writeModelFile) {
@@ -1066,7 +1118,7 @@ public class WekaClassifier {
 	 * @param randomForest
 	 * @param data
 	 */
-	private WekaClassifierResult[] runNestedCVNaiveBayes(Instances data, int repetitions) {
+	private WekaClassifierResult[] runNestedCVNaiveBayes() {
 		final NaiveBayes naiveBayes = new NaiveBayes();
 		final long systemMillisBegin = System.currentTimeMillis();
 		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
@@ -1099,12 +1151,7 @@ public class WekaClassifier {
 					if (!silent) System.out.println("could not create summary");
 				}
 				
-				if (showEstimatedDuration) {
-					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
-					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
-					System.out.println("  time remaining: " + df.format(estimatedTime) + "s");
-				}
-				run++;
+				run = showEstimatedDuration(systemMillisBegin, run);
 			}
 		}
 		if (writeModelFile) {
@@ -1119,7 +1166,8 @@ public class WekaClassifier {
 	 * @param randomForest
 	 * @param data
 	 */
-	private WekaClassifierResult[] runNestedCVKStar(Instances data, int repetitions) {
+	private WekaClassifierResult[] runNestedCVKStar() {
+		
 		final KStar pls = new KStar();
 		final long systemMillisBegin = System.currentTimeMillis();
 		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
@@ -1151,12 +1199,7 @@ public class WekaClassifier {
 					if (!silent) System.out.println("could not create summary");
 				}
 				
-				if (showEstimatedDuration) {
-					double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
-					double estimatedTime = getEstimatedTimeInseconds(systemMillisBegin, System.currentTimeMillis(), percentDone);
-					System.out.println("  time remaining: " + df.format(estimatedTime) + "s");
-				}
-				run++;
+				run = showEstimatedDuration(systemMillisBegin, run);
 			}
 		}
 		if (writeModelFile) {
@@ -1164,6 +1207,24 @@ public class WekaClassifier {
 			writeModelFile(pls);
 		}
 		return classResults;
+	}
+	
+	private synchronized int showEstimatedDuration(long startTime, int run) {
+		
+		if (showEstimatedDuration) {
+			double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
+			double estimatedTime = getEstimatedTimeInseconds(startTime, System.currentTimeMillis(), percentDone);
+			if (multithreading) {
+				String classifierName = ClassificationMethod.valueOf(selectedClassifier).printName;
+				if (estimatedTime == 0) {
+					System.out.println("  " + classifierName + " has finished.");
+				} else 
+					System.out.println("  " + classifierName + ": " + df.format(estimatedTime) + " sec remaining...");
+			} else {
+				System.out.println("  time remaining: " + df.format(estimatedTime) + " sec");
+			}
+		}
+		return(++run);
 	}
 
 	/**

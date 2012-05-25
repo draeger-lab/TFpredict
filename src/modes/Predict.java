@@ -344,7 +344,7 @@ public class Predict {
 			for (int i=0; i<inputSeq.length; i++) {
 				fastaSeq[i+1] = inputSeq[i];
 			}
-			BasicTools.writeArrayToFile(fastaSeq, input_file);
+			BasicTools.writeArray2File(fastaSeq, input_file);
 		}
 	}
 	

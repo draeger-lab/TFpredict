@@ -70,7 +70,7 @@ public class BasicTools {
 		return(res);
 	}
 	
-	public static void writeSplittedArrayListToFile(ArrayList<String[]> arraylist, String outfile) {
+	public static void writeSplittedArrayList2File(ArrayList<String[]> arraylist, String outfile) {
 		
 		ArrayList<String> collapsedList = new ArrayList<String>();
 		for (int i=1; i<arraylist.size(); i++) {
@@ -80,16 +80,21 @@ public class BasicTools {
 			}
 			collapsedList.add(currLine.toString().trim());
 		}
-		writeArrayListToFile(collapsedList, outfile);
+		writeArrayList2File(collapsedList, outfile);
 	}
 	
-	public static void writeArrayListToFile(ArrayList<String> arraylist, String outfile) {
+	public static void writeArrayList2File(ArrayList<String> arraylist, String outfile) {
 		
 		String[] array = arraylist.toArray(new String[] {});
-		writeArrayToFile(array, outfile);
+		writeArray2File(array, outfile);
 	}
 	
-	public static void writeArrayToFile(String[] array, String outfile) {
+	public static void writeString2File(String lines, String outfile) {
+		
+		writeArray2File(lines.split("\\n"), outfile);
+	}
+	
+	public static void writeArray2File(String[] array, String outfile) {
 		
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
@@ -278,6 +283,24 @@ public class BasicTools {
 		return (keyValueMap);
 	}
 	
+	
+	public static String readFile2String(String infile) {
+		
+		String lines = "";
+		String line;
+		
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(infile));
+			
+			while ((line = br.readLine()) != null) {
+				 lines += (line + "\n");
+			}
+		}
+		catch (IOException ioe) {
+			ioe.printStackTrace();
+		}	
+		return lines;
+	}
 	
 	public static ArrayList<String[]> readFile2ListSplitLines(String infile) {
 		
