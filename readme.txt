@@ -2,7 +2,7 @@
   -----------------------------------------------------------------------------------
   TFpredict - Identification and structural characterization of transcription factors
   -----------------------------------------------------------------------------------
-  (version 1.0, Copyright (C) 2012 Florian Topf and Johannes Eichner)
+  (version 1.1, Copyright (C) 2012 Florian Topf and Johannes Eichner)
 
 
   Contents:
@@ -85,12 +85,18 @@ ________________________________________________________________________________
 
   OPTIONS : 	-sabineOutfile  <output_filename>	Output file for post-processing of the results with SABINE.
 
-            	-species        <organism_name>        	Organism name (e.g., Homo sapiens). See list of supported organisms:
-							http://www.cogsys.cs.uni-tuebingen.de/software/SABINE/doc/organism_list.txt
+            	-species        <organism_name>		Organism name (e.g., Homo sapiens). See list of supported organisms:
+													http://www.cogsys.cs.uni-tuebingen.de/software/SABINE/doc/organism_list.txt
 
-            	-iprscanPath    <path_to_iprscan>   	Path to "iprscan" executable from local InterProScan installation.
-							Only needed if you have a local installation of InterProScan which 
-							shall be used by TFpredict.
+				-tfClassifier <classifier_name>     Classifier used for TF/non-TF classification
+													possible values: SVM_linear, NaiveBayes, KNN, Kstar
+				
+				-superClassifier <classifier_name>  Classifier used for superclass prediction
+													possible values: SVM_linear, NaiveBayes, KNN, Kstar	
+
+            	-iprscanPath    <path_to_iprscan>   Path to "iprscan" executable from local InterProScan installation.
+													Only needed if you have a local installation of InterProScan which 
+													shall be used by TFpredict.
 
   A full documentation including a tutorial is available at the supplementary website of TFpredict:
   http://www.cogsys.cs.uni-tuebingen.de/software/TFpredict/ 
@@ -144,9 +150,9 @@ ________________________________________________________________________________
 
   @UNPUBLISHED{eichner2012,
 	author = {Johannes Eichner and Florian Topf and Andreas Dr\"ager and Clemens Wrzodek 
-		  and Adrian Schr\"oder Jochen Supper and Dierk Wanke and Andreas Zell},
-	title = {{TFpredict and SABINE: sequence-based prediction of structural and functional characteristics 
-	          of transcription factors using supervised machine learning methods}},
+		  	  and Dierk Wanke and Andreas Zell},
+	title = {{TFpredict and SABINE: Support Vector Machines-based prediction of structural and functional characteristics 
+	          of transcription factors}},
 	note = {Submitted to Bioinformatics},
 	year = {2012}
   }
@@ -158,6 +164,6 @@ ________________________________________________________________________________
   ---------------------
 
   To obtain more detailed information about TFpredict, see the website: http://www.cogsys.cs.uni-tuebingen.de/software/TFpredict/ 
-  If you have any further questions, please contact me by e-mail:    johannes.eichner@uni-tuebingen.de
+  If you have any further questions, please contact me by e-mail:    	johannes.eichner@uni-tuebingen.de
 
 

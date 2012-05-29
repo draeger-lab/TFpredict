@@ -46,7 +46,7 @@ public class TFpredictMain {
 	private static boolean trainMode = false;
 	
 	private static final int[] validClassifierIdx = new int[] {3,4,5,6}; 
-	private static final String version = "1.0";
+	private static final String version = "1.1";
 	
 	private static final String sabineSpeciesList = "organism_list.txt"; 
 	
@@ -267,6 +267,16 @@ public class TFpredictMain {
 		} else {
 			System.out.println("  SABINE output file:     not generated.");
 		} 
+		String tfClassifier = ClassificationMethod.valueOf("SVM_linear").printName; 
+		if (cmd.hasOption("tfClassifier")) {
+			tfClassifier = ClassificationMethod.valueOf(cmd.getOptionValue("tfClassifier")).printName; 
+		}
+		String superClassifier = ClassificationMethod.valueOf("SVM_linear").printName; 
+		if (cmd.hasOption("superClassifier")) {
+			superClassifier = ClassificationMethod.valueOf(cmd.getOptionValue("superClassifier")).printName; 
+		}
+		System.out.println("  TF/non-TF classifier:   " + tfClassifier);
+		System.out.println("  Superclass classifier:  " + superClassifier);
 	}
 	
  	public static void checkClassifier(String classifierType, String givenClassifier) {
