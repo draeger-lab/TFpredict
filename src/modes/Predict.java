@@ -85,7 +85,7 @@ public class Predict {
 
 	// static arguments required by TFpredict
 	static String iprpath = "";
-	static String tfClassifier_file = "models/tfPred/knn.model";
+	static String tfClassifier_file = "models/tfPred/svmLinear.model";
 	static String superClassifier_file = "models/superPred/svmLinear.model";
 	static String relDomainsTF_file = "domainsTFpred.txt";
 	static String relDomainsSuper_file = "domainsSuperPred.txt";
