@@ -303,6 +303,10 @@ public class BasicTools {
 	}
 	
 	public static ArrayList<String[]> readFile2ListSplitLines(String infile) {
+		return readFile2ListSplitLines(infile, false);
+	}
+	
+	public static ArrayList<String[]> readFile2ListSplitLines(String infile, boolean useTokenizer) {
 		
 		ArrayList<String[]> splittedLines = new ArrayList<String[]>();
 		String line = null;
@@ -316,7 +320,18 @@ public class BasicTools {
 				 if (line.trim().equals("")) continue;
 				 
 				 // add splitted line
-				 splittedLines.add(line.split("\t"));
+				 if (useTokenizer) {
+					 StringTokenizer strtok = new StringTokenizer(line);
+					 int numValues = strtok.countTokens();
+					 String[] currEntries = new String[numValues];
+					 for (int t=0; t < numValues; t++) {
+						 currEntries[t] = strtok.nextToken();
+					 }
+					 splittedLines.add(currEntries);
+					 
+				 } else {
+					 splittedLines.add(line.split("\t"));
+				 }
 			}		 
 			 br.close();
 		}
@@ -422,6 +437,39 @@ public class BasicTools {
 			System.out.println("> " + header);
 			System.out.println(sequences.get(header));
 		}
+	}
+	
+	
+	public static String[] runCommand(String cmd) {
+		return runCommand(cmd, true);
+	}
+	
+	public static String[] runCommand(String cmd, boolean parseOutput) {
+		
+		String[] consoleOutput = null;
+		
+		try {
+			Process proc = Runtime.getRuntime().exec(cmd);
+			proc.waitFor();
+			
+			if (parseOutput) {
+				ArrayList<String> stdout = new ArrayList<String>();
+				String line;
+				BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			
+				while ((line = br.readLine()) != null) {
+					stdout.add(line.trim());
+				}
+				consoleOutput = stdout.toArray(new String[]{});
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		return consoleOutput;
 	}
 }
 

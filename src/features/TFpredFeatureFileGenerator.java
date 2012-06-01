@@ -186,6 +186,7 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 		
 		// remove domains which are not contained in current version of InterPro
 		filterCurrentDomainsInSeq2DomMap();
+		int[] numSeqPerClass = getNumSeqPerClass(true);
 		
 		BasicTools.writeArrayList2File(relevantDomainIDs, basedir + relevantDomainsFile);
 		BasicTools.writeArrayList2File(filteredDomainIDs, basedir + filteredDomainsFile);
@@ -208,8 +209,8 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 			 System.out.println("Number of unique feature vectors:                  " + (numFeatVecRelevant[0] + numFeatVecRelevant[1]) + " / " + seq2domain.size());
 			 System.out.println("Number of feature vectors after significance test: " + (numFeatVecFiltered[0] + numFeatVecFiltered[1]) + " / " + (numFeatVecRelevant[0] + numFeatVecRelevant[1])  + "\n");
 			 
-			 System.out.println("Number of TF feature vectors after test:           " + numFeatVecFiltered[0] + " / " + numFeatVecRelevant[0]);
-			 System.out.println("Number of Non-TF feature vectors after test:       " + numFeatVecFiltered[1] + " / " + numFeatVecRelevant[1]);
+			 System.out.println("Number of TF feature vectors after test:           " + numFeatVecFiltered[0] + " / " + numFeatVecRelevant[0] + " / " + numSeqPerClass[0]);
+			 System.out.println("Number of Non-TF feature vectors after test:       " + numFeatVecFiltered[1] + " / " + numFeatVecRelevant[1] + " / " + numSeqPerClass[1]);
 		 }
 	}
 	
