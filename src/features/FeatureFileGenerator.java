@@ -59,6 +59,29 @@ public abstract class FeatureFileGenerator {
 		}
 	}
 	
+	protected int[] getNumSeqPerClass(boolean isTFnonTF) {
+		
+		int[] seqCounter; 
+		if (isTFnonTF) {
+			seqCounter = new int[2];
+		} else {
+			seqCounter = new int[5];
+		}
+		
+		for (String seq: seq2domain.keySet().toArray(new String[]{})) {
+			if (isTFnonTF) {
+				if (seq2domain.get(seq).isTF) {
+					seqCounter[0]++;
+				} else {
+					seqCounter[1]++;
+				}
+				
+			} else {
+				seqCounter[seq2domain.get(seq).superclass]++;
+			}
+		}
+		return seqCounter;
+	}
 	
 	protected static ArrayList<String> downloadAllDomainIDs() {
 		
@@ -87,14 +110,14 @@ public abstract class FeatureFileGenerator {
 		// generate feature file for TF prediction
 		String iprscanResultFileTF =  dataDir + "tf_pred/interpro_files/TF.fasta.out"; 
 		String iprscanResultsFileNonTF = dataDir + "tf_pred/interpro_files/NonTF.fasta.out";
-		String tfFeatureFile = dataDir + "tf_pred/feature_files/libsvm_featurefile.txt";
+		String tfFeatureFile = dataDir + "tf_pred/feature_files/latest/libsvm_featurefile.txt";
 		TFpredFeatureFileGenerator tfFeatFileGenerator = new TFpredFeatureFileGenerator(iprscanResultFileTF, iprscanResultsFileNonTF, tfFeatureFile);
 		tfFeatFileGenerator.writeFeatureFile();
 		
 	    // generate feature file for superclass prediction
 		String fastaFileSuper =  dataDir + "super_pred/fasta_files/superclassTF.fasta"; 
 		String iprscanResultFileSuper =  dataDir + "super_pred/interpro_files/superclassTF.fasta.out"; 
-		String superFeatureFile = dataDir + "super_pred/feature_files/libsvm_featurefile.txt";
+		String superFeatureFile = dataDir + "super_pred/feature_files/latest/libsvm_featurefile.txt";
 		SuperPredFeatureFileGenerator superFeatFileGenerator = new SuperPredFeatureFileGenerator(fastaFileSuper, iprscanResultFileSuper, superFeatureFile);
 		superFeatFileGenerator.writeFeatureFile();	
 	}
