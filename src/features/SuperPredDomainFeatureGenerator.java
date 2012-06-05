@@ -15,18 +15,18 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-public class SuperPredFeatureFileGenerator extends FeatureFileGenerator {
+public class SuperPredDomainFeatureGenerator extends DomainFeatureGenerator {
 
 	private String fastaFileTF = "";
 
-	public SuperPredFeatureFileGenerator(String fastaFileTF, String iprscanResultFileTF, String libsvmOutfile) {
+	public SuperPredDomainFeatureGenerator(String fastaFileTF, String iprscanResultFileTF, String libsvmOutfile) {
 		this.fastaFileTF = fastaFileTF;
 		this.iprscanResultFileTF = iprscanResultFileTF;
 		this.libsvmOutfile = libsvmOutfile;
 		this.basedir = new File(libsvmOutfile).getParent() + "/";
 	}
 	
-	public SuperPredFeatureFileGenerator() {
+	public SuperPredDomainFeatureGenerator() {
 	}
 	
 	private void parseArguments(String[] args) {
@@ -97,14 +97,7 @@ public class SuperPredFeatureFileGenerator extends FeatureFileGenerator {
 		
 		// read superclass for each TF sequence
 		HashMap<String, String> fastaFiles = BasicTools.readFASTA(fastaFileTF, true);
-		HashMap<String, Integer> tf2superclass = new HashMap<String, Integer>();
-		for (String header: fastaFiles.keySet()) {
-			String[] splittedHeader = header.split("\\|");
-			String seqID = splittedHeader[1];
-			String classID = splittedHeader[4];
-			int superclass = Integer.parseInt(classID.substring(0, 1));
-			tf2superclass.put(seqID, superclass);
-		}
+		HashMap<String, Integer> tf2superclass = getLabelsFromFastaHeaders(fastaFiles.keySet(), true, true);
 		
 		// add superclass to IprEntry objects
 		int[] tfsPerClassCounter = new int[] {0,0,0,0,0};
@@ -142,13 +135,13 @@ public class SuperPredFeatureFileGenerator extends FeatureFileGenerator {
 			 System.out.println("Number of other feature vectors:                   " + numFeatVecRelevant[0] + " / " + numFeatVec + "\n");
 		 }
 	}
-		
+			
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		
-		SuperPredFeatureFileGenerator featureFileGenerator = new SuperPredFeatureFileGenerator();
+		SuperPredDomainFeatureGenerator featureFileGenerator = new SuperPredDomainFeatureGenerator();
 		
 		featureFileGenerator.parseArguments(args);
 	}

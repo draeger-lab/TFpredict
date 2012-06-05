@@ -78,8 +78,11 @@ public class TFpredictMain {
 		CommandLineParser cmdparser = new PosixParser();
 		try {
 			cmd = cmdparser.parse(options, args);
+			
 		} catch (ParseException e) {
-			e.printStackTrace();
+			printCopyright();
+			System.out.println("Error. Invalid argument.\n");
+			usage();
 		}
 		
 		if (galaxyMode) {
@@ -226,7 +229,7 @@ public class TFpredictMain {
 	}
 	
 	private static void checkArguments(CommandLine cmd) {
-		
+
 		// check if input FASTA file exists
 		if (!new File(cmd.getOptionValue("fasta")).exists()) {
 			System.out.println("  Error. Input FASTA file not found.");

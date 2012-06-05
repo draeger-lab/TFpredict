@@ -119,6 +119,15 @@ public class BasicTools {
 		return(res);
 	}
 	
+	public static int[] Integer2int(Integer[] intArray) {
+		
+		int[] res = new int[intArray.length];
+		for (int i=0; i<res.length; i++) {
+			res[i] = intArray[i].intValue();
+		}
+		return(res);
+	}
+	
 	public static double[] Double2double(Double[] doubleArray) {
 		
 		double[] res = new double[doubleArray.length];
@@ -202,7 +211,12 @@ public class BasicTools {
 			if (sequences.containsKey(header)) {
 				sequences.put(duplicatedHeaderKey, "");
 			}
-			sequences.put(header, curr_seq.toString());
+			String seq = curr_seq.toString();
+			if (!seq.matches("^[A-IK-NP-Za-ik-np-z\\s]*$")) {
+				System.out.println("\nWarning. Given protein sequence \"" + header + "\" contains invalid symbols.");
+			}
+			
+			sequences.put(header, seq);
 			
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -210,6 +224,13 @@ public class BasicTools {
 		return(sequences);
 	}
 	
+	
+	public static void writeFASTA(String header, String sequence, String output_file) {
+		
+		HashMap<String, String> sequenceMap = new HashMap<String, String>();
+		sequenceMap.put(header, sequence);
+		writeFASTA(sequenceMap, output_file);
+	}
 	
 	public static void writeFASTA(HashMap<String, String> sequences, String output_file) {
 		
@@ -470,6 +491,31 @@ public class BasicTools {
 		}
 		
 		return consoleOutput;
+	}
+	
+	public static String collapseStringArray(String[] stringArray) {
+		
+		return collapseStringArray(stringArray, "\t");
+	}
+	
+	public static String collapseStringArray(String[] stringArray, String separator) {
+		
+		StringBuffer stringBuffer = new StringBuffer(stringArray[0]);
+		for (int i=1; i<stringArray.length; i++) {
+			stringBuffer.append(separator + stringArray[i]);
+		}
+		return stringBuffer.toString();
+	}
+
+	public static int[] getAllIndicesOf(String string, String substring) {
+		
+		ArrayList<Integer> indices = new ArrayList<Integer>();
+		int index = string.indexOf(substring);
+		while(index >= 0) {
+			indices.add(index);
+			index = string.indexOf(substring, index+1);
+		}
+		return Integer2int(indices.toArray(new Integer[]{}));
 	}
 }
 

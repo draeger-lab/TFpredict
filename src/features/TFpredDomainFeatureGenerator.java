@@ -23,7 +23,7 @@ import org.apache.commons.cli.PosixParser;
 
 
 
-public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
+public class TFpredDomainFeatureGenerator extends DomainFeatureGenerator{
 
 	/**
 	 * @param args
@@ -42,14 +42,14 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 	
 	private ArrayList<String> filteredDomainIDs = new ArrayList<String>();
 
-	public TFpredFeatureFileGenerator(String iprscanResultFileTF, String iprscanResultFileNonTF, String libsvmOutfile) {
+	public TFpredDomainFeatureGenerator(String iprscanResultFileTF, String iprscanResultFileNonTF, String libsvmOutfile) {
 		this.iprscanResultFileTF = iprscanResultFileTF;
 		this.iprscanResultFileNonTF = iprscanResultFileNonTF;
 		this.libsvmOutfile = libsvmOutfile;
 		this.basedir = new File(libsvmOutfile).getParent() + "/";
 	}
 	
-	public TFpredFeatureFileGenerator() {
+	public TFpredDomainFeatureGenerator() {
 	}
 
 	private void parseArguments(String[] args) {
@@ -217,7 +217,7 @@ public class TFpredFeatureFileGenerator extends FeatureFileGenerator{
 	
 	public static void main(String[] args) {
 		
-		TFpredFeatureFileGenerator featureFileGenerator = new TFpredFeatureFileGenerator();
+		TFpredDomainFeatureGenerator featureFileGenerator = new TFpredDomainFeatureGenerator();
 		featureFileGenerator.parseArguments(args);
 		featureFileGenerator.writeFeatureFile();
 	}

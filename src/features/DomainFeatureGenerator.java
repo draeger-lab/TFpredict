@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
-public abstract class FeatureFileGenerator {
+public abstract class DomainFeatureGenerator {
 	
 	protected static final String domainDescriptionURL = "ftp://ftp.ebi.ac.uk/pub/databases/interpro/names.dat";
 	protected static final String relevantDomainsFile = "relevant_domains.txt";
@@ -98,6 +98,40 @@ public abstract class FeatureFileGenerator {
 		return(allDomainIDs);
 	}
 	
+	public static HashMap<String, Integer> getLabelsFromFastaHeaders(Set<String> fastaFileHeaders, boolean superPred, boolean useUniprotIDasKey) {
+		
+		HashMap<String, Integer> tf2superclass = new HashMap<String, Integer>();
+		for (String header: fastaFileHeaders) {
+			
+			// use either UniProt ID or full Header (with label) as sequence ID
+			String[] splittedHeader = header.split("\\|");
+			String seqID = header;
+			if (useUniprotIDasKey) { 
+				seqID = splittedHeader[2];
+			}
+			
+			String labelField;
+			int superclass = 0;
+			if (superPred) {
+				labelField = splittedHeader[4];
+				superclass = Integer.parseInt(labelField.substring(0, 1));
+			
+			} else {
+				String classLabel = splittedHeader[1];
+				if (classLabel.equals("TF")) {
+					superclass = 1;
+				} else if (classLabel.equals("NonTF")) {
+					superclass = -1;
+				} else {
+					System.out.println("Error. Unknown label in FASTA header: " + classLabel);
+					System.exit(0);
+				}
+			}
+			
+			tf2superclass.put(seqID, superclass);
+		}
+		return(tf2superclass);
+	}
 	
 	public static void main(String[] args) {
 		
@@ -111,14 +145,14 @@ public abstract class FeatureFileGenerator {
 		String iprscanResultFileTF =  dataDir + "tf_pred/interpro_files/TF.fasta.out"; 
 		String iprscanResultsFileNonTF = dataDir + "tf_pred/interpro_files/NonTF.fasta.out";
 		String tfFeatureFile = dataDir + "tf_pred/feature_files/latest/libsvm_featurefile.txt";
-		TFpredFeatureFileGenerator tfFeatFileGenerator = new TFpredFeatureFileGenerator(iprscanResultFileTF, iprscanResultsFileNonTF, tfFeatureFile);
+		TFpredDomainFeatureGenerator tfFeatFileGenerator = new TFpredDomainFeatureGenerator(iprscanResultFileTF, iprscanResultsFileNonTF, tfFeatureFile);
 		tfFeatFileGenerator.writeFeatureFile();
 		
 	    // generate feature file for superclass prediction
 		String fastaFileSuper =  dataDir + "super_pred/fasta_files/superclassTF.fasta"; 
 		String iprscanResultFileSuper =  dataDir + "super_pred/interpro_files/superclassTF.fasta.out"; 
 		String superFeatureFile = dataDir + "super_pred/feature_files/latest/libsvm_featurefile.txt";
-		SuperPredFeatureFileGenerator superFeatFileGenerator = new SuperPredFeatureFileGenerator(fastaFileSuper, iprscanResultFileSuper, superFeatureFile);
+		SuperPredDomainFeatureGenerator superFeatFileGenerator = new SuperPredDomainFeatureGenerator(fastaFileSuper, iprscanResultFileSuper, superFeatureFile);
 		superFeatFileGenerator.writeFeatureFile();	
 	}
 }
