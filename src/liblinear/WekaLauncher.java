@@ -46,7 +46,6 @@ public class WekaLauncher {
 	}
 
 	private static final String mergedResultsFileName = "evaluationResults.txt";
-	private static final String singleResultsFileSuffix = "_results.txt"; 
 	
 	static boolean silent = false;
 	static PrintStream defaultOutstream = System.out;
@@ -55,6 +54,7 @@ public class WekaLauncher {
     private String resultsDir = null;
     private String modelFileDir = null;
     private String classProbFileDir = null;
+    private String cvSplitFile = null;
 
     private boolean nestedCV = false;
 	private int multiruns = 1;
@@ -108,7 +108,7 @@ public class WekaLauncher {
 		}
 		if (resultsDir != null) {
 			argsClassifier.add("-s");
-			argsClassifier.add(resultsDir + classifierName + singleResultsFileSuffix);
+			argsClassifier.add(resultsDir + ClassificationMethod.valueOf(classifierName).modelFileName.replace(".model", ".eval"));
 		}
 		if (multithreading) {
 			argsClassifier.add("-t");
@@ -118,8 +118,60 @@ public class WekaLauncher {
 		return argsClassifier.toArray(new String[]{});
 	}
 	
+	private void saveWekaCVsplit() {
+		
+		// get unscaled libsvm feature vectors for each run and split
+		String[][][] splittedDatasets = new String[multiruns][][];
+		for (int run = 0; run < multiruns; run++) {
+			splittedDatasets[run] = WekaClassifier.getSplittedDataset(libsvmFeatureFile, folds, run);
+		}
+		
+		// read original feature file
+		ArrayList<String> featureVectors = BasicTools.readFile2List(libsvmFeatureFile, false);
+		
+		// reconstruct random splits and permutations performed by Weka during cross-validation
+		int [][][] cvSplit = new int[multiruns][folds][];
+		for (int run = 0; run < multiruns; run++) {
+			for (int fold = 0; fold < folds; fold++) {
+				int[] foldPerm = new int[splittedDatasets[run][fold].length];
+				for (int instIdx = 0; instIdx < splittedDatasets[run][fold].length; instIdx++) {
+					 String featVec = splittedDatasets[run][fold][instIdx].replaceAll("([0-9])\\.0\\s", "$1 ").replaceFirst("\\.0$", "");
+					 int idx = featureVectors.indexOf(featVec);
+					 if (idx != -1) {
+						 foldPerm[instIdx] = idx;
+					 
+					 // instance was not found in CV-split --> Error.
+					 } else {
+						 System.out.println("Error. Feature vector was not found.");
+						 System.out.println(featVec);
+						 System.exit(0);
+					 }
+				}
+				cvSplit[run][fold] = foldPerm;
+			}
+		}
+		
+		// write cross-validation split to file
+		ArrayList<String> cvSplitList = new ArrayList<String>();
+		for (int run = 0; run < multiruns; run++) {
+			for (int fold = 0; fold < folds; fold++) {
+				StringBuffer cvSplitLine = new StringBuffer("" + cvSplit[run][fold][0]);
+				for (int instIdx = 1; instIdx < cvSplit[run][fold].length; instIdx++) {
+					cvSplitLine.append(" " + cvSplit[run][fold][instIdx]);
+				}
+				cvSplitList.add(cvSplitLine.toString());
+			}
+		}
+		BasicTools.writeArrayList2File(cvSplitList, cvSplitFile);
+	}
 	
 	public double[][] runWekaClassifier(Boolean multithreading) {
+		
+		//save cross-validation split used by Weka
+		if (resultsDir != null) {
+			cvSplitFile = resultsDir + "cvSplit.txt";
+			saveWekaCVsplit();
+		}
 		
 		// run classifiers in separate threads
 		if (multithreading) {
@@ -145,6 +197,7 @@ public class WekaLauncher {
 				String[] argsClassifier = getClassifierArguments(classMethod.name(), multithreading);
 				try {
 					WekaClassifier.main(argsClassifier);
+					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -165,7 +218,7 @@ public class WekaLauncher {
 	private void mergeResultsFiles() {
 		String mergedClassResults = "";
 		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
-			String classResultFile = resultsDir + classMethod.name() + singleResultsFileSuffix;
+			String classResultFile = resultsDir + classMethod.modelFileName.replace(".model", ".eval");
 			mergedClassResults = mergedClassResults.concat(BasicTools.readFile2String(classResultFile));
 		}
 		BasicTools.writeString2File(mergedClassResults, resultsDir + mergedResultsFileName);
@@ -221,7 +274,7 @@ public class WekaLauncher {
 		public String call() throws Exception {
 
 			String modelFile = modelFileDir + ClassificationMethod.valueOf(classifierType).modelFileName;
-			String summaryFile = resultsDir + classifierType + singleResultsFileSuffix;
+			String summaryFile = resultsDir + ClassificationMethod.valueOf(classifierType).modelFileName.replace(".model", ".eval");
 			String classProbFile = classProbFileDir + ClassificationMethod.valueOf(classifierType).modelFileName.replace(".model", ".prob");
 
 			WekaClassifier classifier = new WekaClassifier(classifierType, libsvmFeatureFile, multiruns, folds, nestedCV, modelFile, summaryFile, classProbFile);
@@ -232,19 +285,16 @@ public class WekaLauncher {
 		}
 	}
 	
-	/*
+	
 	public static void main(String[] args) {
 		
-		WekaLauncher launcher;
-		if (args.length == 1) {
-			launcher = new WekaLauncher(args[0]);
-		} else {
-			launcher = new WekaLauncher(args[0], args[1]);
-		}
+		String feature_file = "/rahome/eichner/projects/tfpredict/data/super_pred/feature_files/latest/libsvm_featurefile_small.txt";
+		String results_dir = "/rahome/eichner/Desktop/tmp/class_dir/";
+		String model_dir = "/rahome/eichner/Desktop/tmp/model_dir/";
 		
+		WekaLauncher launcher = new WekaLauncher(feature_file, results_dir, model_dir, true);
 		launcher.printConfiguration();
-		launcher.runWekaClassifierSingle();
-
+		launcher.runWekaClassifier(false);
 	}
 	
 	private void printConfiguration() {
@@ -258,11 +308,11 @@ public class WekaLauncher {
 		if (classProbFileDir != null) {
 			System.out.println("Class Probability File(s): " + classProbFileDir);
 		}
-		System.out.println("Multiruns:                " + multiruns);
-		System.out.println("Folds:            	      " + folds);
-		System.out.println(nestedCV ? "Nested CV:             yes" : "Nested CV:             no");
+		System.out.println("Multiruns:                 " + multiruns);
+		System.out.println("Folds:            	   " + folds);
+		System.out.println(nestedCV ? "Nested CV:                 yes" : "Nested CV:                 no");
 	}
-	*/
+	
 }
 
 
