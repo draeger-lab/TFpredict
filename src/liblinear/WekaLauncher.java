@@ -133,8 +133,9 @@ public class WekaLauncher {
 		int [][][] cvSplit = new int[multiruns][folds][];
 		for (int run = 0; run < multiruns; run++) {
 			for (int fold = 0; fold < folds; fold++) {
-				int[] foldPerm = new int[splittedDatasets[run][fold].length];
-				for (int instIdx = 0; instIdx < splittedDatasets[run][fold].length; instIdx++) {
+				int foldSize = splittedDatasets[run][fold].length;
+				int[] foldPerm = new int[foldSize];
+				for (int instIdx = 0; instIdx < foldSize; instIdx++) {
 					 String featVec = splittedDatasets[run][fold][instIdx].replaceAll("([0-9])\\.0\\s", "$1 ").replaceFirst("\\.0$", "");
 					 int idx = featureVectors.indexOf(featVec);
 					 if (idx != -1) {

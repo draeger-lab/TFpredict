@@ -541,6 +541,20 @@ public class BasicTools {
 			System.exit(0);
 		}
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T[] concatenateArrays(T[] array1, T[] array2) {
+		
+		int arraySize = array1.length + array2.length;
+		T[] resArray = (T[]) new Object[arraySize];
+		for (int i=0; i<array1.length; i++) {
+			resArray[i] = array1[i];
+		}
+		for (int i=0; i<array2.length; i++) {
+			resArray[array1.length+i] = array2[i];
+		}
+		return resArray;
+	}
 } 
 
 
