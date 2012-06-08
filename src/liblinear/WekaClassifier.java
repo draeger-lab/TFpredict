@@ -1,7 +1,11 @@
 package liblinear;
 
+import io.BasicTools;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -37,6 +41,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SelectedTag;
 import weka.core.converters.LibSVMLoader;
+import weka.core.converters.LibSVMSaver;
 import weka.filters.Filter;
 import weka.filters.unsupervised.instance.NonSparseToSparse;
 import weka.filters.unsupervised.instance.Normalize;
@@ -94,6 +99,7 @@ public class WekaClassifier {
 	boolean showEstimatedDuration = true;
 	private PrintStream stdOut = System.out;
 	private String mainPerformanceMeasure = "ROC";
+	private String featureFileFormat = "libsvm";
 
 	private final static int innerRepetitions = 1;
 	
@@ -172,8 +178,13 @@ public class WekaClassifier {
 	
 	private void prepareNestedCV() {
 		
+		// create directories for output files (if necessary)
+		BasicTools.createDir4File(summaryFile);
+		BasicTools.createDir4File(modelFile);
+		BasicTools.createDir4File(classProbabilityFile);
+		
 		// read data from libsvm format
-		data = readData();
+		data = readData(featureFile, folds, featureFileFormat);
 		normalizeData(data);
 
 		// no model selection possible for Kstar and Naive Bayes
@@ -247,14 +258,19 @@ public class WekaClassifier {
 	 * @author Florian Topf
 	 * @return
 	 */
-	private Instances readData() {
+	private static synchronized Instances readData(String featureFile, int numFolds, String format) {
 		
-		if (!featureFile.contains("libsvm")) {
-			return readDataFromARFF();
+		if (format.equals("arff")) {
+			return readDataFromARFF(featureFile, numFolds);
+		
+		} else if (format.equals("libsvm")) {
+			return readDataFromLibsvm(featureFile, numFolds);
+		
+		} else {
+			System.out.println("Error. Invalid feature file format: " + format);
+			System.exit(0);
 		}
-		else {
-			return readDataFromLibsvm();
-		}
+		return null;
 	}
 	
 	/**
@@ -262,7 +278,7 @@ public class WekaClassifier {
 	 * 
 	 * @return
 	 */
-	private Instances readDataFromARFF() {
+	private static synchronized Instances readDataFromARFF(String featureFile, int numFolds) {
 		BufferedReader dataReader = null;
 		try {
 			dataReader = new BufferedReader(new FileReader(new File(featureFile)));
@@ -278,8 +294,26 @@ public class WekaClassifier {
 		trainInsts.setClassIndex(trainInsts.numAttributes() - 1);
 		trainInsts = arffToSparse(trainInsts);
 		trainInsts.randomize(new Random(1));
-		trainInsts.stratify(folds);
+		trainInsts.stratify(numFolds);
 		return trainInsts;
+	}
+	
+	/**
+	 * read sparse
+	 * 
+	 * @param source
+	 */
+	private static synchronized Instances arffToSparse(Instances source) {
+		final NonSparseToSparse sp = new NonSparseToSparse();
+		try {
+			sp.setInputFormat(source);
+			final Instances newData = Filter.useFilter(source, sp);
+			return newData;
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+
+		return source;
 	}
 	
 	/**
@@ -288,7 +322,7 @@ public class WekaClassifier {
 	 * 
 	 * @return
 	 */
-	private Instances readDataFromLibsvm() {
+	private static synchronized Instances readDataFromLibsvm(String featureFile, int numFolds) {
 		Instances trainInsts = null;
 		try {
 			LibSVMLoader lsl = new LibSVMLoader();
@@ -313,10 +347,33 @@ public class WekaClassifier {
 			e.printStackTrace();
 		}
 		Insts_filtered.randomize(new Random(1));
-		Insts_filtered.stratify(folds);
+		Insts_filtered.stratify(numFolds);
 		return Insts_filtered;
 	}
 
+	
+	private static synchronized String[] convertInstances2featureVectors(Instances instances) {
+
+		String[] libsvmFeatureVectors = null;
+		
+		try {
+			LibSVMSaver saver = new LibSVMSaver();
+			saver.setInstances(instances);
+			
+			// convert instances to LibSVM format and write them to OutputStream
+			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+			saver.setDestination(outStream);
+			saver.writeBatch();
+			
+			ArrayList<String> libsvmFeatures = BasicTools.readStream2List(new ByteArrayInputStream(outStream.toByteArray()), false);
+			libsvmFeatureVectors = libsvmFeatures.toArray(new String[]{});
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return libsvmFeatureVectors;
+	}
+	
 	/**
 	 * normalizes the attribute value in 0,1
 	 * 
@@ -820,16 +877,12 @@ public class WekaClassifier {
 					// cross-validate on n-1 folds
 					double bestGamma = 0.005;
 					double bestC = 1;
-					// double bestWeight = 1.0;
 					double bestAUC = 0.0;
 					for (double gamma = 0.005; gamma <= 0.1; gamma = gamma * 2) {
 						for (double C = Math.pow(2, -5); C <= Math.pow(2, 4); C = C * 2) {
-							// for (double weight = 1.0; weight <= 4.0; weight =
-							// weight * 2) {
 	
 							libsvm.setGamma(gamma);
 							libsvm.setCost(C);
-							// libsvm.setWeights((1.0 / weight) + " " + 1.0);
 							
 							if (hideLibsvmDebugOutput) {
 								String debugOutputFile = WekaLauncher.redirectSystemOut2TempFile();
@@ -845,16 +898,13 @@ public class WekaClassifier {
 								bestC = C;
 								bestGamma = gamma;
 								bestAUC = auc;
-								// bestWeight = weight;
 							}
-							// }
 						}
 					}
 	
 					// predict external data
 					libsvm.setGamma(bestGamma);
 					libsvm.setCost(bestC);
-					// libsvm.setWeights((1.0 / bestWeight) + " " + 1.0);
 				}
 				
 				if (hideLibsvmDebugOutput) {
@@ -1299,24 +1349,6 @@ public class WekaClassifier {
 	}
 
 	/**
-	 * read sparse
-	 * 
-	 * @param source
-	 */
-	private Instances arffToSparse(Instances source) {
-		final NonSparseToSparse sp = new NonSparseToSparse();
-		try {
-			sp.setInputFormat(source);
-			final Instances newData = Filter.useFilter(source, sp);
-			return newData;
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
-
-		return source;
-	}
-
-	/**
 	 * returns the score for this fold
 	 * 
 	 * @param testSamples
@@ -1380,7 +1412,18 @@ public class WekaClassifier {
 		return classLabels;
 	}
 	
-	
+	public static String[][] getSplittedDataset(String featureFile, int folds, int run) {
+		
+		Instances data = readDataFromLibsvm(featureFile, folds);
+		Instances[] splits = getSplits(data, folds, run);
+		
+		// save feature vectors (libSVM format) for each subset of CV split
+		String[][] splittedDataset = new String[folds][];
+		for (int i = 0; i < splits.length; i++) {
+			splittedDataset[i] = convertInstances2featureVectors(splits[i]);
+		}
+		return splittedDataset;
+	}
 
 	/**
 	 * splits an array of instances into n folds of equal size
@@ -1390,7 +1433,7 @@ public class WekaClassifier {
 	 * @param seed
 	 * @return
 	 */
-	private Instances[] getSplits(Instances data, int folds, int seed) {
+	private static synchronized Instances[] getSplits(Instances data, int folds, int seed) {
 
 		Instances[] splits = new Instances[folds];
 		for (int i = 0; i < splits.length; i++) {

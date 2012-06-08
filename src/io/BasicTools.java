@@ -22,6 +22,8 @@ package io;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -261,6 +263,19 @@ public class BasicTools {
 		return(readStream2List(Resource.class.getResourceAsStream(resourceName), upperCase));
 	}
 		
+	public static ArrayList<String> readFile2List(String fileName, boolean upperCase) {
+		
+		ArrayList<String> fileContent = null;
+		
+		try {
+			fileContent = readStream2List(new FileInputStream(new File(fileName)), upperCase);
+		
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return fileContent;
+	}
+	
 	public static ArrayList<String> readStream2List(InputStream stream, boolean upperCase) {
 		
 		ArrayList<String> fileContent = new ArrayList<String>();
@@ -517,6 +532,15 @@ public class BasicTools {
 		}
 		return Integer2int(indices.toArray(new Integer[]{}));
 	}
-}
+	
+	public static void createDir4File(String file) {
+		
+		String directory = new File(file).getParent();
+		if (!new File(directory).exists() && !new File(directory).mkdirs()) {
+			System.out.println("Error. Directory for file \"" + file + "\" could not be created.");
+			System.exit(0);
+		}
+	}
+} 
 
 
