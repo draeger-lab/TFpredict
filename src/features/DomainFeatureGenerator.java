@@ -111,24 +111,24 @@ public abstract class DomainFeatureGenerator {
 			}
 			
 			String labelField;
-			int superclass = 0;
+			int classLabel = 0;
 			if (superPred) {
 				labelField = splittedHeader[4];
-				superclass = Integer.parseInt(labelField.substring(0, 1));
+				classLabel = Integer.parseInt(labelField.substring(0, 1));
 			
 			} else {
-				String classLabel = splittedHeader[1];
-				if (classLabel.equals("TF")) {
-					superclass = 1;
-				} else if (classLabel.equals("NonTF")) {
-					superclass = -1;
+				labelField = splittedHeader[1];
+				if (labelField.equals("TF")) {
+					classLabel = 1;
+				} else if (labelField.equals("NonTF")) {
+					classLabel = -1;
 				} else {
-					System.out.println("Error. Unknown label in FASTA header: " + classLabel);
+					System.out.println("Error. Unknown label in FASTA header: " + labelField);
 					System.exit(0);
 				}
 			}
 			
-			tf2superclass.put(seqID, superclass);
+			tf2superclass.put(seqID, classLabel);
 		}
 		return(tf2superclass);
 	}
