@@ -1,3 +1,4 @@
+package main;
 /*
     TFpredict performs the identification and structural characterization
     of transcription factors.
@@ -48,7 +49,8 @@ public class TFpredictMain {
 	private static final int[] validClassifierIdx = new int[] {3,4,5,6}; 
 	private static final String version = "1.1";
 	
-	private static final String sabineSpeciesList = "organism_list.txt"; 
+	public static final String sabineSpeciesList = "organism_list.txt";
+	public static final String classMappingFile = "class_mapping.txt"; 
 	
 	/**
 	 * @param args

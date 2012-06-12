@@ -191,7 +191,7 @@ public class BasicTools {
 					}
 					// read new header
 					if (readFullHeader) {
-						header = line.trim();
+						header = line.replaceFirst(">", "").trim();
 					
 					// generate headers as done by InterProScan 
 					// ">sp|P04637|P53_HUMAN Cellular tumor..." --> "P53_HUMAN" 
