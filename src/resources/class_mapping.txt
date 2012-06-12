@@ -1,0 +1,56 @@
+0.5. C0037 APETALA2/EREBP-like factors, AP2 domain, ERF domain; 
+0. C0048 AT-rich interaction domain family.
+2. C0043 BED finger.
+2. C0038 DNA-binding with One Finger.
+3.5.2. C0016 Factor family with homology to the ets-protooncogenes;
+4.9. C0051 Grainyhead; 
+3.1.1.15. C0053 Homeo domain only, NK-2/Nkx subfamily; 
+3.1.3.1. C0025 LIM domain plus homeo domain; 
+3.1.3.2. C0028 LIM domain; 
+4.4. C0014 MCM1-agamous-deficiens-SRF; 
+4.12.2. C0060 NF1/CTF; 
+4.1.3. C0052 Nuclear Factor of Activated T-cells family; 
+2. C0042 PHD finger. 
+3.1.2. C0007 POU domain; 
+2. C0049 RING finger. 
+4.1. C0020 Rel-related factor; 
+4.12.1. C0041 SMA- and MAD (Mother against DPP) related proteins; 
+4.12. C0059 Smad/NF1; 
+0. C0044 T domain, T-box proteins. 
+3.6. C0024 TEA domain; 
+0. C0046 Trihelix motif.
+2. C0040 WRKY domain together with a novel zinc-finger-like motif.
+1. C0033 basic domain (superclass);
+1.3. C0012 basic region + helix-loop-helix motif + leucine zipper; 
+1.2. C0010 basic region + helix-loop-helix motif; 
+1.6. C0032 basic region + helix-span-helix domain; 
+1.1. C0008 basic region + leucine zipper; 
+4. C0036 beta-scaffold factors with minor groove contacts (superclass); 
+4.10. C0019 cold-shock domain; 
+3.3. C0023 fork head domain; 
+0. C0031 glial cells missing. 
+3.4. C0050 heat stress transcription factor; 
+1. C0013 helix-loop-helix motif + leucine zipper. 
+1.2.8. C0011 helix-loop-helix motif; 
+3. C0035 helix-turn-helix (superclass); 
+3. C0026 helix-turn-helix. 
+4.7. C0015 high-mobility group protein-like factors; 
+4.8. C0030 histone fold; 
+1. C0027 homeodomain plus leucine zipper. 
+3.1. C0006 homeodomain; homeobox protein; 
+1.1.6. C0009 leucine zipper; 
+4.3. C0057 p53-like; 
+3.2.1. C0018 paired domain, paired box + homeo domain; 
+3.2. C0017 paired domain, paired box; 
+4.11. C0029 runt homology domain; 
+2. C0058 several C2H2 type zinc fingers and BTB/POZ domain. 
+4.2. C0039 signal transducers and activators of transcription; 
+3.5. C0022 tryptophan cluster; 
+2.4. C0005 zinc cluster; zinc-cysteine cluster; C6 zinc finger; 
+2. C0034 zinc finger (superclass); 
+2. C0045 zinc finger + HMG like domain. 
+3.1.4. C0021 zinc finger + homeo domain; 
+2. C0004 zinc finger. 
+2.2. C0003 zinc finger; 
+2.3. C0001 zinc finger; 
+2.1. C0002 zinc finger; zinc twist;
