@@ -189,6 +189,6 @@ public class TrainingDataGenerator {
 		generateMergedFastafile(transfacFastafile, matbaseFastafile, "TransFac", "MatBase", mergedFastafile);
 		
 		generateFastafile4SuperPred(mergedFastafile, superclassFastafile);
-		//convertFlatfile2Fasta(mergedFlatfile, sabineFastafile);
+		convertFlatfile2Fasta(mergedFlatfile, sabineFastafile);
 	}
 }
