@@ -191,10 +191,13 @@ public abstract class TFdataParser {
 	
 				// write domains 
 				if (domains.size() > 0) {
+					
 					for (int j=0; j<domains.get(i).size(); j++) {
 						bw.write("FT  " + domains.get(i).get(j) + "\n");
 					}
-					bw.write("XX\n");
+					if (domains.get(i).size() > 0) {
+						bw.write("XX\n");
+					}
 				}
 	
 	
