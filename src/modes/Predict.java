@@ -84,13 +84,13 @@ public class Predict {
 	static boolean silent = false;
 
 	// static arguments required by TFpredict
-	static String iprpath = "";
-	static String tfClassifier_file = "models/tfPred/svmLinear.model";
-	static String superClassifier_file = "models/superPred/svmLinear.model";
-	static String relDomainsTF_file = "domainsTFpred.txt";
-	static String relDomainsSuper_file = "domainsSuperPred.txt";
-	static String relGOterms_file = "DNA.go";
-	static String tfName2class_file = "transHMan";
+	public static String iprpath = "";
+	public static String tfClassifier_file = "models/tfPred/svmLinear.model";
+	public static String superClassifier_file = "models/superPred/svmLinear.model";
+	public static String relDomainsTF_file = "domainsTFpred.txt";
+	public static String relDomainsSuper_file = "domainsSuperPred.txt";
+	public static String relGOterms_file = "DNA.go";
+	public static String tfName2class_file = "transHMan";
 	
 	// arguments passed from Galaxy to TFpredict
 	static String basedir = "";

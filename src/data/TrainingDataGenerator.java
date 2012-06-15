@@ -1,9 +1,19 @@
 package data;
 
 import io.BasicTools;
+import io.ObjectRW;
+import ipr.IPRextract;
+import ipr.IPRprocess;
+import ipr.IprEntry;
+import ipr.IprProcessed;
+import ipr.IprRaw;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+
+import modes.Predict;
 
 public class TrainingDataGenerator {
 	
@@ -159,6 +169,42 @@ public class TrainingDataGenerator {
 	}
 	
 	
+	// adds DNA-binding domains parsed from InterPro result to SABINE flatfile
+	private static void addDBDs2Flatfile(String flatFile, String interproFile, String outputFile) {
+		
+		// parse SABINE training set
+		SabineTrainingSetParser parser = new SabineTrainingSetParser();
+		parser.parseTrainingset(flatFile);
+		
+		// parse domains from InterProScan result
+		ArrayList<String> relGOterms = BasicTools.readResource2List(Predict.relGOterms_file);
+		@SuppressWarnings("unchecked")
+		HashMap<String, String> tfName2class = (HashMap<String, String>) ObjectRW.readFromResource(Predict.tfName2class_file);
+		
+		ArrayList<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(interproFile);
+		HashMap<String, IprEntry> seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
+		HashMap<String, IprRaw>	IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
+		HashMap<String, IprProcessed> seq2bindingDomain = IPRprocess.filterIPRdomains(seq2domain, IPRdomains, relGOterms, tfName2class);
+		
+		for (int i=0; i<parser.tf_names.size(); i++) {
+			
+			// TODO: check if IDs are consistent with IDs used in InterProScan result
+			String currID = parser.crossrefs.get(i);
+			if (currID.equals("NA")) {
+				currID = parser.tf_names.get(i).split("\\|")[0];
+			}
+			
+			
+			if (seq2bindingDomain.containsKey(currID)) {
+				IprProcessed currDBDs = seq2bindingDomain.get(currID);
+				parser.domains.set(i, currDBDs.binding_domains);
+			}
+		}
+		
+		// write SABINE training set with DBDs to file
+		parser.writeTrainingset(outputFile);
+	}
+	
 	public static void main(String args[]) {
 		
 		String fastaDir = "/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/latest/";
@@ -171,6 +217,7 @@ public class TrainingDataGenerator {
 		String transfacFlatfile = flatfileDir + "transfac_2011.4_flatfile.txt";
 		String matbaseFlatfile = flatfileDir + "matbase_8.2_flatfile.txt";
 		String mergedFlatfile = flatfileDir + "transfac2011.4_matbase8.2_flatfile.txt";
+		String mergedFlatfileDBDs = flatfileDir + "transfac2011.4_matbase8.2_flatfile_with_dbd.txt";
 		
 		String transfacFastafile = fastaDir + "transfac_2011.4.fasta";
 		String matbaseFastafileOldHeaders = fastaDir + "matbase_8.2_oldHeaders.fasta";
@@ -180,6 +227,7 @@ public class TrainingDataGenerator {
 		String superclassFastafile = fastaDir + "transfac2011.4_matbase8.2_with_superclass.fasta";
 		String sabineFastafile = fastaDir + "transfac2011.4_matbase8.2_with_superclass_and_pfm.fasta";
 				
+		
 		generateTransfacFlatfile(factorFile, matrixFile, transfacFlatfile);
 		generateTransfacFastafile(factorFile, matrixFile, transfacFastafile);
 		
@@ -190,5 +238,8 @@ public class TrainingDataGenerator {
 		
 		generateFastafile4SuperPred(mergedFastafile, superclassFastafile);
 		convertFlatfile2Fasta(mergedFlatfile, sabineFastafile);
+		
+		String interproFile = "/rahome/eichner/projects/tfpredict/data/tf_pred/interpro_files/TF.fasta.out";
+		addDBDs2Flatfile(mergedFlatfile, interproFile, mergedFlatfileDBDs);
 	}
 }

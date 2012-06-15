@@ -143,23 +143,4 @@ public class KmerFeatureGenerator {
 		}
 		BasicTools.writeArrayList2File(libSVMfeatures, featureFile);
 	}
-	
-	
-	public static void main(String[] args) {
-		
-		/*
-		 *  Generation of feature files
-		 */
-		
-		String dataDir = "/rahome/eichner/projects/tfpredict/data/";
-		
-		// generate feature file for TF prediction
-		String tfFastaFile = dataDir + "super_pred/fasta_files/superclassTF.fasta"; 
-		String tfFeatureFile = dataDir + "super_pred/feature_files/latest/kmer_featurefile.txt";
-
-		KmerFeatureGenerator tfFeatureGenerator = new KmerFeatureGenerator(tfFastaFile, tfFeatureFile, true, 3, 3);
-		tfFeatureGenerator.generateKmerFeatures();
-
-		
-	}
 }
