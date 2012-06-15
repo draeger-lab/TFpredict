@@ -42,29 +42,4 @@ public class PSSMFeatureGenerator extends BLASTfeatureGenerator {
 		
 		return scaledScore;
 	}
-	
-	
-	public static void main(String[] args) {
-		
-		/*
-		 *  Generation of feature files
-		 */
-		
-		String dataDir = "/rahome/eichner/projects/tfpredict/data/";
-		
-		// generate feature file for TF prediction
-		String tfFastaFile = dataDir + "tf_pred/fasta_files/TFandNonTF.fasta"; 
-		String tfFeatureFile = dataDir + "tf_pred/feature_files/latest/pssm_featurefile.txt";
-
-		PSSMFeatureGenerator tfFeatureGenerator = new PSSMFeatureGenerator(tfFastaFile, tfFeatureFile, false);
-		tfFeatureGenerator.generateFeatures();
-		
-		
-		// generate feature file for superclass prediction
-		String superFastaFile = dataDir + "super_pred/fasta_files/superclassTF.fasta"; 
-		String superFeatureFile = dataDir + "super_pred/feature_files/latest/pssm_featurefile.txt";
-
-		PSSMFeatureGenerator superFeatureGenerator = new PSSMFeatureGenerator(superFastaFile, superFeatureFile, false);
-		superFeatureGenerator.generateFeatures();
-	}
 }
