@@ -3,11 +3,12 @@ package features;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.StringTokenizer;
 
-import main.TFpredictMain;
+import features.PseAACGenerator.start;
 
+import io.BasicTools;
 import resources.Resource;
 
 public class PseAACGenerator {
@@ -17,37 +18,87 @@ public class PseAACGenerator {
   
 	private static String aa_attr = "aa_attr.txt";
 	
-	//TODO
-	private static HashMap<String, String[]> readAttributes(String aa_attr) {
+	private start start;
+	public enum start {
+	    Amino, Hpho, Hphi, Mass 
+	}
+	public void EnumSet(start Start) {
+        this.start = Start;
+    }
+	
+	private static HashMap<String, AAentry> readAttributes() {
 		
-		HashMap<String, String[]> AAmap = new HashMap<String, String[]>();
+		HashMap<String, AAentry> AAmap = new HashMap<String, AAentry>();
 		
-		String line = null;
-		String res = null;
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(Resource.class.getResourceAsStream(PseAACGenerator.aa_attr)));
-						
-			while((line = br.readLine()) != null) {	
-				String[] tmp = line.split("\t");
-								
-			}
-
-			br.close();
+		ArrayList<String> lines = BasicTools.readResource2List(aa_attr);
+				
+		ArrayList<String[]> splittedLines = new ArrayList<String[]>();
 		
-		} catch (IOException e) {		
-			System.out.println("IOException caught while fetching class."); 
+		for (int i = 0; i < lines.size(); i++) {
+			String line = lines.get(i);
+			if (!line.isEmpty()) splittedLines.add(line.split("\t"));
 		}
 		
-				
+		for (int i = 1; i <=20; i++) {
+			
+			String Amino	=	(splittedLines.get(0)[i]);
+			double Hpho	=	Double.valueOf(splittedLines.get(1)[i]);
+			double Hphi	=	Double.valueOf(splittedLines.get(2)[i]);
+			int Mass 	=	Integer.valueOf(splittedLines.get(3)[i]);
+			
+			AAmap.put(Amino, new AAentry(Amino, Hpho, Hphi, Mass));
+		}
+		
 		return AAmap;
 	}
 	
 
-	//TODO
+	//TODO http://sourceforge.net/projects/pseb/
 	private String buildPseAAC(String sequence) {
+		
 		String pseVector = null;
 		
         int length = sequence.length();
+        
+        /*
+        int cntAttr = this.attrMasks.Length;
+
+        String[] attrNames = this.queryAttrNames();
+        double[] tmpResult = new double[lambda];
+
+        double effAttr = (double)this.attrMasks.Sum();
+        unsafe
+        {
+            for (int i = 0; i < lambda; i++)
+            {
+                int delay = i + 1;
+                int skipped = 0;
+                for (int j = 0; j < length - delay; j++)
+                {
+                    char sym1 = src[j];
+                    char sym2 = src[j + delay];
+                    if (!syms.Contains(sym1) || !syms.Contains(sym2))
+                    {
+                        skipped++;
+                        continue;
+                    }
+                    double t_sum = 0;
+
+                    foreach (String curID in effAttrList.Keys)
+                    {
+                        double delta = effAttrList[curID][sym1] - effAttrList[curID][sym2];
+                        t_sum += delta * delta / effAttr;
+                    }
+
+
+                    tmpResult[i] += t_sum;
+                }
+                
+                if (length-delay-skipped != 0)
+                    tmpResult[i] /= (length - delay - skipped);
+            }
+        }
+        */
 
         return pseVector;
     }
@@ -60,7 +111,7 @@ public class PseAACGenerator {
 		
 		PseAACGenerator PseAAC = new PseAACGenerator();
 		
-		HashMap<String, String[]> AAmap = readAttributes(aa_attr);
+		HashMap<String, AAentry> AAmap = readAttributes();
 		
 		String pseVector = PseAAC.buildPseAAC(sequence);
 		
@@ -69,3 +120,4 @@ public class PseAACGenerator {
 	}
 	
 }
+
