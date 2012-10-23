@@ -29,9 +29,6 @@ import java.util.ArrayList;
 public class IprRaw {
 	
 	public String domain_id;
-	// domains positions are represented in the form "DomainID  start_pos  end_pos"
-	public String domain_pos;
-	// domains names are obtained from "description" fields returned by InterProScan
 	public String[] domain_names;
 	public ArrayList<String> go_terms;
 	
@@ -39,12 +36,10 @@ public class IprRaw {
 	public IprRaw() {
 	}
 	
-	public IprRaw(String id, String bind, String[] doms, ArrayList<String> gos) {
+	public IprRaw(String id, String[] doms, ArrayList<String> gos) {
 		this.domain_id = id;
-		this.domain_pos = bind;
 		this.domain_names = doms;
 		this.go_terms = gos;
 		
 	}
-
 }

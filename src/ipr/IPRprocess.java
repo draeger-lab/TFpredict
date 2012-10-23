@@ -38,8 +38,11 @@ public class IPRprocess {
 		
 		for (String sequence_id: seq2domain.keySet()) {
 			ArrayList<String> curr_domains = seq2domain.get(sequence_id).domain_ids;
+			ArrayList<String> curr_domain_pos = seq2domain.get(sequence_id).domain_pos;
 			
-			for (String domain_id : curr_domains) {
+			for (int i=0; i<curr_domains.size(); i++) {
+				String domain_id = curr_domains.get(i);
+				String domain_pos = curr_domain_pos.get(i);
 				IprRaw iprDomain = IPRdomains.get(domain_id);
 				
 				// current domain is a DNA-binding domain?
@@ -57,15 +60,15 @@ public class IPRprocess {
 	
 					if (!seq2bindingDomain.containsKey(sequence_id)) {
 						ArrayList<String> bindingDomains = new ArrayList<String>();
-						bindingDomains.add(iprDomain.domain_pos);
+						bindingDomains.add(domain_pos);
 						IprProcessed currDBD = new IprProcessed(sequence_id, bindingDomains, transfacClass);
 						seq2bindingDomain.put(sequence_id, currDBD);
 					}
 					else {
 						IprProcessed currDBD = seq2bindingDomain.get(sequence_id);
 						currDBD.anno_transfac_class = mergeTransfacClassAnnos(currDBD.anno_transfac_class, transfacClass);
-						if (!currDBD.binding_domains.contains(iprDomain.domain_pos)) {
-							currDBD.binding_domains.add(iprDomain.domain_pos);
+						if (!currDBD.binding_domains.contains(domain_pos)) {
+							currDBD.binding_domains.add(domain_pos);
 						}
 						seq2bindingDomain.put(sequence_id, currDBD);
 					}

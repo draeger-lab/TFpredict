@@ -23,6 +23,7 @@ package ipr;
  * (C) Florian Topf, University of Tuebingen, 2012
  * ===============================================
  */
+import io.BasicTools;
 import io.NoExitSecurityManager;
 
 import java.io.BufferedReader;
@@ -46,7 +47,22 @@ import uk.ac.ebi.webservices.jaxws.IPRScanClient;
 
 
 public class IPRrun {
-
+	
+	public static boolean addSpacerLine = true;
+ 	
+	// fixes bug in current version of InterProScan which removes first line of sequence if header is given
+	private static void addSpacerLine(String seqfile) {
+		
+		String SPACER_LINE = "SPACERLINESPACERLINESPACERLINESPACERLINESPACERLINESPACERLINE";
+		
+		HashMap<String,String> fastaSeqs = BasicTools.readFASTA(seqfile, true);
+		for (String header: fastaSeqs.keySet()) {
+			String currSeq = fastaSeqs.get(header);
+			fastaSeqs.put(header, SPACER_LINE + currSeq);
+		}
+		BasicTools.writeFASTA(fastaSeqs, seqfile);
+	}
+	
 	public IPRrun(boolean silent) {
 		this.silent = silent;
 	}
@@ -79,6 +95,11 @@ public class IPRrun {
 		
 		ArrayList<String[]> IPRoutput = null;
 		InputStream iprScan_StdOut;
+		
+		// HACK: add dummy line to fasta file to fix bug in InterProScan
+		if (addSpacerLine) {
+			addSpacerLine(seqfile);
+		}
 		
 		if (useWeb) { // SOAP
 
