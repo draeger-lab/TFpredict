@@ -42,6 +42,15 @@ public abstract class TFdataParser {
 		}
 	}
 	 
+	protected void filterTFsWithDBD() {
+		
+		for (int i=(domains.size()-1); i>=0 ;i--) {
+			if (domains.get(i) == null) {
+				removeTF(i);
+			}
+		}
+	}
+	
 	protected void sanitizeTrainingset() {
 		
 		// eliminate duplicated UniProt IDs
@@ -61,7 +70,7 @@ public abstract class TFdataParser {
 		}
 	}
 	
-	private void removeTF(int idx) {
+	public void removeTF(int idx) {
 		tf_names.remove(idx);
 		species.remove(idx);
 		crossrefs.remove(idx);
@@ -192,11 +201,13 @@ public abstract class TFdataParser {
 				// write domains 
 				if (domains.size() > 0) {
 					
-					for (int j=0; j<domains.get(i).size(); j++) {
-						bw.write("FT  " + domains.get(i).get(j) + "\n");
-					}
-					if (domains.get(i).size() > 0) {
-						bw.write("XX\n");
+					if (domains.get(i) != null) {
+						for (int j=0; j<domains.get(i).size(); j++) {
+							bw.write("FT  " + domains.get(i).get(j) + "\n");
+						}
+						if (domains.get(i).size() > 0) {
+							bw.write("XX\n");
+						}
 					}
 				}
 	

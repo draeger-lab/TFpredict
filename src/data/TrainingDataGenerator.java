@@ -11,7 +11,6 @@ import ipr.IprRaw;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 import modes.Predict;
 
@@ -161,7 +160,11 @@ public class TrainingDataGenerator {
 		// extract IDs and sequences
 		HashMap<String,String> sequences = new HashMap<String, String>();
 		for (int i=0; i<parser.tf_names.size(); i++) {
-			sequences.put(parser.tf_names.get(i), parser.sequences1.get(i));
+			String currSeq = parser.sequences1.get(i);
+			if (currSeq == null) {
+				currSeq = parser.sequences2.get(i);
+			}
+			sequences.put(parser.tf_names.get(i), currSeq);
 		}
 		
 		// write FASTA file
@@ -176,28 +179,64 @@ public class TrainingDataGenerator {
 		SabineTrainingSetParser parser = new SabineTrainingSetParser();
 		parser.parseTrainingset(flatFile);
 		
-		// parse domains from InterProScan result
+		// read InterProScan output file and adjust TF names
 		ArrayList<String> relGOterms = BasicTools.readResource2List(Predict.relGOterms_file);
 		@SuppressWarnings("unchecked")
 		HashMap<String, String> tfName2class = (HashMap<String, String>) ObjectRW.readFromResource(Predict.tfName2class_file);
-		
 		ArrayList<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(interproFile);
+		for (int i=0; i<IPRoutput.size(); i++) {
+			String[] splittedLine = IPRoutput.get(i);
+			splittedLine[0] = splittedLine[0].replace("_", "|");
+			IPRoutput.set(i, splittedLine);
+		}
+		
+		// parse domains from InterProScan result
 		HashMap<String, IprEntry> seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
 		HashMap<String, IprRaw>	IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
+		
+		IprRaw domainsRaw = IPRdomains.get("T00650|NA|TransFac");
+		
 		HashMap<String, IprProcessed> seq2bindingDomain = IPRprocess.filterIPRdomains(seq2domain, IPRdomains, relGOterms, tfName2class);
 		
 		for (int i=0; i<parser.tf_names.size(); i++) {
 			
-			// TODO: check if IDs are consistent with IDs used in InterProScan result
-			String currID = parser.crossrefs.get(i);
-			if (currID.equals("NA")) {
-				currID = parser.tf_names.get(i).split("\\|")[0];
+			String currID = parser.tf_names.get(i);
+			
+			if (currID.equals("T00650|NA|TransFac")) {
+				System.out.println("Code reached.");
 			}
-			
-			
 			if (seq2bindingDomain.containsKey(currID)) {
 				IprProcessed currDBDs = seq2bindingDomain.get(currID);
 				parser.domains.set(i, currDBDs.binding_domains);
+				
+			} else {
+				parser.domains.set(i, null);
+			}
+		}
+		
+		// remove TFs for which no DBDs are available
+		parser.filterTFsWithDBD();
+		
+		// write SABINE training set with DBDs to file
+		parser.writeTrainingset(outputFile);
+	}
+	
+	
+	// adds DNA-binding domains parsed from InterPro result to SABINE flatfile
+	private static void filterFlatfileUsingFasta(String flatFile, String fastaFile, String outputFile) {
+		
+		// parse SABINE training set
+		SabineTrainingSetParser parser = new SabineTrainingSetParser();
+		parser.parseTrainingset(flatFile);
+		
+		// read Fasta file
+		HashMap<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
+		ArrayList<String> tfNames = new ArrayList<String>();
+		tfNames.addAll(fastaSeqs.keySet());
+		
+		for (int i=parser.tf_names.size()-1; i>=0; i--) {
+			if (!tfNames.contains(parser.tf_names.get(i))) {
+				parser.removeTF(i);
 			}
 		}
 		
@@ -207,27 +246,28 @@ public class TrainingDataGenerator {
 	
 	public static void main(String args[]) {
 		
+		/*
 		String fastaDir = "/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/latest/";
-		String transfacDir = "/rahome/eichner/data/biobase/transfac_2011.4/dat/";
+		String transfacDir = "/rahome/eichner/data/biobase/transfac_2012.2/dat/";
 		String flatfileDir = "/rahome/eichner/projects/tfpredict/data/tf_pred/sabine_files/latest/";
 		
 		String factorFile = transfacDir + "factor.dat";
 		String matrixFile = transfacDir + "matrix.dat";
 		
-		String transfacFlatfile = flatfileDir + "transfac_2011.4_flatfile.txt";
+		String transfacFlatfile = flatfileDir + "transfac_2012.2_flatfile.txt";
 		String matbaseFlatfile = flatfileDir + "matbase_8.2_flatfile.txt";
-		String mergedFlatfile = flatfileDir + "transfac2011.4_matbase8.2_flatfile.txt";
-		String mergedFlatfileDBDs = flatfileDir + "transfac2011.4_matbase8.2_flatfile_with_dbd.txt";
+		String mergedFlatfile = flatfileDir + "transfac2012.2_matbase8.2_flatfile.txt";
+		String mergedFlatfileDBDs = flatfileDir + "transfac2012.2_matbase8.2_flatfile_with_dbd.txt";
+		String mergedFlatfileDBDsFBPs = flatfileDir + "transfac2012.2_matbase8.2_flatfile_with_dbd_and_mergedPFM.txt";
 		
-		String transfacFastafile = fastaDir + "transfac_2011.4.fasta";
+		String transfacFastafile = fastaDir + "transfac_2012.2.fasta";
 		String matbaseFastafileOldHeaders = fastaDir + "matbase_8.2_oldHeaders.fasta";
 		String matbaseFastafileOldHeadersSuper = fastaDir + "matbase_8.2_oldHeaders_with_superclass.fasta";
 		String matbaseFastafile = fastaDir + "matbase_8.2.fasta";
-		String mergedFastafile = fastaDir + "transfac2011.4_matbase8.2.fasta";
-		String superclassFastafile = fastaDir + "transfac2011.4_matbase8.2_with_superclass.fasta";
-		String sabineFastafile = fastaDir + "transfac2011.4_matbase8.2_with_superclass_and_pfm.fasta";
-				
-		
+		String mergedFastafile = fastaDir + "transfac2012.2_matbase8.2.fasta";
+		String superclassFastafile = fastaDir + "transfac2012.2_matbase8.2_with_superclass.fasta";
+		String sabineFastafile = fastaDir + "transfac2012.2_matbase8.2_with_superclass_and_pfm.fasta";
+			
 		generateTransfacFlatfile(factorFile, matrixFile, transfacFlatfile);
 		generateTransfacFastafile(factorFile, matrixFile, transfacFastafile);
 		
@@ -239,7 +279,56 @@ public class TrainingDataGenerator {
 		generateFastafile4SuperPred(mergedFastafile, superclassFastafile);
 		convertFlatfile2Fasta(mergedFlatfile, sabineFastafile);
 		
-		String interproFile = "/rahome/eichner/projects/tfpredict/data/tf_pred/interpro_files/TF.fasta.out";
+		
+		String interproFile = "/rahome/eichner/projects/tfpredict/data/tf_pred/interpro_files/latest/transfac2012.2_matbase8.2_with_superclass_and_pfm.fasta.out";
 		addDBDs2Flatfile(mergedFlatfile, interproFile, mergedFlatfileDBDs);
+		*/
+		
+		
+		/*
+		 * INFO: merging of PFMs was performed using class "TrainingDataGenerator" from SABINE project (as STAMP is required)  
+		 */
+		
+		/*
+		 *  generate FASTA file for InterProScan based on old public and proprietary SABINE training set
+		 */
+		
+		/*
+		String sabineTrainingsetBiobase = "/rahome/eichner/workspace/SABINE/data/trainingsets_biobase/trainingset_full.txt"; 
+		String sabineTrainingsetPublic = "/rahome/eichner/workspace/SABINE/data/trainingsets_public/trainingset_public.txt";
+		String sabineTrainingsetInterpro = "/rahome/eichner/workspace/SABINE/data/trainingsets_interpro/trainingset_interpro.txt"; 
+		String fastaTrainingsetBiobase = "/rahome/eichner/workspace/SABINE/data/trainingsets_biobase/trainingset_full.fasta";
+		String fastaTrainingsetPublic = "/rahome/eichner/workspace/SABINE/data/trainingsets_public/trainingset_public.fasta";
+		String fastaTrainingsetInterpro = "/rahome/eichner/workspace/SABINE/data/trainingsets_interpro/trainingset_interpro.fasta"; 
+		
+		convertFlatfile2Fasta(sabineTrainingsetBiobase, fastaTrainingsetBiobase);
+		convertFlatfile2Fasta(sabineTrainingsetPublic, fastaTrainingsetPublic);
+		convertFlatfile2Fasta(sabineTrainingsetInterpro, fastaTrainingsetInterpro);
+		*/
+		
+		/*
+		 *  generate homology-reduced training set for SABINE 
+		 */
+		
+		/*
+		String sabineTrainingsetInterpro = "/rahome/eichner/workspace/SABINE/data/trainingsets_interpro/trainingset_interpro.txt"; 
+		String fastaTrainingsetCdHit = "/rahome/eichner/workspace/SABINE/data/trainingsets_interpro/trainingset_interpro_cdhit70.fasta";
+		String sabineTrainingsetCdHit = "/rahome/eichner/workspace/SABINE/data/trainingsets_interpro/trainingset_interpro_cdhit70.txt"; 
+		filterFlatfileUsingFasta(sabineTrainingsetInterpro, fastaTrainingsetCdHit, sabineTrainingsetCdHit);
+		*/
+		
+		/*
+		 *  replace DBDs in old public/proprietary training set by InterPro domains
+		 */
+		
+		String sabineTrainingsetBiobase = "/rahome/eichner/workspace/SABINE/data/trainingsets_biobase/trainingset_full.txt";
+		String sabineTrainingsetBiobaseInterpro = "/rahome/eichner/workspace/SABINE/data/trainingsets_biobase_interpro/trainingset_biobase_interpro.txt";
+		String sabineTrainingsetPublic = "/rahome/eichner/workspace/SABINE/data/trainingsets_public/trainingset_public.txt";
+		String sabineTrainingsetPublicInterpro = "/rahome/eichner/workspace/SABINE/data/trainingsets_public_interpro/trainingset_public_interpro.txt";
+		
+		String domainsTrainingsetBiobase = "/home/eichner/projects/tfpredict/data/tf_pred/interpro_files/16.08.2012/trainingset_full.fasta.out";
+		
+		addDBDs2Flatfile(sabineTrainingsetBiobase, domainsTrainingsetBiobase, sabineTrainingsetBiobaseInterpro);
+		addDBDs2Flatfile(sabineTrainingsetPublic, domainsTrainingsetBiobase, sabineTrainingsetPublicInterpro);
 	}
 }

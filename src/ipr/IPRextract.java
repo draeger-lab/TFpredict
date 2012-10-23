@@ -47,6 +47,7 @@ public class IPRextract {
 			String[] domain_entry = IPRoutput.get(i);
 			String sequence_id = domain_entry[0].trim();
 			String domain_id = domain_entry[11].trim();
+			String domain_interval = domain_id + "    " + domain_entry[6].trim() + "\t" + domain_entry[7].trim();
 			
 			// skip domains for which no InterPro-ID is given
 			if (domain_id.equals("NULL")) {
@@ -59,14 +60,15 @@ public class IPRextract {
 				
 				if (!curr_entry.domain_ids.contains(domain_id)) {
 					curr_entry.domain_ids.add(domain_id);
+					curr_entry.domain_pos.add(domain_interval);
 				}
 				seq2domain.put(sequence_id, curr_entry);
 			}
 			else {
 				if (label == null) {
-					curr_entry = new IprEntry(sequence_id, domain_id);
+					curr_entry = new IprEntry(sequence_id, domain_id, domain_interval);
 				} else {
-					curr_entry = new IprEntry(sequence_id, label, domain_id);
+					curr_entry = new IprEntry(sequence_id, label, domain_id, domain_interval);
 				}
 				seq2domain.put(sequence_id, curr_entry);
 			}
@@ -128,7 +130,7 @@ public class IPRextract {
 			
 			String domain_name1 = domain_entry[5].trim().split(",")[0].trim();
 			String domain_name2 = domain_entry[12].trim().split(",")[0].trim();
-			String domain_interval = domain_id + "    " + domain_entry[6].trim() + "\t" + domain_entry[7].trim();
+			
 			
 			// parse domain names from description fields (used for TF class annotation via TransFac)
 			HashSet<String> domain_names_set = new HashSet<String>();
@@ -155,7 +157,7 @@ public class IPRextract {
 					}
 				}
 			}
-			IprRaw ipr_domain = new IprRaw(domain_id, domain_interval, domain_names, domain_GOterms);
+			IprRaw ipr_domain = new IprRaw(domain_id, domain_names, domain_GOterms);
 			ipr_domains.put(domain_id, ipr_domain);
 		}
 		return ipr_domains;

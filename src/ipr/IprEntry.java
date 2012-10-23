@@ -36,6 +36,7 @@ public class IprEntry implements Serializable{
 	public boolean isTF;
 	public Integer superclass = null;
 	public ArrayList<String> domain_ids = new ArrayList<String>();
+	public ArrayList<String> domain_pos = new ArrayList<String>();
 	
 	public IprEntry() {
 	}
@@ -46,24 +47,32 @@ public class IprEntry implements Serializable{
 	}
 	
 	public IprEntry(String id, boolean label) {
-		this.sequence_id = id;
+		this(id);
 		this.isTF = label;
 	}
 	
 	public IprEntry(String id, boolean label, ArrayList<String> iprs) {
-		this.sequence_id = id;
-		this.isTF = label;
+		this(id, label);
 		this.domain_ids = iprs;
 	}
 	
 	public IprEntry(String id, boolean label, String ipr) {
-		this.sequence_id = id;
-		this.isTF = label;
+		this(id, label);
 		domain_ids.add(ipr);
 	}
 	
+	public IprEntry(String id, boolean label, String ipr, String ipr_pos) {
+		this(id, label, ipr);
+		domain_pos.add(ipr_pos);
+	}
+	
 	public IprEntry(String id, String ipr) {
-		this.sequence_id = id;
+		this(id);
 		domain_ids.add(ipr);
+	}
+	
+	public IprEntry(String id, String ipr, String ipr_pos) {
+		this(id, ipr);
+		domain_pos.add(ipr_pos);
 	}
 }
