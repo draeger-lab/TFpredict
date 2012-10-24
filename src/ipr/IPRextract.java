@@ -22,6 +22,7 @@ package ipr;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.StringTokenizer;
 
 /*
  * 
@@ -47,7 +48,11 @@ public class IPRextract {
 			String[] domain_entry = IPRoutput.get(i);
 			String sequence_id = domain_entry[0].trim();
 			String domain_id = domain_entry[11].trim();
-			String domain_interval = domain_id + "    " + domain_entry[6].trim() + "\t" + domain_entry[7].trim();
+			int domain_start = Integer.parseInt(domain_entry[6]);
+			int domain_end = Integer.parseInt(domain_entry[7]);
+			int curr_domain_length = domain_end - domain_start + 1;
+			
+			String domain_interval = domain_id + "    " + domain_start + "\t" + domain_end;
 			
 			// skip domains for which no InterPro-ID is given
 			if (domain_id.equals("NULL")) {
@@ -61,10 +66,18 @@ public class IPRextract {
 				if (!curr_entry.domain_ids.contains(domain_id)) {
 					curr_entry.domain_ids.add(domain_id);
 					curr_entry.domain_pos.add(domain_interval);
+				
+				// use longest instance of domain if multiple intervals were found for the same domain ID
+				} else {
+					int idx = curr_entry.domain_ids.indexOf(domain_id);
+					int old_domain_length = getDomainLength(curr_entry.domain_pos.get(idx));
+					if (curr_domain_length > old_domain_length) {
+						curr_entry.domain_pos.set(idx, domain_interval);
+					}
 				}
 				seq2domain.put(sequence_id, curr_entry);
-			}
-			else {
+			
+			} else {
 				if (label == null) {
 					curr_entry = new IprEntry(sequence_id, domain_id, domain_interval);
 				} else {
@@ -76,6 +89,14 @@ public class IPRextract {
 		return seq2domain;
 	}
 	
+	private static int getDomainLength(String domain_pos) {
+		StringTokenizer strtok = new StringTokenizer(domain_pos);
+		strtok.nextToken();   // skip domain ID (e.g., IPR9381)
+		int domainStart = Integer.parseInt(strtok.nextToken());
+		int domainEnd = Integer.parseInt(strtok.nextToken());
+		int domainLength = domainEnd - domainStart + 1; 
+		return domainLength;
+	}
 	
 	public static HashMap<String, ArrayList<String>> getDomain2SeqMap(ArrayList<String[]> IPRoutput) {
 		
