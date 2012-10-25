@@ -11,7 +11,6 @@
   - Installation
   - Manual
   - Format specification
-  - Citation
   - Website and questions
 ____________________________________________________________________________________________________________________________  
 
@@ -139,23 +138,6 @@ ________________________________________________________________________________
   XX
   //
   XX
-
-  ____________________________________________________________________________________________________________________________
-
-  --------
-  Citation
-  --------
-
-  If you use TFpredict in any published work, please cite the following article:
-
-  @UNPUBLISHED{eichner2012,
-	author = {Johannes Eichner and Florian Topf and Andreas Dr\"ager and Clemens Wrzodek 
-		  	  and Dierk Wanke and Andreas Zell},
-	title = {{TFpredict and SABINE: Support Vector Machines-based prediction of structural and functional characteristics 
-	          of transcription factors}},
-	note = {Submitted to Bioinformatics},
-	year = {2012}
-  }
 
   ____________________________________________________________________________________________________________________________
 
