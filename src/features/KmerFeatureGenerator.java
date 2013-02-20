@@ -117,8 +117,15 @@ public class KmerFeatureGenerator {
 	private void writeFeatureFile() {
 		
 		ArrayList<String> libSVMfeatures = new ArrayList<String>();
+		ArrayList<String> proteinNames = new ArrayList<String>();
 		
+		int seqCnt= 0;
 		for (String seqID: seq2kmerCounts.keySet()) {
+			proteinNames.add(seqID);
+			seqCnt++;
+			if (seqCnt % 1000 == 0) {
+				System.out.println("Processed " + seqCnt + " / " + seq2kmerCounts.size() + " sequences.");
+			}
 
 			int label = seq2label.get(seqID);
 			StringBuffer featureString = new StringBuffer("" + label);
@@ -141,6 +148,8 @@ public class KmerFeatureGenerator {
 			}
 			libSVMfeatures.add(featureString.toString());
 		}
+
 		BasicTools.writeArrayList2File(libSVMfeatures, featureFile);
+		BasicTools.writeArrayList2File(proteinNames, featureFile.replace(".txt", "_names.txt"));
 	}
 }

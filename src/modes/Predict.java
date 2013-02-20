@@ -130,13 +130,13 @@ public class Predict {
 	private HashMap<String, Boolean> annotatedClassAvailable = new HashMap<String, Boolean>();
 	private HashMap<String, Boolean> domainsPredicted = new HashMap<String, Boolean>();
 	
-	private static final int Non_TF = 0;
-	private static final int TF = 1;
-	private static final int Basic_domain = 1;
-	private static final int Zinc_finger = 2;
-	private static final int Helix_turn_helix = 3;
-	private static final int Beta_scaffold = 4;
-	private static final int Other = 0;
+	public static final int Non_TF = 0;
+	public static final int TF = 1;
+	public static final int Basic_domain = 1;
+	public static final int Zinc_finger = 2;
+	public static final int Helix_turn_helix = 3;
+	public static final int Beta_scaffold = 4;
+	public static final int Other = 0;
 	private static final String[] superclassNames = new String[] {"Other", "Basic domain", "Zinc finger", "Helix-turn-helix", "Beta scaffold"};
 	
 	static DecimalFormat df = new DecimalFormat("0.00");

@@ -60,12 +60,18 @@ public class FeatureGenerator {
 	 *  Pseudo amino acid composition features
 	 */
 	
-	private static void generatePseudoFeaturesTFpred(String fastaFile, String featureDir) {
-		//TODO
+	private static void generatePseudoAAcFeaturesTFpred(String fastaFile, String featureDir) {
+		generatePseudoAAcFeatures(fastaFile, featureDir, false);
 	}
 	
-	private static void generatePseudoFeaturesSuperPred(String fastaFile, String featureDir) {
-		//TODO
+	private static void generatePseudoAAcFeaturesSuperPred(String fastaFile, String featureDir) {
+		generatePseudoAAcFeatures(fastaFile, featureDir, true);
+	}
+	
+	private static void generatePseudoAAcFeatures(String fastaFile, String featureDir, boolean superPred) {
+		String featureFile = featureDir + FeatureType.pseudo.featureFileName;
+		PseudoAAcFeatureGenerator featureGenerator = new PseudoAAcFeatureGenerator(fastaFile, featureFile, superPred);
+		featureGenerator.generatePseudoAAcFeatures();
 	}
 	
 	/*
@@ -90,14 +96,19 @@ public class FeatureGenerator {
 	 *  Percentile features
 	 */
 	
-	private static void generatePercentileFeaturesTFpred(String fastaFile, String featureFile) {
-		//TODO
+	private static void generatePercentileFeaturesTFpred(String fastaFile, String featureDir) {
+		generatePercentileFeatures(fastaFile, featureDir, false);
 	}
 	
-	private static void generatePercentileFeaturesSuperPred(String fastaFile, String featureFile) {
-		//TODO
+	private static void generatePercentileFeaturesSuperPred(String fastaFile, String featureDir) {
+		generatePercentileFeatures(fastaFile, featureDir, true);
 	}
 
+	private static void generatePercentileFeatures(String fastaFile, String featureDir, boolean superPred) {
+		String featureFile = featureDir + FeatureType.percentile.featureFileName;
+		PercentileFeatureGenerator featureGenerator = new PercentileFeatureGenerator(fastaFile, featureFile, superPred);
+		featureGenerator.generateFeatures();
+	}
 	
 	
 	@SuppressWarnings("unused")
@@ -106,31 +117,34 @@ public class FeatureGenerator {
 		// set paths to input files
 		String dataDir = "/rahome/eichner/projects/tfpredict/data/";
 		
-		String fastaFileTFnonTF =  dataDir + "tf_pred/fasta_files/TFnonTF.fasta"; 
-		String fastaFileSuper =  dataDir + "super_pred/fasta_files/superclassTF.fasta"; 
+		String fastaFileTF =  dataDir + "tf_pred/fasta_files/latest/TF.fasta"; 
+		String fastaFileNonTF =  dataDir + "tf_pred/fasta_files/latest/NonTF.fasta"; 
+		String fastaFileTFnonTF =  dataDir + "tf_pred/fasta_files/latest/TFnonTF.fasta"; 
 
-		String interproResultFileTF =  dataDir + "tf_pred/interpro_files/TF.fasta.out"; 
-		String interproResultFileNonTF = dataDir + "tf_pred/interpro_files/NonTF.fasta.out";
-		String interproResultFileSuper =  dataDir + "super_pred/interpro_files/superclassTF.fasta.out"; 
+		String interproResultFileTF =  dataDir + "tf_pred/interpro_files/latest/TF.fasta.out"; 
+		String interproResultFileNonTF = dataDir + "tf_pred/interpro_files/latest/NonTF.fasta.out";
 		
 		String tfFeatureDir = dataDir + "tf_pred/feature_files/latest/";
 		String superFeatureDir = dataDir + "super_pred/feature_files/latest/";
 		
 	    // generate domain-based features
-		generateDomainFeaturesTFpred(interproResultFileTF, interproResultFileNonTF, tfFeatureDir);
-		generateDomainFeaturesSuperPred(fastaFileSuper, interproResultFileSuper, superFeatureDir);
+		//generateDomainFeaturesTFpred(interproResultFileTF, interproResultFileNonTF, tfFeatureDir);
+		generateDomainFeaturesSuperPred(fastaFileTF, interproResultFileTF, superFeatureDir);
 		
 		// generate k-mer-based features
-		generateKmerFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
-		generateKmerFeaturesSuperPred(fastaFileSuper, superFeatureDir);
+		//generateKmerFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
+		//generateKmerFeaturesSuperPred(fastaFileTF, superFeatureDir);
 		
 		// generate PSSM-based features
-		generatePssmFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
-		generatePssmFeaturesSuperPred(fastaFileSuper, superFeatureDir);
+		//generatePssmFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
+		//generatePssmFeaturesSuperPred(fastaFileTF, superFeatureDir);
 
-		// generate percentile features
-		generatePercentileFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
-		generatePercentileFeaturesSuperPred(fastaFileSuper, superFeatureDir);
+		// generate pseudo-amino-acid features
+		//generatePseudoAAcFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
+		//generatePseudoAAcFeaturesSuperPred(fastaFileTF, superFeatureDir);
 		
+		// generate percentile features
+		//generatePercentileFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
+		//generatePercentileFeaturesSuperPred(fastaFileTF, superFeatureDir);
 	}
 }

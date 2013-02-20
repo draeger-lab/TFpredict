@@ -43,7 +43,7 @@ public class FourFieldTest {
 		Summon tfsummon = new Summon(iprs, iprTF2ids);
 		Thread tfsummonthread = new Thread(tfsummon);
 		
-		Summon nontfsummon = new Summon(iprs, iprTF2ids);
+		Summon nontfsummon = new Summon(iprs, iprNONTF2ids);
 		Thread nontfsummonthread = new Thread(nontfsummon);
 		
 		tfsummonthread.start();
@@ -130,6 +130,10 @@ public class FourFieldTest {
 		// d (nontf, nonipr)
 		int d = sum_nontf - num_nontfs_ipr;
 		
+		if (d < 0) {
+			System.out.println(d);
+		}
+		
 		// four field test matrix
 		double[][] matrix = new double[2][2];
 		matrix[0][0] = a;
@@ -147,6 +151,7 @@ public class FourFieldTest {
 		}
 		else {
 			try {
+				
 				pvalue = TestUtils.chiSquareTest(conv2long(matrix));
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();

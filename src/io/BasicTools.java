@@ -35,6 +35,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
+import org.apache.commons.math.stat.descriptive.moment.Mean;
+import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
+import org.apache.commons.math.stat.descriptive.rank.Min;
+import org.apache.commons.math.stat.descriptive.rank.Percentile;
+
 import resources.Resource;
 
 public class BasicTools {
@@ -75,7 +80,7 @@ public class BasicTools {
 	public static void writeSplittedArrayList2File(ArrayList<String[]> arraylist, String outfile) {
 		
 		ArrayList<String> collapsedList = new ArrayList<String>();
-		for (int i=1; i<arraylist.size(); i++) {
+		for (int i=0; i<arraylist.size(); i++) {
 			StringBuffer currLine = new StringBuffer();
 			for (String token: arraylist.get(i)) {
 				currLine.append(token + "\t");
@@ -555,6 +560,41 @@ public class BasicTools {
 		}
 		return resArray;
 	}
+	
+	public static double[] transform2zScores(double[] array) {
+		
+		Mean mean = new Mean();
+		StandardDeviation sd = new StandardDeviation(false);
+		
+		double mu = mean.evaluate(array);
+		double sigma = sd.evaluate(array);
+		
+		double[] zScores = new double[array.length];
+		for (int i=0; i<array.length; i++) {
+			zScores[i] = (array[i] - mu) / sigma;
+		}
+		return(zScores);
+	}
+	
+	
+	public static double computePercentile(double[] array, double perc) {
+		
+		double res = 0;
+		if (perc == 0) {
+			Min minCalculator = new Min();
+			res = minCalculator.evaluate(array);
+			
+		} else if (perc <= 100) {
+			Percentile percCalculator = new Percentile();
+			res = percCalculator.evaluate(array, perc);
+			
+		} else {
+			System.out.println("Error. Percentile has to be between 0 and 100.");
+			System.exit(0);
+		}
+		return(res);
+	}
+
 } 
 
 

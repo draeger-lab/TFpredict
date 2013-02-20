@@ -85,6 +85,7 @@ public abstract class BLASTfeatureGenerator {
 			if (!silent) System.out.println("Processing sequence: " + seqID + "\t(" + seqCnt++ + "/" + sequences.size() + ")");
 			
 			if (pssmFeat) {
+
 				pssms.put(seqID, getPsiBlastPSSM(infileFasta, database, outfileHits, outfilePSSM, numIter).toArray(new int[][]{}));
 			
 			} else {
@@ -100,7 +101,7 @@ public abstract class BLASTfeatureGenerator {
 		BasicTools.runCommand(cmd, false);
 		
 		// read PSI-BLAST output from temporary files
-		ArrayList<String> hitsTable = BasicTools.readFile2List(hitsOutfile, true);
+		ArrayList<String> hitsTable = BasicTools.readFile2List(hitsOutfile, false);
 		HashMap<String, Double> currHits = new HashMap<String, Double>();
 		
 		int lineIdx = 0;
@@ -110,9 +111,9 @@ public abstract class BLASTfeatureGenerator {
 		while (lineIdx < hitsTable.size() && !(line = hitsTable.get(lineIdx)).startsWith("Sequences producing significant alignments")) {
 			lineIdx++;
 		}
-		lineIdx++; 
+		lineIdx = lineIdx + 2; 
 
-		while (lineIdx < hitsTable.size() && !(line = hitsTable.get(lineIdx)).startsWith(">")) {
+		while (lineIdx < hitsTable.size() && !hitsTable.get(lineIdx).isEmpty() && !(line = hitsTable.get(lineIdx)).startsWith(">")) {
 			
 			StringTokenizer strtok = new StringTokenizer(line);
 			String hitID = strtok.nextToken();
@@ -167,17 +168,21 @@ public abstract class BLASTfeatureGenerator {
 	protected void writeFeatureFile() {
 		
 		ArrayList<String> libSVMfeatures = new ArrayList<String>();
-
+		ArrayList<String> sequenceNames = new ArrayList<String>();
+		
 		for (String seqID: features.keySet()) {
 			
+			sequenceNames.add(seqID);
 			double[] featureVector = features.get(seqID);
 			int label = seq2label.get(seqID);
 			StringBuffer featureString = new StringBuffer("" + label);
 			for (int i=0; i<featureVector.length; i++) {
-				featureString.append( " " + (i+1) + ":" + featureVector[i]);
+				if (featureVector[i] == 0) continue;     // skip features with value zero
+				featureString.append( " " + (i+1) + ":" + (featureVector[i] + "").replaceFirst("\\.0$", ""));
 			}
 			libSVMfeatures.add(featureString.toString());
 		}
 		BasicTools.writeArrayList2File(libSVMfeatures, featureFile);
+		BasicTools.writeArrayList2File(sequenceNames, featureFile.replace(".txt", "_names.txt"));
 	}
 }

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import modes.Predict;
+import io.BasicTools;
 import ipr.IprEntry;
 
 
@@ -26,6 +27,8 @@ public class LibSVMOutfileWriter {
 	public int[] write(ArrayList<String> domainIDs, HashMap<String, IprEntry> seq2domain, String outfile) {
 		
 		ArrayList<String> libsvmFeatureTable = new ArrayList<String>();
+		ArrayList<String> excludedSequences = new ArrayList<String>();
+		HashMap<Integer, ArrayList<String>> feat2seq = new HashMap<Integer, ArrayList<String>>();
 
 		// check if feature file for superclass prediction shall be generated
 		boolean superclassFeatures = false;
@@ -44,8 +47,8 @@ public class LibSVMOutfileWriter {
 		String label;
 		
 		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
-			
+			BufferedWriter bw_libsvmfile = new BufferedWriter(new FileWriter(new File(outfile)));
+
 			for (String currSeq : seq2domain.keySet()) {
 				
 				IprEntry curr_entry = seq2domain.get(currSeq);
@@ -67,27 +70,65 @@ public class LibSVMOutfileWriter {
 				
 				String fvector = Predict.createIPRvector(curr_entry.domain_ids, domainIDs, Predict.featureOffset);
 				String line = label + " " + fvector + "\n";
-				if (!fvector.isEmpty() && !libsvmFeatureTable.contains(line)) {
+				
+				// save names of sequences for which no feature vector could be generated as no InterPro domains were found
+				if (fvector.isEmpty()) {
+					excludedSequences.add(currSeq);
+					continue;
+				}
+				
+				if (currSeq.equals("GL2_P46607_MatBase")) {
+					System.out.println("Superclass: " + curr_entry.superclass);
+				}
+				
+				// save mapping from feature vectors to (multiple) sequence IDs
+				int featVecIdx = libsvmFeatureTable.indexOf(line);
+				if (featVecIdx != -1) {
+					ArrayList<String> currSeqIDs = feat2seq.get(featVecIdx);
+					currSeqIDs.add(currSeq);
+					feat2seq.put(featVecIdx, currSeqIDs);
+					continue;
+				
+				} else {
 					libsvmFeatureTable.add(line);
-					bw.write(line);
+					bw_libsvmfile.write(line);
 					
-					if (curr_entry.isTF) {
-						if (superclassFeatures) {
-							numFeatureVectors[curr_entry.superclass]++;
-						} else {
-							numFeatureVectors[0]++;
-						}
+					ArrayList<String> currSeqIDs = new ArrayList<String>();
+					currSeqIDs.add(currSeq);
+					feat2seq.put(feat2seq.size(), currSeqIDs);
+				}
+
+				if (curr_entry.isTF) {
+					if (superclassFeatures) {
+						numFeatureVectors[curr_entry.superclass]++;
 					} else {
-						numFeatureVectors[1]++;
+						numFeatureVectors[0]++;
 					}
+				} else {
+					numFeatureVectors[1]++;
 				}
 			}
-			bw.flush();
-			bw.close();
+			bw_libsvmfile.flush();
+			bw_libsvmfile.close();
 		}
 		catch(IOException ioe) {
 			System.out.println(ioe.getMessage());
 			System.out.println("IOException occurred while writing output file");
+		}
+		
+		// write Sequence IDs for each feature vector to file
+		String namesFile = outfile.replace(".txt", "_names.txt");
+		ArrayList<String[]> namesList = new ArrayList<String[]>();
+		for (int i=0; i<feat2seq.size(); i++) {
+			namesList.add(feat2seq.get(i).toArray(new String[]{}));
+		}
+		BasicTools.writeSplittedArrayList2File(namesList, namesFile);
+		
+		// write names of proteins for which no feature vectors were generated to file
+		String excludedNamesFile = outfile.replace(".txt", "_excluded.txt");
+		if (!excludedSequences.isEmpty()) {
+			System.out.println("Excluded " + excludedSequences.size() + " protein sequences with empty feature vectors.");
+			BasicTools.writeArrayList2File(excludedSequences, excludedNamesFile);
 		}
 		return numFeatureVectors;
 	}
