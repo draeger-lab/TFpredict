@@ -209,6 +209,7 @@ public class WekaClassifier {
 	
 	private void runNestedCV() {
 		
+		
 		if (selectedClassifier == ClassificationMethod.RandomForest.name()) {
 			classResult = runNestedCVRandomForest();
 			
@@ -223,7 +224,7 @@ public class WekaClassifier {
 		
 		} else if (selectedClassifier == ClassificationMethod.NaiveBayes.name()) {
 			classResult = runNestedCVNaiveBayes();
-	
+		
 		} else if (selectedClassifier == ClassificationMethod.Kstar.name()) {
 			classResult = runNestedCVKStar();
 		
@@ -565,8 +566,8 @@ public class WekaClassifier {
 					bw.write("# Class Probabilities\tLabels\n");
 				}
 				
-				int trainSetSize = classResult[i].classLabels.length;
-				for (int j=0; j<trainSetSize; j++) {
+				int testSetSize = classResult[i].classLabels.length;
+				for (int j=0; j<testSetSize; j++) {
 					bw.write("(" + df.format(classResult[i].classProbabilities[j][0]));
 					for (int k=1; k<numClasses; k++) {
 						bw.write(", " + df.format(classResult[i].classProbabilities[j][k]));

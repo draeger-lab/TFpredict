@@ -8,6 +8,7 @@ import ipr.IprEntry;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -92,7 +93,7 @@ public class SuperPredDomainFeatureGenerator extends DomainFeatureGenerator {
 		
 		seq2domain = new HashMap<String, IprEntry>();
 		seq2domain.putAll(IPRextract.getSeq2DomainMap(iprOutputTF, true));
-		int numTrainSeq = seq2domain.size(); 
+		int numTrainSeq = seq2domain.size();
 		filterCurrentDomainsInSeq2DomMap();
 		
 		// read superclass for each TF sequence
@@ -102,8 +103,12 @@ public class SuperPredDomainFeatureGenerator extends DomainFeatureGenerator {
 		// add superclass to IprEntry objects
 		int[] tfsPerClassCounter = new int[] {0,0,0,0,0};
 		for (String seqID: seq2domain.keySet()) {
+			String uniprotID = seqID;
+			if (uniprotID.matches(".*_.*_.*")) {
+				uniprotID = uniprotID.split("_")[1];
+			}
 			IprEntry currEntry = seq2domain.get(seqID);
-			Integer currSuperclass = tf2superclass.get(seqID);
+			Integer currSuperclass = tf2superclass.get(uniprotID);
 			if (currSuperclass == null) {
 				System.out.println("Error. No superclass found for sequence: " + seqID);
 				System.exit(0);

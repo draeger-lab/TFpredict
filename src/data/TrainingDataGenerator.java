@@ -76,6 +76,39 @@ public class TrainingDataGenerator {
 		BasicTools.writeFASTA(newContent, outFile);
 	}
 	
+	// TF FASTA file: IRX3|A2VDX5|MatBase --> IRX3|A2VDX5|MatBase|TF|3.2.1.0.0
+	private static void adjustHeadersInFastafile(String fastaFile, String flatFile, String outputFile) {
+		
+		// read FASTA file
+		HashMap<String, String> sequences = BasicTools.readFASTA(fastaFile, true);
+		
+		// read SABINE flatfile
+		SabineTrainingSetParser parser = new SabineTrainingSetParser();
+		parser.parseTrainingset(flatFile);
+		
+		ArrayList<String> headers = new ArrayList<String>();
+		headers.addAll(sequences.keySet());
+		
+		HashMap<String, String> headerMap = new HashMap<String, String>();
+		for (String header: headers) {
+			int idx = parser.tf_names.indexOf(header);
+			if (idx == -1) {
+				System.out.println("Error. No entry found for TF: " + header);
+				System.exit(0);
+			}
+			
+			// TODO: adjust superclass string (C0022; trp; 3.5.1.2.4. --> 3.5.1.2.4.)
+			String newHeader = header + "|" + "TF" + "|" + parser.classes.get(idx);
+			headerMap.put(header, newHeader);
+		}
+		
+		// change headers of sequences and write FASTA file
+		for (String header: sequences.keySet()) {
+			sequences.put(headerMap.get(header), sequences.get(header));
+			sequences.remove(header);
+		}
+		BasicTools.writeFASTA(sequences, outputFile);
+	}
 	
 	private static void generateMergedFlatfile(String flatfile1, String flatfile2, String databaseName1, String databaseName2, String outputFile) {
 		
@@ -222,7 +255,6 @@ public class TrainingDataGenerator {
 	}
 	
 	
-	// adds DNA-binding domains parsed from InterPro result to SABINE flatfile
 	private static void filterFlatfileUsingFasta(String flatFile, String fastaFile, String outputFile) {
 		
 		// parse SABINE training set
@@ -234,6 +266,15 @@ public class TrainingDataGenerator {
 		ArrayList<String> tfNames = new ArrayList<String>();
 		tfNames.addAll(fastaSeqs.keySet());
 		
+		
+		// adjust headers (IRX3|A2VDX5|TF|1.2.1.4.3.|MatBase --> IRX3|A2VDX5|MatBase) to enable comparison
+		for (int i=0; i<tfNames.size(); i++) {
+			String[] splittedHeader = tfNames.get(i).split("\\|");
+			String newHeader = splittedHeader[NameField] + "|" + splittedHeader[UniProtIDField] + "|" + splittedHeader[DatabaseField]; 
+			tfNames.set(i, newHeader);
+		}
+		
+
 		for (int i=parser.tf_names.size()-1; i>=0; i--) {
 			if (!tfNames.contains(parser.tf_names.get(i))) {
 				parser.removeTF(i);
@@ -242,6 +283,133 @@ public class TrainingDataGenerator {
 		
 		// write SABINE training set with DBDs to file
 		parser.writeTrainingset(outputFile);
+	}
+	
+	// adds DNA-binding domains parsed from InterPro result to SABINE flatfile
+	private static void filterIPRscanFileUsingFasta(String iprFile, String fastaFile, String outputFile) {
+		
+		// read InterProScan output file
+		ArrayList<String[]> iprOutput = BasicTools.readFile2ListSplitLines(iprFile);
+		System.out.println("Number of parsed interpro domains: " + iprOutput.size());
+				
+		// read Fasta file
+		HashMap<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
+		ArrayList<String> tfNames = new ArrayList<String>();
+		tfNames.addAll(fastaSeqs.keySet());
+		for (int i=0; i<tfNames.size(); i++) {
+			tfNames.set(i, tfNames.get(i).split("\\|")[UniProtIDField]);
+		}
+		
+		// generate filtered InterProScan output file
+		for (int i=iprOutput.size()-1; i>=0; i--) {
+			String currSeqID = iprOutput.get(i)[0];
+			
+			// is Sequence ID of form P10628 or Hoxd4_P10628_MatBase ?
+			if (currSeqID.contains("_")) {
+				currSeqID = currSeqID.split("_")[UniProtIDField];
+			}
+			
+			if (!tfNames.contains(currSeqID)) {
+				iprOutput.remove(i);
+			}
+		}
+		System.out.println("Number of parsed interpro domains after filtering: " + iprOutput.size());
+		
+		BasicTools.writeSplittedArrayList2File(iprOutput, outputFile);
+	}	
+	
+	
+	// add superclass annotation to fasta file headers (IRX3|A2VDX5|MatBase --> IRX3|A2VDX5|TF|1.2.1.4.3.|MatBase)
+	private static void addSuperclass2Fasta(String sabineFlatfile, String inputFasta, String outputFasta) {
+		
+		// read FASTA file
+		HashMap<String, String> fastaSeqs = BasicTools.readFASTA(inputFasta, true);
+		
+		// generate mapping from TF names to superclasses
+		SabineTrainingSetParser parser = new SabineTrainingSetParser();
+		parser.parseTrainingset(sabineFlatfile);
+		HashMap<String, String> tfName2class = new HashMap<String, String>();
+		for (int i=0; i<parser.tf_names.size(); i++) {
+			tfName2class.put(parser.tf_names.get(i), parser.classes.get(i));
+		}
+		
+		HashMap<String, String> fastaSeqsWithSuperclass = new HashMap<String, String>();
+		for (String tfName: fastaSeqs.keySet()) {
+			
+			String currClass = tfName2class.get(tfName);
+			if (currClass.equals("NA")) {
+				continue;
+			} else {
+				currClass = TFdataTools.getTransfacClass(tfName2class.get(tfName));
+			}
+			
+			String[] splittedHeader = tfName.split("\\|");
+			String newHeader = splittedHeader[NameField] + "|" + splittedHeader[UniProtIDField] + "|TF|" + currClass + "|" + splittedHeader[DatabaseField-2];
+			fastaSeqsWithSuperclass.put(newHeader, fastaSeqs.get(tfName));
+		}
+		
+		// write FASTA file with modified headers
+		BasicTools.writeFASTA(fastaSeqsWithSuperclass, outputFasta);
+	}
+	
+	public static void printDoubletteUniprotID(String fastaFile) {
+		
+		HashMap<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
+		HashMap<String, String> uniprot2header = new HashMap<String, String>();
+		for (String header: fastaSeqs.keySet()) {
+			String uniprotID = header.split("\\|")[1];
+			if (!uniprot2header.containsKey(uniprotID)) {
+				uniprot2header.put(uniprotID, header);
+			} else {
+				System.out.println("(1) " + uniprot2header.get(uniprotID) + "\t(2) " + header);
+			}
+		}
+	}
+	 
+	public static void adjustHeadersInIPRscanFile(String iprFile, String fastaFile, String outputFile) {
+		
+		// generate mapping from TF names to UniProt IDs
+		HashMap<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
+		HashMap<String, String> tfName2uniprot = new HashMap<String, String>();
+		for (String header: fastaSeqs.keySet()) {
+			String tfName = header.split("\\|")[0];
+			String uniprotID = header.split("\\|")[1];
+			if (!tfName2uniprot.containsKey(tfName)) {
+				tfName2uniprot.put(tfName, uniprotID);
+			} else {
+				System.out.println("Name: " + tfName + "\tUniProt: " + uniprotID + " is already in map.");
+			}
+		}
+		
+		// read InterProScan output file
+		ArrayList<String[]> iprOutput = BasicTools.readFile2ListSplitLines(iprFile);
+		System.out.println("Number of parsed interpro domains: " + iprOutput.size());
+		
+		boolean[] irrelLines = new boolean[iprOutput.size()];
+		for (int i=0; i<iprOutput.size(); i++) {
+			String[] currLine = iprOutput.get(i);
+			String[] splittedID = currLine[0].split("_");
+			if (splittedID[UniProtIDField].equals("NA")) {
+				String currName = splittedID[NameField];
+				if (tfName2uniprot.containsKey(currName)) {
+					String currUniprot = tfName2uniprot.get(currName);
+					currLine[0] = splittedID[NameField] + "_" + currUniprot + "_" + splittedID[DatabaseField-2];
+					System.out.println(currLine[0]);
+					iprOutput.set(i, currLine);
+					
+				} else {
+					irrelLines[i] = true;
+				}
+			} 
+		}
+		for (int i=iprOutput.size()-1; i>=0; i--) {
+			if (irrelLines[i]) {
+				iprOutput.remove(i);
+			}
+		}
+		System.out.println("Number of parsed interpro domains after filtering: " + iprOutput.size());
+		
+		BasicTools.writeSplittedArrayList2File(iprOutput, outputFile);
 	}
 	
 	public static void main(String args[]) {
@@ -321,6 +489,7 @@ public class TrainingDataGenerator {
 		 *  replace DBDs in old public/proprietary training set by InterPro domains
 		 */
 		
+		/*
 		String sabineTrainingsetBiobase = "/rahome/eichner/workspace/SABINE/data/trainingsets_biobase/trainingset_full.txt";
 		String sabineTrainingsetBiobaseInterpro = "/rahome/eichner/workspace/SABINE/data/trainingsets_biobase_interpro/trainingset_biobase_interpro.txt";
 		String sabineTrainingsetPublic = "/rahome/eichner/workspace/SABINE/data/trainingsets_public/trainingset_public.txt";
@@ -330,5 +499,57 @@ public class TrainingDataGenerator {
 		
 		addDBDs2Flatfile(sabineTrainingsetBiobase, domainsTrainingsetBiobase, sabineTrainingsetBiobaseInterpro);
 		addDBDs2Flatfile(sabineTrainingsetPublic, domainsTrainingsetBiobase, sabineTrainingsetPublicInterpro);
+		*/
+		
+		/*
+		 *  adjust InterPro files based on CD-HIT-filtered FASTA files
+		 */
+		
+		String baseDir = "/rahome/eichner/projects/tfpredict/data/tf_pred/";
+		/*
+		String fastaDir = baseDir + "fasta_files/latest/";
+		String interproDir = baseDir + "interpro_files/latest/";
+		
+		String trainTFfasta = fastaDir + "TF_cdhit80.fasta";
+		String trainTFinterpro = interproDir + "TF.fasta.out";
+		String trainTFinterproFiltered = interproDir + "TF_cdhit80.fasta.out";
+		filterIPRscanFileUsingFasta(trainTFinterpro, trainTFfasta, trainTFinterproFiltered);
+		
+		String trainNonTFfasta = fastaDir + "NonTF_cdhit80.fasta";
+		String trainNonTFinterpro = interproDir + "NonTF.fasta.out";
+		String trainNonTFinterproFiltered = interproDir + "NonTF_cdhit80.fasta.out";		
+		filterIPRscanFileUsingFasta(trainNonTFinterpro, trainNonTFfasta, trainNonTFinterproFiltered);
+		
+
+		String nonTfTrainFasta = fastaDir + "latest/NonTF_cdhit80.fasta";			 // 24351 Non-TFs
+		String nonTfTrainInterpro = interproDir + "NonTF_cdhit80.fasta.out";		 // 290056 Domains
+		String tfTrainFasta = fastaDir + "TF_cdhit80.fasta";						 // 1648 TFs
+		String tfTrainInterpro = interproDir + "TF_cdhit80.fasta.out";				 // 23155 Domains
+		 */
+		 
+		/*
+		 *  Add superclass annotation to TF fastafile headers
+		 */
+		String sabineTrainFlatfile = baseDir + "sabine_files/29.11.2012/TF_cdhit80.txt";
+		String sabineTrainFlatfileWithSuper = baseDir + "sabine_files/29.11.2012/TF_cdhit80_withSuper.txt";      
+		String tfTrainFasta = baseDir + "fasta_files/29.11.2012/TF_cdhit80.fasta"; 
+		String nontfTrainFasta = baseDir + "fasta_files/latest/NonTF.fasta"; 
+		String tfTrainFastaWithSuper = baseDir + "fasta_files/29.11.2012/TF_cdhit80_withSuper.fasta";
+		String tfTrainFastaWithSuperAndUniProt = baseDir + "fasta_files/12.02.2013/TF.fasta";
+		String tfTrainInterpro = baseDir + "interpro_files/29.11.2012/TF_cdhit80.fasta.out";
+		String nontfTrainInterpro = baseDir + "interpro_files/latest/NonTF.fasta.out";
+		String nontfTrainInterproFiltered = baseDir + "interpro_files/latest/NonTF_filtered.fasta.out";
+		String tfTrainInterproFiltered = baseDir + "interpro_files/29.11.2012/TF_cdhit80_filtered.fasta.out";
+		String tfTrainInterproFilteredWithUniProt = baseDir + "interpro_files/29.11.2012/TF_cdhit80_filtered_uniprot.fasta.out";
+		
+		/*
+		addSuperclass2Fasta(sabineTrainFlatfile, tfTrainFasta, tfTrainFastaWithSuper);
+		filterFlatfileUsingFasta(sabineTrainFlatfile, tfTrainFastaWithSuper,  sabineTrainFlatfileWithSuper);
+		*/
+		filterIPRscanFileUsingFasta(nontfTrainInterpro, nontfTrainFasta, nontfTrainInterproFiltered);
+		
+		//adjustHeadersInIPRscanFile(tfTrainInterproFiltered, tfTrainFastaWithSuperAndUniProt, tfTrainInterproFilteredWithUniProt);
+
+		
 	}
 }

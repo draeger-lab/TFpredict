@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
+import data.TrainingDataGenerator;
+
 public abstract class DomainFeatureGenerator {
 	
 	protected static final String domainDescriptionURL = "ftp://ftp.ebi.ac.uk/pub/databases/interpro/names.dat";
@@ -20,7 +22,6 @@ public abstract class DomainFeatureGenerator {
 	protected String basedir = "";
 	protected ArrayList<String> relevantDomainIDs = new ArrayList<String>();
 	protected HashMap<String, IprEntry> seq2domain = new HashMap<String, IprEntry>();
-	
 	
 	protected static ArrayList<String> filterCurrentDomainsInSet(Set<String> domainSet, ArrayList<String> currentDomains) {
 		ArrayList<String> domainsList = new ArrayList<String>();
@@ -107,17 +108,17 @@ public abstract class DomainFeatureGenerator {
 			String[] splittedHeader = header.split("\\|");
 			String seqID = header;
 			if (useUniprotIDasKey) { 
-				seqID = splittedHeader[2];
+				seqID = splittedHeader[TrainingDataGenerator.UniProtIDField];
 			}
 			
 			String labelField;
 			int classLabel = 0;
 			if (superPred) {
-				labelField = splittedHeader[4];
+				labelField = splittedHeader[TrainingDataGenerator.TransfacClassField];
 				classLabel = Integer.parseInt(labelField.substring(0, 1));
 			
 			} else {
-				labelField = splittedHeader[1];
+				labelField = splittedHeader[TrainingDataGenerator.ProteinClassField];
 				if (labelField.equals("TF")) {
 					classLabel = 1;
 				} else if (labelField.equals("NonTF")) {
