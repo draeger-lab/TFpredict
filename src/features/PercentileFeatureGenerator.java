@@ -20,6 +20,7 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 		this.featureFile = featureFile;
 		this.superPred = superPred;
 		this.pssmFeat = false;
+		this.naiveFeat = false;
 	}
 	
 	protected void computeFeaturesFromBlastResult() {
@@ -88,6 +89,9 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 				ArrayList<Double> scoresTF = new ArrayList<Double>();
 				ArrayList<Double> scoresNonTF = new ArrayList<Double>();
 				for (String hit: currHits.keySet()) {
+					if (hit.equals(seqID)) {
+						continue;
+					}
 					if (seq2label.get(hit) == 1) {
 						scoresTF.add(currHits.get(hit));
 						

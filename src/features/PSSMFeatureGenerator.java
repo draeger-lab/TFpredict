@@ -10,6 +10,7 @@ public class PSSMFeatureGenerator extends BLASTfeatureGenerator {
 		this.featureFile = featureFile;
 		this.superPred = superPred;
 		this.pssmFeat = true;
+		this.naiveFeat = false;
 	}
 	
 	protected void computeFeaturesFromBlastResult() {

@@ -118,10 +118,10 @@ public class WekaClassifier {
 	public enum ClassificationMethod {
 		RandomForest("Random Forest", "randomForest.model"),
 		DecisionTree("Decision Tree", "decisionTree.model"),
-		SVM_rbf("SVM rbf kernel", "svmRBF.model"),
+		//SVM_rbf("SVM rbf kernel", "svmRBF.model"),
 		SVM_linear("SVM linear kernel", "svmLinear.model"),
 		NaiveBayes("Naive Bayes", "naiveBayes.model"),
-		Kstar("K*", "kStar.model"),
+		//Kstar("K*", "kStar.model"),
 		KNN("kNN", "knn.model");
 		
 		public String printName;
@@ -188,7 +188,7 @@ public class WekaClassifier {
 		normalizeData(data);
 
 		// no model selection possible for Kstar and Naive Bayes
-		if (ClassificationMethod.valueOf(selectedClassifier).equals(ClassificationMethod.Kstar.name()) ||
+		if ( // ClassificationMethod.valueOf(selectedClassifier).equals(ClassificationMethod.Kstar.name()) ||
 				ClassificationMethod.valueOf(selectedClassifier).equals(ClassificationMethod.NaiveBayes.name())) {
 			performNestedCV = false;
 		}
@@ -215,19 +215,19 @@ public class WekaClassifier {
 			
 		} else if (selectedClassifier == ClassificationMethod.DecisionTree.name()) {
 			classResult = runNestedCVJ48();
-		
+		/*
 		} else if (selectedClassifier == ClassificationMethod.SVM_rbf.name()) {
 			classResult = runNestedCVLIBSVM();
-		
+		*/
 		} else if (selectedClassifier == ClassificationMethod.SVM_linear.name()) {
 			classResult = runNestedCVLIBLINEAR();
 		
 		} else if (selectedClassifier == ClassificationMethod.NaiveBayes.name()) {
 			classResult = runNestedCVNaiveBayes();
-		
+		/*
 		} else if (selectedClassifier == ClassificationMethod.Kstar.name()) {
 			classResult = runNestedCVKStar();
-		
+		*/
 		} else if (selectedClassifier == ClassificationMethod.KNN.name()) {
 			classResult = runNestedCVkNN();
 		

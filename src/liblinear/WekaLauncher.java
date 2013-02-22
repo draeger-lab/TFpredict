@@ -128,6 +128,14 @@ public class WekaLauncher {
 		
 		// read original feature file
 		ArrayList<String> featureVectors = BasicTools.readFile2List(libsvmFeatureFile, false);
+		for (int i=0; i<featureVectors.size(); i++) {
+			String currFeatVec = featureVectors.get(i);
+			if (currFeatVec.startsWith("-1")) {
+				featureVectors.set(i, currFeatVec.replaceFirst("-1", "0"));
+			} else if (currFeatVec.startsWith("+1")) {
+				featureVectors.set(i, currFeatVec.replaceFirst("\\+1", "1"));
+			}
+		}
 		
 		// reconstruct random splits and permutations performed by Weka during cross-validation
 		int [][][] cvSplit = new int[multiruns][folds][];
