@@ -11,11 +11,17 @@ import java.util.StringTokenizer;
 public abstract class BLASTfeatureGenerator {
 
 	protected static final String[] aminoAcids = new String[]{"A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"};
-	protected static final String path2BLAST = "/opt/blast/latest/";
+	protected static String path2BLAST = "/opt/blast/latest/";
+	static { 
+		if (BasicTools.isWindows()) {
+			path2BLAST = "C:/Programme/NCBI/blast-2.2.27+/";
+		}
+	}
 	
 	protected static boolean silent = false;
 	
 	protected boolean pssmFeat;
+	protected boolean naiveFeat;
 	protected boolean superPred;
 	
 	protected String fastaFile;
@@ -69,8 +75,16 @@ public abstract class BLASTfeatureGenerator {
 		
 			// prepare temporary files for PSI-BLAST output
 			String tempFilePrefix = "";
+			File localTempDir = new File("/rascratch/user/eichner/tmp/");
+
 			try {
-				tempFilePrefix = File.createTempFile("psiblast_", "").getAbsolutePath();
+				if (localTempDir.exists()) {
+					tempFilePrefix = File.createTempFile("psiblast_", "", localTempDir).getAbsolutePath();
+				
+				// use system default directory for temporary files
+				} else {
+					tempFilePrefix = File.createTempFile("psiblast_", "").getAbsolutePath();
+				}
 			
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -117,8 +131,10 @@ public abstract class BLASTfeatureGenerator {
 			
 			StringTokenizer strtok = new StringTokenizer(line);
 			String hitID = strtok.nextToken();
-			double hitScore = Double.parseDouble(strtok.nextToken());
-			
+			String nextToken;
+			while ((nextToken = strtok.nextToken()).startsWith("GO:"));   // skip GO terms in non-TF headers
+			double hitScore = Double.parseDouble(nextToken); 
+
 			currHits.put(hitID, hitScore);
 			lineIdx++;
 		}
@@ -177,7 +193,7 @@ public abstract class BLASTfeatureGenerator {
 			int label = seq2label.get(seqID);
 			StringBuffer featureString = new StringBuffer("" + label);
 			for (int i=0; i<featureVector.length; i++) {
-				if (featureVector[i] == 0) continue;     // skip features with value zero
+				if (!naiveFeat && featureVector[i] == 0) continue;     // skip features with value zero
 				featureString.append( " " + (i+1) + ":" + (featureVector[i] + "").replaceFirst("\\.0$", ""));
 			}
 			libSVMfeatures.add(featureString.toString());

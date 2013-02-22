@@ -46,6 +46,10 @@ public class BasicTools {
 	
 	public static final String duplicatedHeaderKey = "duplicated";
 	
+	public static boolean isWindows() {
+		return(System.getProperty("os.name").startsWith("Windows"));
+	}
+	
 	public static String[] wrapString(String string) {
 		return(wrapString(string, 60));
 	}

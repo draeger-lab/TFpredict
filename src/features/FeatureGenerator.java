@@ -1,5 +1,7 @@
 package features;
 
+import io.BasicTools;
+
 public class FeatureGenerator {
 
 	private static int kMin = 3;
@@ -9,6 +11,7 @@ public class FeatureGenerator {
 		
 		domain("domain_features.txt"),
 		kmer("kmer_features.txt"),
+		naive("naive_features.txt"),
 		percentile("percentile_features.txt"),
 		pssm("pssm_features.txt"),
 		pseudo("pseudo_features.txt");
@@ -93,6 +96,24 @@ public class FeatureGenerator {
 	}
 	
 	/*
+	 *  Naive approach (best  BLAST hit)
+	 */
+	
+	private static void generateNaiveFeaturesTFpred(String fastaFile, String featureDir) {
+		generateNaiveFeatures(fastaFile, featureDir, false);
+	}
+	
+	private static void generateNaiveFeaturesSuperPred(String fastaFile, String featureDir) {
+		generateNaiveFeatures(fastaFile, featureDir, true);
+	}
+
+	private static void generateNaiveFeatures(String fastaFile, String featureDir, boolean superPred) {
+		String featureFile = featureDir + FeatureType.naive.featureFileName;
+		NaiveFeatureGenerator featureGenerator = new NaiveFeatureGenerator(fastaFile, featureFile, superPred);
+		featureGenerator.generateFeatures();
+	}
+	
+	/*
 	 *  Percentile features
 	 */
 	
@@ -115,7 +136,11 @@ public class FeatureGenerator {
 	public static void main(String[] args) {
 
 		// set paths to input files
-		String dataDir = "/rahome/eichner/projects/tfpredict/data/";
+		String home_dir = "/rahome/eichner/";
+		if (BasicTools.isWindows()) {
+			home_dir = "R:/";
+		}
+		String dataDir = home_dir + "projects/tfpredict/data/";
 		
 		String fastaFileTF =  dataDir + "tf_pred/fasta_files/latest/TF.fasta"; 
 		String fastaFileNonTF =  dataDir + "tf_pred/fasta_files/latest/NonTF.fasta"; 
@@ -129,14 +154,18 @@ public class FeatureGenerator {
 		
 	    // generate domain-based features
 		//generateDomainFeaturesTFpred(interproResultFileTF, interproResultFileNonTF, tfFeatureDir);
-		generateDomainFeaturesSuperPred(fastaFileTF, interproResultFileTF, superFeatureDir);
+		//generateDomainFeaturesSuperPred(fastaFileTF, interproResultFileTF, superFeatureDir);
 		
 		// generate k-mer-based features
 		//generateKmerFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
 		//generateKmerFeaturesSuperPred(fastaFileTF, superFeatureDir);
 		
+		// generate naive features
+		generateNaiveFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
+		generateNaiveFeaturesSuperPred(fastaFileTF, superFeatureDir);
+		
 		// generate PSSM-based features
-		//generatePssmFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
+		generatePssmFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
 		//generatePssmFeaturesSuperPred(fastaFileTF, superFeatureDir);
 
 		// generate pseudo-amino-acid features
@@ -144,7 +173,7 @@ public class FeatureGenerator {
 		//generatePseudoAAcFeaturesSuperPred(fastaFileTF, superFeatureDir);
 		
 		// generate percentile features
-		//generatePercentileFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
+		generatePercentileFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
 		//generatePercentileFeaturesSuperPred(fastaFileTF, superFeatureDir);
 	}
 }
