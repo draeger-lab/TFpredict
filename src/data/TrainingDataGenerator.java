@@ -33,6 +33,8 @@ import ipr.IprRaw;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import modes.Predict;
 
@@ -77,13 +79,13 @@ public class TrainingDataGenerator {
 	// 2) adds TransFac classes (if available)
 	private static void adjustHeadersInMatbaseFastafile(String oldFastaFile, String oldFastaFileSuper, String outFile) {
 		
-		HashMap<String, String> oldContent = BasicTools.readFASTA(oldFastaFile, true);
-		HashMap<String, String> newContent = new HashMap<String, String>();
+		Map<String, String> oldContent = BasicTools.readFASTA(oldFastaFile, true);
+		Map<String, String> newContent = new HashMap<String, String>();
 		
 		// generate map from UniProt ID --> TransFac class based on FASTA headers
 		// example header: >sp|P41738|P41738|TF|1.2.6.0.1.
-		HashMap<String, String> superContent = BasicTools.readFASTA(oldFastaFileSuper, true);
-		HashMap<String, String> uniprot2superclass = new HashMap<String, String>();
+		Map<String, String> superContent = BasicTools.readFASTA(oldFastaFileSuper, true);
+		Map<String, String> uniprot2superclass = new HashMap<String, String>();
 		for (String superHeader: superContent.keySet()) {
 			String[] splittedHeader = superHeader.split("\\|");
 			uniprot2superclass.put(splittedHeader[2], splittedHeader[4]);
@@ -108,16 +110,16 @@ public class TrainingDataGenerator {
 	private static void adjustHeadersInFastafile(String fastaFile, String flatFile, String outputFile) {
 		
 		// read FASTA file
-		HashMap<String, String> sequences = BasicTools.readFASTA(fastaFile, true);
+		Map<String, String> sequences = BasicTools.readFASTA(fastaFile, true);
 		
 		// read SABINE flatfile
 		SabineTrainingSetParser parser = new SabineTrainingSetParser();
 		parser.parseTrainingset(flatFile);
 		
-		ArrayList<String> headers = new ArrayList<String>();
+		List<String> headers = new ArrayList<String>();
 		headers.addAll(sequences.keySet());
 		
-		HashMap<String, String> headerMap = new HashMap<String, String>();
+		Map<String, String> headerMap = new HashMap<String, String>();
 		for (String header: headers) {
 			int idx = parser.tf_names.indexOf(header);
 			if (idx == -1) {
@@ -159,10 +161,10 @@ public class TrainingDataGenerator {
 	
 	private static void generateMergedFastafile(String fastafile1, String fastafile2, String databaseName1, String databaseName2, String outputFile) {
 		
-		HashMap<String,String> mergedSeqs = new HashMap<String, String>();
+		Map<String,String> mergedSeqs = new HashMap<String, String>();
 
-		HashMap<String,String> fastaSeqs1 = BasicTools.readFASTA(fastafile1, true);
-		HashMap<String,String> fastaSeqs2 = BasicTools.readFASTA(fastafile2, true);
+		Map<String,String> fastaSeqs1 = BasicTools.readFASTA(fastafile1, true);
+		Map<String,String> fastaSeqs2 = BasicTools.readFASTA(fastafile2, true);
 		
 		// add all sequences from first FASTA file to merged FASTA file
 		for (String header: fastaSeqs1.keySet()) {
@@ -196,8 +198,8 @@ public class TrainingDataGenerator {
 	
 	private static void generateFastafile4SuperPred(String fastaFile, String outputFile) {
 		
-		HashMap<String,String> sequences = BasicTools.readFASTA(fastaFile, true);
-		HashMap<String,String> seqWithSuperclass = new HashMap<String, String>();
+		Map<String,String> sequences = BasicTools.readFASTA(fastaFile, true);
+		Map<String,String> seqWithSuperclass = new HashMap<String, String>();
 		
 		// filter TF sequences with superclass annotation
 		for (String header: sequences.keySet()) {
@@ -219,7 +221,7 @@ public class TrainingDataGenerator {
 		parser.parseTrainingset(flatFile);
 		
 		// extract IDs and sequences
-		HashMap<String,String> sequences = new HashMap<String, String>();
+		Map<String,String> sequences = new HashMap<String, String>();
 		for (int i=0; i<parser.tf_names.size(); i++) {
 			String currSeq = parser.sequences1.get(i);
 			if (currSeq == null) {
@@ -241,10 +243,10 @@ public class TrainingDataGenerator {
 		parser.parseTrainingset(flatFile);
 		
 		// read InterProScan output file and adjust TF names
-		ArrayList<String> relGOterms = BasicTools.readResource2List(Predict.relGOterms_file);
+		List<String> relGOterms = BasicTools.readResource2List(Predict.relGOterms_file);
 		@SuppressWarnings("unchecked")
-		HashMap<String, String> tfName2class = (HashMap<String, String>) ObjectRW.readFromResource(Predict.tfName2class_file);
-		ArrayList<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(interproFile);
+		Map<String, String> tfName2class = (Map<String, String>) ObjectRW.readFromResource(Predict.tfName2class_file);
+		List<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(interproFile);
 		for (int i=0; i<IPRoutput.size(); i++) {
 			String[] splittedLine = IPRoutput.get(i);
 			splittedLine[0] = splittedLine[0].replace("_", "|");
@@ -252,12 +254,12 @@ public class TrainingDataGenerator {
 		}
 		
 		// parse domains from InterProScan result
-		HashMap<String, IprEntry> seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
-		HashMap<String, IprRaw>	IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
+		Map<String, IprEntry> seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
+		Map<String, IprRaw>	IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
 		
 		IprRaw domainsRaw = IPRdomains.get("T00650|NA|TransFac");
 		
-		HashMap<String, IprProcessed> seq2bindingDomain = IPRprocess.filterIPRdomains(seq2domain, IPRdomains, relGOterms, tfName2class);
+		Map<String, IprProcessed> seq2bindingDomain = IPRprocess.filterIPRdomains(seq2domain, IPRdomains, relGOterms, tfName2class);
 		
 		for (int i=0; i<parser.tf_names.size(); i++) {
 			
@@ -290,8 +292,8 @@ public class TrainingDataGenerator {
 		parser.parseTrainingset(flatFile);
 		
 		// read Fasta file
-		HashMap<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
-		ArrayList<String> tfNames = new ArrayList<String>();
+		Map<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
+		List<String> tfNames = new ArrayList<String>();
 		tfNames.addAll(fastaSeqs.keySet());
 		
 		
@@ -317,12 +319,12 @@ public class TrainingDataGenerator {
 	private static void filterIPRscanFileUsingFasta(String iprFile, String fastaFile, String outputFile) {
 		
 		// read InterProScan output file
-		ArrayList<String[]> iprOutput = BasicTools.readFile2ListSplitLines(iprFile);
+		List<String[]> iprOutput = BasicTools.readFile2ListSplitLines(iprFile);
 		System.out.println("Number of parsed interpro domains: " + iprOutput.size());
 				
 		// read Fasta file
-		HashMap<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
-		ArrayList<String> tfNames = new ArrayList<String>();
+		Map<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
+		List<String> tfNames = new ArrayList<String>();
 		tfNames.addAll(fastaSeqs.keySet());
 		for (int i=0; i<tfNames.size(); i++) {
 			tfNames.set(i, tfNames.get(i).split("\\|")[UniProtIDField]);
@@ -351,17 +353,17 @@ public class TrainingDataGenerator {
 	private static void addSuperclass2Fasta(String sabineFlatfile, String inputFasta, String outputFasta) {
 		
 		// read FASTA file
-		HashMap<String, String> fastaSeqs = BasicTools.readFASTA(inputFasta, true);
+		Map<String, String> fastaSeqs = BasicTools.readFASTA(inputFasta, true);
 		
 		// generate mapping from TF names to superclasses
 		SabineTrainingSetParser parser = new SabineTrainingSetParser();
 		parser.parseTrainingset(sabineFlatfile);
-		HashMap<String, String> tfName2class = new HashMap<String, String>();
+		Map<String, String> tfName2class = new HashMap<String, String>();
 		for (int i=0; i<parser.tf_names.size(); i++) {
 			tfName2class.put(parser.tf_names.get(i), parser.classes.get(i));
 		}
 		
-		HashMap<String, String> fastaSeqsWithSuperclass = new HashMap<String, String>();
+		Map<String, String> fastaSeqsWithSuperclass = new HashMap<String, String>();
 		for (String tfName: fastaSeqs.keySet()) {
 			
 			String currClass = tfName2class.get(tfName);
@@ -382,8 +384,8 @@ public class TrainingDataGenerator {
 	
 	public static void printDoubletteUniprotID(String fastaFile) {
 		
-		HashMap<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
-		HashMap<String, String> uniprot2header = new HashMap<String, String>();
+		Map<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
+		Map<String, String> uniprot2header = new HashMap<String, String>();
 		for (String header: fastaSeqs.keySet()) {
 			String uniprotID = header.split("\\|")[1];
 			if (!uniprot2header.containsKey(uniprotID)) {
@@ -397,8 +399,8 @@ public class TrainingDataGenerator {
 	public static void adjustHeadersInIPRscanFile(String iprFile, String fastaFile, String outputFile) {
 		
 		// generate mapping from TF names to UniProt IDs
-		HashMap<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
-		HashMap<String, String> tfName2uniprot = new HashMap<String, String>();
+		Map<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
+		Map<String, String> tfName2uniprot = new HashMap<String, String>();
 		for (String header: fastaSeqs.keySet()) {
 			String tfName = header.split("\\|")[0];
 			String uniprotID = header.split("\\|")[1];
@@ -410,7 +412,7 @@ public class TrainingDataGenerator {
 		}
 		
 		// read InterProScan output file
-		ArrayList<String[]> iprOutput = BasicTools.readFile2ListSplitLines(iprFile);
+		List<String[]> iprOutput = BasicTools.readFile2ListSplitLines(iprFile);
 		System.out.println("Number of parsed interpro domains: " + iprOutput.size());
 		
 		boolean[] irrelLines = new boolean[iprOutput.size()];

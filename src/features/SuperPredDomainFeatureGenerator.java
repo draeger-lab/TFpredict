@@ -28,8 +28,9 @@ import ipr.IPRrun;
 import ipr.IprEntry;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -108,13 +109,13 @@ public class SuperPredDomainFeatureGenerator extends DomainFeatureGenerator {
 	public void writeFeatureFile() {
 		 
 		// parse output files from InterProScan
-		ArrayList<String[]> iprOutputTF = IPRrun.readIPRoutput(iprscanResultFileTF);
+		List<String[]> iprOutputTF = IPRrun.readIPRoutput(iprscanResultFileTF);
 		
 		// compute mapping from domain IDs to TF and Non-TF IDs, respectively
-		HashMap<String,ArrayList<String>> domain2seqTF = IPRextract.getDomain2SeqMap(iprOutputTF);
+		Map<String, List<String>> domain2seqTF = IPRextract.getDomain2SeqMap(iprOutputTF);
 		
 		// filter domains which 1) exist in current InterPro release and 2) were detected in sequences from training set 
-		ArrayList<String> currentDomains = downloadAllDomainIDs(); 
+		List<String> currentDomains = downloadAllDomainIDs(); 
 		relevantDomainIDs = filterCurrentDomainsInSet(domain2seqTF.keySet(), currentDomains);
 		domain2seqTF = filterCurrentDomainsInDom2SeqMap(domain2seqTF, relevantDomainIDs);
 		
@@ -124,8 +125,8 @@ public class SuperPredDomainFeatureGenerator extends DomainFeatureGenerator {
 		filterCurrentDomainsInSeq2DomMap();
 		
 		// read superclass for each TF sequence
-		HashMap<String, String> fastaFiles = BasicTools.readFASTA(fastaFileTF, true);
-		HashMap<String, Integer> tf2superclass = getLabelsFromFastaHeaders(fastaFiles.keySet(), true, true);
+		Map<String, String> fastaFiles = BasicTools.readFASTA(fastaFileTF, true);
+		Map<String, Integer> tf2superclass = getLabelsFromFastaHeaders(fastaFiles.keySet(), true, true);
 		
 		// add superclass to IprEntry objects
 		int[] tfsPerClassCounter = new int[] {0,0,0,0,0};
@@ -145,7 +146,7 @@ public class SuperPredDomainFeatureGenerator extends DomainFeatureGenerator {
 			seq2domain.put(seqID, currEntry);
 		}
 		
-		BasicTools.writeArrayList2File(relevantDomainIDs, basedir + relevantDomainsFile);
+		BasicTools.writeList2File(relevantDomainIDs, basedir + relevantDomainsFile);
 		LibSVMOutfileWriter libsvmwriter = new LibSVMOutfileWriter();
 		int[] numFeatVecRelevant = libsvmwriter.write(relevantDomainIDs, seq2domain, libsvmOutfile);
 		int numFeatVec = numFeatVecRelevant[0] + numFeatVecRelevant[1] + numFeatVecRelevant[2] + numFeatVecRelevant[3] + numFeatVecRelevant[4];

@@ -22,7 +22,7 @@
  */
 package ipr;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -34,13 +34,22 @@ public class IprRaw {
 	
 	public String domain_id;
 	public String[] domain_names;
-	public ArrayList<String> go_terms;
+	public List<String> go_terms;
 	
-	
+	/**
+	 * 
+	 */
 	public IprRaw() {
+		super();
 	}
 	
-	public IprRaw(String id, String[] doms, ArrayList<String> gos) {
+	/**
+	 * 
+	 * @param id
+	 * @param doms
+	 * @param gos
+	 */
+	public IprRaw(String id, String[] doms, List<String> gos) {
 		this.domain_id = id;
 		this.domain_names = doms;
 		this.go_terms = gos;

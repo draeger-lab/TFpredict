@@ -24,6 +24,8 @@ package ipr;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -38,13 +40,13 @@ import java.util.HashMap;
  */
 public class IPRprocess {
 
-	public static HashMap<String, IprProcessed> filterIPRdomains(HashMap<String,IprEntry> seq2domain, HashMap<String,IprRaw> IPRdomains, ArrayList<String> relGOterms, HashMap<String, String> tfName2class) {
+	public static Map<String, IprProcessed> filterIPRdomains(Map<String,IprEntry> seq2domain, Map<String,IprRaw> IPRdomains, List<String> relGOterms, Map<String, String> tfName2class) {
 		
-		HashMap<String, IprProcessed> seq2bindingDomain = new HashMap<String, IprProcessed>();
+		Map<String, IprProcessed> seq2bindingDomain = new HashMap<String, IprProcessed>();
 		
 		for (String sequence_id: seq2domain.keySet()) {
-			ArrayList<String> curr_domains = seq2domain.get(sequence_id).domain_ids;
-			ArrayList<String> curr_domain_pos = seq2domain.get(sequence_id).domain_pos;
+			List<String> curr_domains = seq2domain.get(sequence_id).domain_ids;
+			List<String> curr_domain_pos = seq2domain.get(sequence_id).domain_pos;
 			
 			for (int i=0; i<curr_domains.size(); i++) {
 				String domain_id = curr_domains.get(i);
@@ -65,7 +67,7 @@ public class IPRprocess {
 					String transfacClass = getTransfacClassAnno(iprDomain.domain_names, tfName2class);
 	
 					if (!seq2bindingDomain.containsKey(sequence_id)) {
-						ArrayList<String> bindingDomains = new ArrayList<String>();
+						List<String> bindingDomains = new ArrayList<String>();
 						bindingDomains.add(domain_pos);
 						IprProcessed currDBD = new IprProcessed(sequence_id, bindingDomains, transfacClass);
 						seq2bindingDomain.put(sequence_id, currDBD);
@@ -85,7 +87,11 @@ public class IPRprocess {
 	}
 
 
-	// returns the more specific class given two Transfac classes (i.e., x.x.x.x.x)
+	/**
+	 * @param transfacClass1
+	 * @param transfacClass2
+	 * @return the more specific class given two Transfac classes (i.e., x.x.x.x.x).
+	 */
 	private static String mergeTransfacClassAnnos(String transfacClass1, String transfacClass2) {
 		
 		String max = "";
@@ -98,7 +104,13 @@ public class IPRprocess {
 		return max;
 	}
 		
-	private static String getTransfacClassAnno(String[] domain_names, HashMap<String, String> tfName2class) {
+	/**
+	 * 
+	 * @param domain_names
+	 * @param tfName2class
+	 * @return
+	 */
+	private static String getTransfacClassAnno(String[] domain_names, Map<String, String> tfName2class) {
 		
 		String max = "";
 		String hit = "";

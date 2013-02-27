@@ -26,6 +26,8 @@ import io.BasicTools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.math.stat.descriptive.summary.Sum;
 
@@ -42,17 +44,17 @@ public class PseudoAAcFeatureGenerator {
     
     private static final String[] AAcs = {"A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y"};
 	private static final String aa_attr = "aa_attr.txt";
-	private static HashMap<String, Double> aac2hpho = new HashMap<String, Double>();
-	private static HashMap<String, Double> aac2hphi = new HashMap<String, Double>();
-	private static HashMap<String, Double> aac2mass = new HashMap<String, Double>();
+	private static Map<String, Double> aac2hpho = new HashMap<String, Double>();
+	private static Map<String, Double> aac2hphi = new HashMap<String, Double>();
+	private static Map<String, Double> aac2mass = new HashMap<String, Double>();
 	
 	protected String fastaFile;
 	protected String featureFile;
 	protected boolean superPred;
 	
-	protected HashMap<String, Integer> seq2label = new HashMap<String, Integer>();
-	protected HashMap<String, String> sequences = new HashMap<String, String>();
-	protected HashMap<String, double[]> features = new HashMap<String, double[]>();
+	protected Map<String, Integer> seq2label = new HashMap<String, Integer>();
+	protected Map<String, String> sequences = new HashMap<String, String>();
+	protected Map<String, double[]> features = new HashMap<String, double[]>();
 	
 	public PseudoAAcFeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
 		
@@ -93,8 +95,8 @@ public class PseudoAAcFeatureGenerator {
 	
 	private static void readAAcAttributes() {
 		
-		ArrayList<String> lines = BasicTools.readResource2List(aa_attr);
-		ArrayList<String[]> splittedLines = new ArrayList<String[]>();
+		List<String> lines = BasicTools.readResource2List(aa_attr);
+		List<String[]> splittedLines = new ArrayList<String[]>();
 		for (int i = 0; i < lines.size(); i++) {
 			String line = lines.get(i);
 			if (!line.isEmpty()) splittedLines.add(line.split("\t"));
@@ -117,7 +119,7 @@ public class PseudoAAcFeatureGenerator {
 		hphiValues = BasicTools.transform2zScores(hphiValues);
 		massValues = BasicTools.transform2zScores(massValues);
 		
-		// save amino acid properties in global HashMaps
+		// save amino acid properties in global Maps
 		for (int i=0; i<20; i++) {
 			aac2hpho.put(aminoAcids[i], hphoValues[i]);
 			aac2hphi.put(aminoAcids[i], hphiValues[i]);
@@ -188,8 +190,8 @@ public class PseudoAAcFeatureGenerator {
 	
 	private void writeFeatureFile() {
 		
-		ArrayList<String> libSVMfeatures = new ArrayList<String>();
-		ArrayList<String> sequenceNames = new ArrayList<String>();
+		List<String> libSVMfeatures = new ArrayList<String>();
+		List<String> sequenceNames = new ArrayList<String>();
 		
 		for (String seqID: features.keySet()) {
 			
@@ -206,8 +208,8 @@ public class PseudoAAcFeatureGenerator {
 			}
 			libSVMfeatures.add(featureString.toString());
 		}
-		BasicTools.writeArrayList2File(libSVMfeatures, featureFile);
-		BasicTools.writeArrayList2File(sequenceNames, featureFile.replace(".txt", "_names.txt"));
+		BasicTools.writeList2File(libSVMfeatures, featureFile);
+		BasicTools.writeList2File(sequenceNames, featureFile.replace(".txt", "_names.txt"));
 	}
 }
 

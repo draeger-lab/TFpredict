@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.commons.math.stat.descriptive.moment.Mean;
@@ -65,7 +67,7 @@ public class BasicTools {
 	
 	public static String[] wrapString(String string, int max_line_length) {
 
-		ArrayList<String> lines = new ArrayList<String>();
+		List<String> lines = new ArrayList<String>();
 
 		int numFullLines = string.length() / max_line_length;
 		for (int i=0; i < numFullLines; i++) {
@@ -90,9 +92,9 @@ public class BasicTools {
 		return(res);
 	}
 	
-	public static void writeSplittedArrayList2File(ArrayList<String[]> arraylist, String outfile) {
+	public static void writeSplittedArrayList2File(List<String[]> arraylist, String outfile) {
 		
-		ArrayList<String> collapsedList = new ArrayList<String>();
+		List<String> collapsedList = new ArrayList<String>();
 		for (int i=0; i<arraylist.size(); i++) {
 			StringBuffer currLine = new StringBuffer();
 			for (String token: arraylist.get(i)) {
@@ -100,11 +102,10 @@ public class BasicTools {
 			}
 			collapsedList.add(currLine.toString().trim());
 		}
-		writeArrayList2File(collapsedList, outfile);
+		writeList2File(collapsedList, outfile);
 	}
 	
-	public static void writeArrayList2File(ArrayList<String> arraylist, String outfile) {
-		
+	public static void writeList2File(List<String> arraylist, String outfile) {
 		String[] array = arraylist.toArray(new String[] {});
 		writeArray2File(array, outfile);
 	}
@@ -183,13 +184,13 @@ public class BasicTools {
 	}
 
 	
-	public static HashMap<String, String> readFASTA(String fasta_file) {
+	public static Map<String, String> readFASTA(String fasta_file) {
 		return readFASTA(fasta_file, false);
 	}
 	
-	public static HashMap<String, String> readFASTA(String fasta_file, boolean readFullHeader) {
+	public static Map<String, String> readFASTA(String fasta_file, boolean readFullHeader) {
 		
-		HashMap<String, String> sequences = new HashMap<String, String>();
+		Map<String, String> sequences = new HashMap<String, String>();
 		
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(new File(fasta_file)));
@@ -247,12 +248,12 @@ public class BasicTools {
 	
 	public static void writeFASTA(String header, String sequence, String output_file) {
 		
-		HashMap<String, String> sequenceMap = new HashMap<String, String>();
+		Map<String, String> sequenceMap = new HashMap<String, String>();
 		sequenceMap.put(header, sequence);
 		writeFASTA(sequenceMap, output_file);
 	}
 	
-	public static void writeFASTA(HashMap<String, String> sequences, String output_file) {
+	public static void writeFASTA(Map<String, String> sequences, String output_file) {
 		
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(output_file)));
@@ -272,18 +273,35 @@ public class BasicTools {
 			ioe.printStackTrace();
 		}
 	}
-		
-	public static ArrayList<String> readResource2List(String resourceName) {
+
+	/**
+	 * 
+	 * @param resourceName
+	 * @return
+	 */
+	public static List<String> readResource2List(String resourceName) {
 		return(readResource2List(resourceName, false));
 	}
 	
-	public static ArrayList<String> readResource2List(String resourceName, boolean upperCase) {
+	/**
+	 * 
+	 * @param resourceName
+	 * @param upperCase
+	 * @return
+	 */
+	public static List<String> readResource2List(String resourceName, boolean upperCase) {
 		return(readStream2List(Resource.class.getResourceAsStream(resourceName), upperCase));
 	}
+
+	/**
+	 * 
+	 * @param fileName
+	 * @param upperCase
+	 * @return
+	 */
+	public static List<String> readFile2List(String fileName, boolean upperCase) {
 		
-	public static ArrayList<String> readFile2List(String fileName, boolean upperCase) {
-		
-		ArrayList<String> fileContent = null;
+		List<String> fileContent = null;
 		
 		try {
 			fileContent = readStream2List(new FileInputStream(new File(fileName)), upperCase);
@@ -294,9 +312,15 @@ public class BasicTools {
 		return fileContent;
 	}
 	
-	public static ArrayList<String> readStream2List(InputStream stream, boolean upperCase) {
+	/**
+	 * 
+	 * @param stream
+	 * @param upperCase
+	 * @return
+	 */
+	public static List<String> readStream2List(InputStream stream, boolean upperCase) {
 		
-		ArrayList<String> fileContent = new ArrayList<String>();
+		List<String> fileContent = new ArrayList<String>();
 		
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(stream));
@@ -319,10 +343,10 @@ public class BasicTools {
 	}
 	
 	
-	public static HashMap<String, String> readFile2Map(String infile) {
+	public static Map<String, String> readFile2Map(String infile) {
 		
-		ArrayList<String[]> keyValueList = readFile2ListSplitLines(infile);
-		HashMap<String, String> keyValueMap= new HashMap<String,String>();
+		List<String[]> keyValueList = readFile2ListSplitLines(infile);
+		Map<String, String> keyValueMap= new HashMap<String,String>();
 		
 		for (String[] pair: keyValueList) {
 			
@@ -356,13 +380,13 @@ public class BasicTools {
 		return lines;
 	}
 	
-	public static ArrayList<String[]> readFile2ListSplitLines(String infile) {
+	public static List<String[]> readFile2ListSplitLines(String infile) {
 		return readFile2ListSplitLines(infile, false);
 	}
 	
-	public static ArrayList<String[]> readFile2ListSplitLines(String infile, boolean useTokenizer) {
+	public static List<String[]> readFile2ListSplitLines(String infile, boolean useTokenizer) {
 		
-		ArrayList<String[]> splittedLines = new ArrayList<String[]>();
+		List<String[]> splittedLines = new ArrayList<String[]>();
 		String line = null;
 		
 		try {
@@ -397,7 +421,7 @@ public class BasicTools {
 		return splittedLines;
 	}	
 	
-	public static ArrayList<String> union(ArrayList<String> list1, ArrayList<String> list2) {
+	public static List<String> union(List<String> list1, List<String> list2) {
 		
 		HashSet<String> unionSet = new HashSet<String>();
 		for (String element: list1) {
@@ -406,17 +430,17 @@ public class BasicTools {
 		for (String element: list2) {
 			unionSet.add(element);
 		}
-		ArrayList<String> union = new ArrayList<String>();
+		List<String> union = new ArrayList<String>();
 		union.addAll(unionSet);
 		
 		return(union);
 	}
 	
-	public static ArrayList<String> union(String[] list1, String[] list2) {
+	public static List<String> union(String[] list1, String[] list2) {
 		return(union(new ArrayList<String>(Arrays.asList(list1)), new ArrayList<String>(Arrays.asList(list2))));
 	}
 	
-	public static ArrayList<String> intersect(ArrayList<String> list1, ArrayList<String> list2) {
+	public static List<String> intersect(List<String> list1, List<String> list2) {
 		
 		HashSet<String> intersectionSet = new HashSet<String>();
 		for (String element: list1) {
@@ -424,37 +448,37 @@ public class BasicTools {
 				intersectionSet.add(element);
 			}
 		}
-		ArrayList<String> intersection = new ArrayList<String>();
+		List<String> intersection = new ArrayList<String>();
 		intersection.addAll(intersectionSet);
 		
 		return(intersection);
 	}
 	
-	public static ArrayList<String> setDiff(String[] list1, String[] list2) {
+	public static List<String> setDiff(String[] list1, String[] list2) {
 		return(setDiff(new ArrayList<String>(Arrays.asList(list1)), new ArrayList<String>(Arrays.asList(list2))));
 	}
 	
-	public static ArrayList<String> setDiff(ArrayList<String> list1, ArrayList<String> list2) {
+	public static List<String> setDiff(List<String> list1, List<String> list2) {
 		HashSet<String> diffSet = new HashSet<String>();
 		for (String element: list1) {
 			if (!list2.contains(element)) {
 				diffSet.add(element);
 			}
 		}
-		ArrayList<String> diff = new ArrayList<String>();
+		List<String> diff = new ArrayList<String>();
 		diff.addAll(diffSet);
 		
 		return(diff);
 	}
 	
-	public static ArrayList<String[]> combineLists(ArrayList<String> ids, ArrayList<Double> values) {
+	public static List<String[]> combineLists(List<String> ids, List<Double> values) {
 		
 		if (ids.size() != values.size()) {
 			System.out.println("Error. Lists have unequal sizes.");
 			System.out.println(1);
 		}
 		
-		ArrayList<String[]> mergedList = new ArrayList<String[]>();
+		List<String[]> mergedList = new ArrayList<String[]>();
 		for (int i=0; i<ids.size(); i++) {
 			mergedList.add(new String[] {ids.get(i), values.get(i).toString()});
 		}
@@ -485,7 +509,7 @@ public class BasicTools {
 	public static void main(String args[]) {
 		
 		String fasta_file = "/rahome/eichner/web_home/test_seq.fasta";
-		HashMap<String, String> sequences = readFASTA(fasta_file);
+		Map<String, String> sequences = readFASTA(fasta_file);
 		
 		for (String header: sequences.keySet()) {
 			System.out.println("> " + header);
@@ -507,7 +531,7 @@ public class BasicTools {
 			proc.waitFor();
 			
 			if (parseOutput) {
-				ArrayList<String> stdout = new ArrayList<String>();
+				List<String> stdout = new ArrayList<String>();
 				String line;
 				BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			
@@ -542,7 +566,7 @@ public class BasicTools {
 
 	public static int[] getAllIndicesOf(String string, String substring) {
 		
-		ArrayList<Integer> indices = new ArrayList<Integer>();
+		List<Integer> indices = new ArrayList<Integer>();
 		int index = string.indexOf(substring);
 		while(index >= 0) {
 			indices.add(index);

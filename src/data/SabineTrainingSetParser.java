@@ -177,10 +177,5 @@ public class SabineTrainingSetParser extends TFdataParser {
 			System.out.println("IOException occurred while parsing transcription factors .");
 		}
 	}
-	
-	
-	public static void main(String[] args) {
-		
-	
-	}
+
 }

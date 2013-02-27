@@ -28,6 +28,7 @@ import io.BasicTools;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import liblinear.WekaClassifier.ClassificationMethod;
 import modes.Predict;
@@ -61,6 +62,8 @@ public class TFpredictMain {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
+		java.util.Locale.setDefault(java.util.Locale.ENGLISH);
 		
 		if (args.length == 0) {
 			printCopyright();
@@ -251,7 +254,7 @@ public class TFpredictMain {
 		
 		// check species for compatibility with SABINE
 		if (cmd.hasOption("species")) { 
-			ArrayList<String> speciesList = BasicTools.readResource2List(sabineSpeciesList, true);
+			List<String> speciesList = BasicTools.readResource2List(sabineSpeciesList, true);
 			String species = cmd.getOptionValue("species");
 			if (!speciesList.contains(species.toUpperCase())) {
 				System.out.println("  Error. Unknown species: \"" + species + "\". A list of accepted values for the argument \"-species\" can be found here:");

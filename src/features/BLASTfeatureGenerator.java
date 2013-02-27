@@ -28,11 +28,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @author Andreas Dr&auml;ger
+ * @version $Rev$
+ * @since 1.0
+ */
 public abstract class BLASTfeatureGenerator {
-
+	
 	protected static final String[] aminoAcids = new String[]{"A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"};
 	
 	protected String path2BLAST;
@@ -53,10 +61,8 @@ public abstract class BLASTfeatureGenerator {
 	protected Map<String, Map<String, Double>> hits = new HashMap<String, Map<String, Double>>();
 	protected Map<String, int[][]> pssms = new HashMap<String, int[][]>();
 	protected Map<String, double[]> features = new HashMap<String, double[]>();
-	
-	static {
-		java.util.Locale.setDefault(java.util.Locale.ENGLISH);
-	}
+
+	private String pathForTmpDir;
 	
 	public void generateFeatures() {
 		
@@ -94,7 +100,7 @@ public abstract class BLASTfeatureGenerator {
 		
 			// prepare temporary files for PSI-BLAST output
 			String tempFilePrefix = "";
-			File localTempDir = new File("/rascratch/user/eichner/tmp/");
+			File localTempDir = new File(pathForTmpDir);
 
 			try {
 				if (localTempDir.exists()) {
@@ -134,7 +140,7 @@ public abstract class BLASTfeatureGenerator {
 		BasicTools.runCommand(cmd, false);
 		
 		// read PSI-BLAST output from temporary files
-		ArrayList<String> hitsTable = BasicTools.readFile2List(hitsOutfile, false);
+		List<String> hitsTable = BasicTools.readFile2List(hitsOutfile, false);
 		Map<String, Double> currHits = new HashMap<String, Double>();
 		
 		int lineIdx = 0;
@@ -161,14 +167,14 @@ public abstract class BLASTfeatureGenerator {
 	}
 	
 	
-	private ArrayList<int[]> getPsiBlastPSSM(String fastaFile, String database, String hitsOutfile, String pssmOutfile, int numIter) {	
+	private List<int[]> getPsiBlastPSSM(String fastaFile, String database, String hitsOutfile, String pssmOutfile, int numIter) {	
 		
 		String cmd = path2BLAST + "bin/psiblast -query " + fastaFile + " -num_iterations " + numIter + " -db " + database + " -out " + hitsOutfile + " -out_ascii_pssm " + pssmOutfile;
 		BasicTools.runCommand(cmd, false);
 
 		// read PSI-BLAST output from temporary files
-		ArrayList<String[]> pssmTable = BasicTools.readFile2ListSplitLines(pssmOutfile, true);
-		ArrayList<int[]> pssm = new ArrayList<int[]>();
+		List<String[]> pssmTable = BasicTools.readFile2ListSplitLines(pssmOutfile, true);
+		List<int[]> pssm = new ArrayList<int[]>();
 
 		for (int i=2; i<pssmTable.size(); i++) {
 
@@ -207,16 +213,24 @@ public abstract class BLASTfeatureGenerator {
 	 */
 	public BLASTfeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
 		path2BLAST = System.getenv("BLAST_DIR");
+		if ((path2BLAST == null) || (path2BLAST.length() == 0)) {
+			throw new RuntimeException("Cannot execute the BLAST tool, because no path to its local installation has been defined. Please define the environment variable BLAST_DIR to point to the BLAST directory on your OS and run this program again.");
+		}
 		
 		this.fastaFile = fastaFile;
 		this.featureFile = featureFile;
 		this.superPred = superPred;
+		
+		// TODO
+		this.pathForTmpDir = "/rascratch/user/eichner/tmp/";
 	}
 	
+	/**
+	 * 
+	 */
 	protected void writeFeatureFile() {
-		
-		ArrayList<String> libSVMfeatures = new ArrayList<String>();
-		ArrayList<String> sequenceNames = new ArrayList<String>();
+		List<String> libSVMfeatures = new ArrayList<String>();
+		List<String> sequenceNames = new ArrayList<String>();
 		
 		for (String seqID: features.keySet()) {
 			
@@ -230,7 +244,7 @@ public abstract class BLASTfeatureGenerator {
 			}
 			libSVMfeatures.add(featureString.toString());
 		}
-		BasicTools.writeArrayList2File(libSVMfeatures, featureFile);
-		BasicTools.writeArrayList2File(sequenceNames, featureFile.replace(".txt", "_names.txt"));
+		BasicTools.writeList2File(libSVMfeatures, featureFile);
+		BasicTools.writeList2File(sequenceNames, featureFile.replace(".txt", "_names.txt"));
 	}
 }

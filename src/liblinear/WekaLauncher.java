@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -148,7 +149,7 @@ public class WekaLauncher {
 		}
 		
 		// read original feature file
-		ArrayList<String> featureVectors = BasicTools.readFile2List(libsvmFeatureFile, false);
+		List<String> featureVectors = BasicTools.readFile2List(libsvmFeatureFile, false);
 		for (int i=0; i<featureVectors.size(); i++) {
 			String currFeatVec = featureVectors.get(i);
 			if (currFeatVec.startsWith("-1")) {
@@ -192,7 +193,7 @@ public class WekaLauncher {
 				cvSplitList.add(cvSplitLine.toString());
 			}
 		}
-		BasicTools.writeArrayList2File(cvSplitList, cvSplitFile);
+		BasicTools.writeList2File(cvSplitList, cvSplitFile);
 	}
 	
 	public double[][] runWekaClassifier(Boolean multithreading) {
@@ -259,7 +260,7 @@ public class WekaLauncher {
 		int numScores = folds * multiruns;
 		int numMethods = ClassificationMethod.values().length;
 		double[][] classResults = new double[numScores][numMethods];
-		ArrayList<String[]> resultsTable = BasicTools.readFile2ListSplitLines(resultsDir + mergedResultsFileName);
+		List<String[]> resultsTable = BasicTools.readFile2ListSplitLines(resultsDir + mergedResultsFileName);
 		int lineIdx = 0;
 		for (int i=0; i<numMethods; i++) {
 			lineIdx += 2; // skip classifier name and table header

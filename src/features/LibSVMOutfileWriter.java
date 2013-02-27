@@ -23,15 +23,19 @@
 package features;
 
 
+import io.BasicTools;
+import ipr.IprEntry;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import modes.Predict;
-import io.BasicTools;
-import ipr.IprEntry;
 
 
 /**
@@ -44,11 +48,11 @@ import ipr.IprEntry;
 public class LibSVMOutfileWriter {
 
 	// clean version
-	public int[] write(ArrayList<String> domainIDs, HashMap<String, IprEntry> seq2domain, String outfile) {
+	public int[] write(List<String> domainIDs, Map<String, IprEntry> seq2domain, String outfile) {
 		
-		ArrayList<String> libsvmFeatureTable = new ArrayList<String>();
-		ArrayList<String> excludedSequences = new ArrayList<String>();
-		HashMap<Integer, ArrayList<String>> feat2seq = new HashMap<Integer, ArrayList<String>>();
+		List<String> libsvmFeatureTable = new ArrayList<String>();
+		List<String> excludedSequences = new ArrayList<String>();
+		Map<Integer, List<String>> feat2seq = new HashMap<Integer, List<String>>();
 
 		// check if feature file for superclass prediction shall be generated
 		boolean superclassFeatures = false;
@@ -104,7 +108,7 @@ public class LibSVMOutfileWriter {
 				// save mapping from feature vectors to (multiple) sequence IDs
 				int featVecIdx = libsvmFeatureTable.indexOf(line);
 				if (featVecIdx != -1) {
-					ArrayList<String> currSeqIDs = feat2seq.get(featVecIdx);
+					List<String> currSeqIDs = feat2seq.get(featVecIdx);
 					currSeqIDs.add(currSeq);
 					feat2seq.put(featVecIdx, currSeqIDs);
 					continue;
@@ -113,7 +117,7 @@ public class LibSVMOutfileWriter {
 					libsvmFeatureTable.add(line);
 					bw_libsvmfile.write(line);
 					
-					ArrayList<String> currSeqIDs = new ArrayList<String>();
+					List<String> currSeqIDs = new ArrayList<String>();
 					currSeqIDs.add(currSeq);
 					feat2seq.put(feat2seq.size(), currSeqIDs);
 				}
@@ -138,7 +142,7 @@ public class LibSVMOutfileWriter {
 		
 		// write Sequence IDs for each feature vector to file
 		String namesFile = outfile.replace(".txt", "_names.txt");
-		ArrayList<String[]> namesList = new ArrayList<String[]>();
+		List<String[]> namesList = new ArrayList<String[]>();
 		for (int i=0; i<feat2seq.size(); i++) {
 			namesList.add(feat2seq.get(i).toArray(new String[]{}));
 		}
@@ -148,7 +152,7 @@ public class LibSVMOutfileWriter {
 		String excludedNamesFile = outfile.replace(".txt", "_excluded.txt");
 		if (!excludedSequences.isEmpty()) {
 			System.out.println("Excluded " + excludedSequences.size() + " protein sequences with empty feature vectors.");
-			BasicTools.writeArrayList2File(excludedSequences, excludedNamesFile);
+			BasicTools.writeList2File(excludedSequences, excludedNamesFile);
 		}
 		return numFeatureVectors;
 	}
