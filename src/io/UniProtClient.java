@@ -19,6 +19,12 @@
 
 package io;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class UniProtClient {
 
 	private boolean silent = true;

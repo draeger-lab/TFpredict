@@ -31,6 +31,10 @@ import java.io.IOException;
  *       [ ] -&gt; (2,0.1) (4,1.4) (5,0.5) (6,1) (-1,?)
  *       [ ] -&gt; (1,-0.1) (2,-0.2) (3,0.1) (4,1.1) (5,0.1) (6,1) (-1,?)
  * </pre></p>
+ *
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
  */
 public class Problem {
 

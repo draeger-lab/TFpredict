@@ -59,6 +59,12 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.LibSVMLoader;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class Predict {
 	
 	public static final int featureOffset = 10;

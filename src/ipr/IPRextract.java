@@ -24,15 +24,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
-/*
- * 
+/**
  * This class contains functions for parsing the standard output of InterProScan
  * - parses InterPro IDs                                                (needed for generation of feature vectors)
  * - parses start and end positions of each predicted InterPro domain   (needed for post-processing with SABINE)
  * - parses GO terms associated with each InterPro domain               (needed to filter DNA-binding domains)
  * - parses InterPro domain descriptions                                (needed for TF class annotation via TransFac)
+ *
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
  */
-
 public class IPRextract {
 	
 	public static HashMap<String, IprEntry> getSeq2DomainMap(ArrayList<String[]> IPRoutput) {

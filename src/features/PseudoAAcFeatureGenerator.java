@@ -7,6 +7,12 @@ import java.util.HashMap;
 
 import org.apache.commons.math.stat.descriptive.summary.Sum;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class PseudoAAcFeatureGenerator {
 	
 	public double weight = 0.05;

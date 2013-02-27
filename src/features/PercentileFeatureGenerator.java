@@ -3,22 +3,24 @@ package features;
 import io.BasicTools;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 
 import modes.Predict;
 
 import org.apache.commons.math.stat.descriptive.rank.Percentile;
 
-
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 	
 	private static final int[] percentiles = new int[] {0,25,50,75,100};
 	
 	public PercentileFeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
-		
-		this.fastaFile = fastaFile;
-		this.featureFile = featureFile;
-		this.superPred = superPred;
+		super(fastaFile, featureFile, superPred);
 		this.pssmFeat = false;
 		this.naiveFeat = false;
 	}
@@ -27,7 +29,7 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 		
 		for (String seqID: hits.keySet()) {
 			
-			HashMap<String, Double> currHits = hits.get(seqID); 
+			Map<String, Double> currHits = hits.get(seqID); 
 			double[] percFeatVec = null;
 			
 			if (superPred) {
@@ -120,17 +122,15 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 		}
 	}
 
+	/**
+	 * Generation of feature files
+	 * 
+	 * @param args tfFastaFile (FASTA format) and tfFeatureFile (TXT format)
+	 */
 	public static void main(String[] args) {
-		
-		/*
-		 *  Generation of feature files
-		 */
-		
-		String dataDir = "/rahome/eichner/projects/tfpredict/data/";
-		
 		// generate feature file for TF prediction
-		String tfFastaFile = dataDir + "tf_pred/fasta_files/latest/TFandNonTF.fasta"; 
-		String tfFeatureFile = dataDir + "tf_pred/feature_files/latest/percentile_featurefile.txt";
+		String tfFastaFile = args[0]; //"/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/latest/TFandNonTF.fasta"; 
+		String tfFeatureFile = args[1]; //"/rahome/eichner/projects/tfpredict/data/tf_pred/feature_files/latest/percentile_featurefile.txt";
 
 		PercentileFeatureGenerator tfFeatureGenerator = new PercentileFeatureGenerator(tfFastaFile, tfFeatureFile, false);
 		tfFeatureGenerator.generateFeatures();

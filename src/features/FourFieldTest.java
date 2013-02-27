@@ -1,10 +1,5 @@
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2010
- * ===============================================
- */
-
 package features;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,7 +13,12 @@ import java.util.concurrent.Future;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.stat.inference.TestUtils;
 
-
+/**
+ * 
+ * @author Florian Topf
+ * @version $Rev$
+ * @since 1.0
+ */
 public class FourFieldTest {
 	
 	ArrayList<String> iprs_fft = new ArrayList<String>();

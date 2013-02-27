@@ -12,7 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class Train {
 
     public static void main(String[] args) throws IOException, InvalidInputDataException {

@@ -1,5 +1,11 @@
 package liblinear;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class FeatureNode {
 
     public final int index;

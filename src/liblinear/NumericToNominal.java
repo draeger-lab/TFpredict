@@ -58,7 +58,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 5987 $
+ * @version $Rev$
  */
 public class NumericToNominal
   extends SimpleBatchFilter {
@@ -416,7 +416,7 @@ public class NumericToNominal
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 5987 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

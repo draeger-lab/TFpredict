@@ -12,6 +12,12 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public abstract class TFdataParser {
 	
 	protected ArrayList<String> tf_names = new ArrayList<String>();

@@ -18,11 +18,6 @@
  */
 
 package io;
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2010
- * ===============================================
- */
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -34,10 +29,13 @@ import java.io.ObjectOutputStream;
 
 import resources.Resource;
 
-/*
+/**
  * Provides read/write support for serializable objects
+ * 
+ * @author Florian Topf
+ * @version $Rev$
+ * @since 1.0
  */
-
 public class ObjectRW {
 
 	////

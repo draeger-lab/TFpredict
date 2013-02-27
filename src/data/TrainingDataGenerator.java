@@ -14,6 +14,12 @@ import java.util.HashSet;
 
 import modes.Predict;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class TrainingDataGenerator {
 	
 	// General form of FASTA headers: Name|UniprotID|TF|TransfacClass|Database

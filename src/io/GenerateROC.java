@@ -19,12 +19,7 @@
 
 
 package io;
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2010
- * ===============================================
- */
-//import java.awt.*;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -33,10 +28,12 @@ import java.io.IOException;
 import weka.core.*;
 import weka.classifiers.*;
 import weka.classifiers.evaluation.*;
-//import weka.gui.visualize.*;
 
 /**
   * Generates and displays a ROC curve from a dataset.
+  * @author Florian Topf
+  * @version $Rev$
+  * @since 1.0
   */
 public class GenerateROC {
   

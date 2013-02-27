@@ -2,13 +2,22 @@ package features;
 
 import io.BasicTools;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class PSSMFeatureGenerator extends BLASTfeatureGenerator {
 	
+	/**
+	 * 
+	 * @param fastaFile
+	 * @param featureFile
+	 * @param superPred
+	 */
 	public PSSMFeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
-		
-		this.fastaFile = fastaFile;
-		this.featureFile = featureFile;
-		this.superPred = superPred;
+		super(fastaFile, featureFile, superPred);
 		this.pssmFeat = true;
 		this.naiveFeat = false;
 	}

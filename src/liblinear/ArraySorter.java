@@ -1,6 +1,11 @@
 package liblinear;
 
-
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 final class ArraySorter {
 
     /**

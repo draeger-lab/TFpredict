@@ -26,9 +26,9 @@ import java.util.regex.Pattern;
  * <p>The usage should be pretty similar to the C version of <tt>liblinear</tt>.</p>
  * <p>Please consider reading the <tt>README</tt> file of <tt>liblinear</tt>.</p>
  *
- * <p><em>The port was done by Benedikt Waldvogel (mail at bwaldvogel.de)</em></p>
- *
- * @version 1.51
+ * @author Benedikt Waldvogel
+ * @version $Rev$
+ * @since 1.0
  */
 public class Linear {
 

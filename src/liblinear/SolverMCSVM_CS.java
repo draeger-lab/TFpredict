@@ -25,6 +25,10 @@ import static liblinear.Linear.swap;
  *
  * solution will be put in w
  * </pre>
+ *
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
  */
 class SolverMCSVM_CS {
 

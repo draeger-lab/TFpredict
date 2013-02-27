@@ -1,9 +1,3 @@
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2010
- * ===============================================
- */
-
 package features;
 
 import java.util.ArrayList;
@@ -13,11 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
-/*
+/**
  * this is a rip of the statistic function of MayDay
  * original implemented by "Florian Battke, Roland Keller"
+ * 
+ * @author Florian Topf
+ * @version $Rev$
+ * @since 1.0
  */
-
 public class BenjaminiHochberg {
 
 	public ArrayList<Double> correct(Collection<Double> pvalues) {

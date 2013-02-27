@@ -7,7 +7,12 @@ import static org.netlib.blas.DDOT.DDOT;
 import static org.netlib.blas.DNRM2.DNRM2;
 import static org.netlib.blas.DSCAL.DSCAL;
 
-
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 class Tron {
 
     private final Function fun_obj;

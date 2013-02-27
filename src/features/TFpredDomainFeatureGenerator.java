@@ -1,11 +1,5 @@
 package features;
 
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2010
- * ===============================================
- */
-
 import io.BasicTools;
 import ipr.IPRextract;
 import ipr.IPRrun;
@@ -22,7 +16,12 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
 
-
+/**
+ * 
+ * @author Florian Topf
+ * @version $Rev$
+ * @since 1.0
+ */
 public class TFpredDomainFeatureGenerator extends DomainFeatureGenerator{
 
 	/**

@@ -7,6 +7,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class SabineTrainingSetParser extends TFdataParser {
 	
 	public void parseTrainingset(String infile) {

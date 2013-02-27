@@ -2,7 +2,12 @@ package liblinear;
 
 import static liblinear.Linear.copyOf;
 
-
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public final class Parameter {
 
     double     C;
