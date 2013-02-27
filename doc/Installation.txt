@@ -1,0 +1,32 @@
+                         -------------------------
+                         Installation of TFpredict
+                         -------------------------
+
+1) Local installation of BLAST
+   
+   Follow the instructions at the BLAST home-page for your operating system.
+   For Unix, go to http://www.ncbi.nlm.nih.gov/books/NBK52640/
+   For Windows, see the instructions http://www.ncbi.nlm.nih.gov/books/NBK52637/
+   
+   Having BLAST successfully installed, it is necessary to pass the path to
+   the executable to TFpredict. To this end, define the environment variable
+   
+   BLAST_DIR
+   
+   on your system to point to the installation directory of your copy of BLAST.
+   This might be, for instance,
+   
+   /usr/local/ncbi/blast/                          if you are working on Mac OS,
+   /opt/blast/latest/                              if you are using Linux, or
+   C:\program~\NCBI\blast-x.x.xxx\                 in case of MS Windows
+   
+   Note that x.x.xxx stands for some arbitrary version number of BLAST and must
+   be replaced as necessary.
+
+   So, the variable BLAST_DIR could be set to one of the above example folders.
+   In the bash under MacOS you would, e.g., type
+   
+   export BLAST_DIR=/usr/local/ncbi/blast/
+   
+   before executing TFpredict.
+
