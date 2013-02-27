@@ -29,6 +29,8 @@ import ipr.IprEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import data.TrainingDataGenerator;
@@ -48,18 +50,18 @@ public abstract class DomainFeatureGenerator {
 	protected String libsvmOutfile = ""; 
 	protected boolean silent = false;
 	protected String basedir = "";
-	protected ArrayList<String> relevantDomainIDs = new ArrayList<String>();
-	protected HashMap<String, IprEntry> seq2domain = new HashMap<String, IprEntry>();
+	protected List<String> relevantDomainIDs = new ArrayList<String>();
+	protected Map<String, IprEntry> seq2domain = new HashMap<String, IprEntry>();
 	
-	protected static ArrayList<String> filterCurrentDomainsInSet(Set<String> domainSet, ArrayList<String> currentDomains) {
-		ArrayList<String> domainsList = new ArrayList<String>();
+	protected static List<String> filterCurrentDomainsInSet(Set<String> domainSet, List<String> currentDomains) {
+		List<String> domainsList = new ArrayList<String>();
 		domainsList.addAll(domainSet);
 		domainsList = BasicTools.intersect(domainsList, currentDomains);
 		
 		return(domainsList);
 	}
 	
-	protected static HashMap<String, ArrayList<String>> filterCurrentDomainsInDom2SeqMap(HashMap<String, ArrayList<String>> domain2seq, ArrayList<String> currDomains) {
+	protected static Map<String, List<String>> filterCurrentDomainsInDom2SeqMap(Map<String, List<String>> domain2seq, List<String> currDomains) {
 	    
 		for (String domain: domain2seq.keySet().toArray(new String[]{})) {
 	    	if (!currDomains.contains(domain)) {
@@ -112,24 +114,31 @@ public abstract class DomainFeatureGenerator {
 		return seqCounter;
 	}
 	
-	protected static ArrayList<String> downloadAllDomainIDs() {
+	protected static List<String> downloadAllDomainIDs() {
 		
 		// retrieve file with InterPro domain IDs and descriptions via FTP site
 		FTPsupport ftp = new FTPsupport();
 		String domainDescFile = ftp.download(domainDescriptionURL);
 		
 		// parse all known InterPro domain IDs
-		HashMap<String, String> domain2desc = BasicTools.readFile2Map(domainDescFile);
-		ArrayList<String> allDomainIDs = new ArrayList<String>();
+		Map<String, String> domain2desc = BasicTools.readFile2Map(domainDescFile);
+		List<String> allDomainIDs = new ArrayList<String>();
 		allDomainIDs.addAll(domain2desc.keySet());
 		Collections.sort(allDomainIDs);
 		
 		return(allDomainIDs);
 	}
 	
-	public static HashMap<String, Integer> getLabelsFromFastaHeaders(Set<String> fastaFileHeaders, boolean superPred, boolean useUniprotIDasKey) {
+	/**
+	 * 
+	 * @param fastaFileHeaders
+	 * @param superPred
+	 * @param useUniprotIDasKey
+	 * @return
+	 */
+	public static Map<String, Integer> getLabelsFromFastaHeaders(Set<String> fastaFileHeaders, boolean superPred, boolean useUniprotIDasKey) {
 		
-		HashMap<String, Integer> tf2superclass = new HashMap<String, Integer>();
+		Map<String, Integer> tf2superclass = new HashMap<String, Integer>();
 		for (String header: fastaFileHeaders) {
 			
 			// use either UniProt ID or full Header (with label) as sequence ID

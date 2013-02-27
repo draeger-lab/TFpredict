@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,16 +43,19 @@ import java.util.logging.Logger;
  */
 public abstract class TFdataParser {
 	
-	protected ArrayList<String> tf_names = new ArrayList<String>();
-	protected ArrayList<String> species = new ArrayList<String>();
-	protected ArrayList<String> crossrefs = new ArrayList<String>();
-	protected ArrayList<String> classes = new ArrayList<String>();
-	protected ArrayList<String> sequences1 = new ArrayList<String>();
-	protected ArrayList<String> sequences2 = new ArrayList<String>();
-	protected ArrayList<ArrayList<String>> domains = new ArrayList<ArrayList<String>>();
-	protected ArrayList<ArrayList<String>> pfm_names = new ArrayList<ArrayList<String>>();
-	protected ArrayList<ArrayList<String[]>> pfms = new ArrayList<ArrayList<String[]>>();
+	protected List<String> tf_names = new ArrayList<String>();
+	protected List<String> species = new ArrayList<String>();
+	protected List<String> crossrefs = new ArrayList<String>();
+	protected List<String> classes = new ArrayList<String>();
+	protected List<String> sequences1 = new ArrayList<String>();
+	protected List<String> sequences2 = new ArrayList<String>();
+	protected List<List<String>> domains = new ArrayList<List<String>>();
+	protected List<List<String>> pfm_names = new ArrayList<List<String>>();
+	protected List<List<String[]>> pfms = new ArrayList<List<String[]>>();
 	
+	/**
+	 * A {@link Logger} for this class.
+	 */
 	public static Logger logger = Logger.getLogger(TFdataParser.class.getName());
 
 	protected void setDataSource(String dataSource) {
@@ -142,11 +146,11 @@ public abstract class TFdataParser {
 					classes.set(idx, parser.classes.get(i));
 				}
 				
-				ArrayList<String> curr_pfm_names = pfm_names.get(idx);
+				List<String> curr_pfm_names = pfm_names.get(idx);
 				curr_pfm_names.addAll(parser.pfm_names.get(i));
 				pfm_names.set(idx, curr_pfm_names);
 			
-				ArrayList<String[]> curr_pfms = pfms.get(idx);
+				List<String[]> curr_pfms = pfms.get(idx);
 				curr_pfms.addAll(parser.pfms.get(i));
 				pfms.set(idx, curr_pfms);
 				
@@ -241,7 +245,7 @@ public abstract class TFdataParser {
 	
 	
 				// write PFMs
-				ArrayList<String> curr_pfm_names = pfm_names.get(i);
+				List<String> curr_pfm_names = pfm_names.get(i);
 				if (curr_pfm_names != null) {
 					for (int j=0; j<curr_pfm_names.size(); j++) {
 						bw.write("MN  " + pfm_names.get(i).get(j) + "\n");
@@ -274,7 +278,7 @@ public abstract class TFdataParser {
 	
 	protected void writeFastafile(String outfile, String[] unknownClassList) {
 		
-		ArrayList<String> unknownClasses = new ArrayList<String>();
+		List<String> unknownClasses = new ArrayList<String>();
 		unknownClasses.add("NA");
 		if (unknownClassList != null) {
 			for (String tfClass: unknownClassList) {

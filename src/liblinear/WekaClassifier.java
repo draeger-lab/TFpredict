@@ -37,6 +37,7 @@ import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.cli.BasicParser;
@@ -394,7 +395,7 @@ public class WekaClassifier {
 			saver.setDestination(outStream);
 			saver.writeBatch();
 			
-			ArrayList<String> libsvmFeatures = BasicTools.readStream2List(new ByteArrayInputStream(outStream.toByteArray()), false);
+			List<String> libsvmFeatures = BasicTools.readStream2List(new ByteArrayInputStream(outStream.toByteArray()), false);
 			libsvmFeatureVectors = libsvmFeatures.toArray(new String[]{});
 			
 		} catch (IOException e) {

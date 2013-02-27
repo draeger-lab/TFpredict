@@ -25,6 +25,8 @@ package ipr;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
@@ -40,13 +42,13 @@ import java.util.StringTokenizer;
  */
 public class IPRextract {
 	
-	public static HashMap<String, IprEntry> getSeq2DomainMap(ArrayList<String[]> IPRoutput) {
+	public static Map<String, IprEntry> getSeq2DomainMap(List<String[]> IPRoutput) {
 		return(getSeq2DomainMap(IPRoutput, null));
 	}
 	
-	public static HashMap<String, IprEntry> getSeq2DomainMap(ArrayList<String[]> IPRoutput, Boolean label) {
+	public static Map<String, IprEntry> getSeq2DomainMap(List<String[]> IPRoutput, Boolean label) {
 
-		HashMap<String, IprEntry> seq2domain = new HashMap<String, IprEntry>();
+		Map<String, IprEntry> seq2domain = new HashMap<String, IprEntry>();
 		
 		for (int i=0; i < IPRoutput.size(); i++) {
 
@@ -103,9 +105,9 @@ public class IPRextract {
 		return domainLength;
 	}
 	
-	public static HashMap<String, ArrayList<String>> getDomain2SeqMap(ArrayList<String[]> IPRoutput) {
+	public static Map<String, List<String>> getDomain2SeqMap(List<String[]> IPRoutput) {
 		
-		HashMap<String, ArrayList<String>> domain2seq = new HashMap<String, ArrayList<String>>();
+		Map<String, List<String>> domain2seq = new HashMap<String, List<String>>();
 		
 		for (int i = 0; i < IPRoutput.size(); i++) {
 			
@@ -118,7 +120,7 @@ public class IPRextract {
 				continue;
 			}
 
-			ArrayList<String> currSeqIDs;
+			List<String> currSeqIDs;
 			if (domain2seq.containsKey(domain_id)) {
 				currSeqIDs = domain2seq.get(domain_id);
 				if (!currSeqIDs.contains(sequence_id)) {
@@ -136,9 +138,9 @@ public class IPRextract {
 	}
 	
 	
-	public static HashMap<String, IprRaw> parseIPRoutput(ArrayList<String[]> IPRoutput) {
+	public static Map<String, IprRaw> parseIPRoutput(List<String[]> IPRoutput) {
 		
-		HashMap<String, IprRaw> ipr_domains = new HashMap<String, IprRaw>();
+		Map<String, IprRaw> ipr_domains = new HashMap<String, IprRaw>();
 		
 		for (int i = 0; i < IPRoutput.size(); i++) {
 			
@@ -166,7 +168,7 @@ public class IPRextract {
 			String[] domain_names = domain_names_set.toArray(new String[]{});
 			
 			// check if GO terms are available for current domain
-			ArrayList<String> domain_GOterms = null;
+			List<String> domain_GOterms = null;
 			if (domain_entry.length == 14) {
 				String domain_go = domain_entry[13].trim();
 				

@@ -30,6 +30,8 @@ import ipr.IprEntry;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -61,7 +63,7 @@ public class TFpredDomainFeatureGenerator extends DomainFeatureGenerator{
 	private boolean useBonferroniHolm = false;
 	private double pValueCutoff = 0.05;
 	
-	private ArrayList<String> filteredDomainIDs = new ArrayList<String>();
+	private List<String> filteredDomainIDs = new ArrayList<String>();
 
 	public TFpredDomainFeatureGenerator(String iprscanResultFileTF, String iprscanResultFileNonTF, String libsvmOutfile) {
 		this.iprscanResultFileTF = iprscanResultFileTF;
@@ -132,14 +134,14 @@ public class TFpredDomainFeatureGenerator extends DomainFeatureGenerator{
 	}	
 	
 	// use four-field test to filter significant domains
-	private void filterDomainIDs(HashMap<String,ArrayList<String>> domain2seqTF, HashMap<String,ArrayList<String>> domain2seqNonTF) {
+	private void filterDomainIDs(Map<String, List<String>> domain2seqTF, Map<String, List<String>> domain2seqNonTF) {
 		
 		filteredDomainIDs.addAll(relevantDomainIDs);
 		FourFieldTest fourFieldTest = new FourFieldTest();
 		fourFieldTest.run(filteredDomainIDs, domain2seqTF, domain2seqNonTF);
 
 		filteredDomainIDs = fourFieldTest.getDomainIDs();		
-		ArrayList<Double> pvalues = fourFieldTest.getPvalues();
+		List<Double> pvalues = fourFieldTest.getPvalues();
 
 		// write InterPro Domain IDs and corresponding p-values to file 
 		BasicTools.writeSplittedArrayList2File(BasicTools.combineLists(filteredDomainIDs, pvalues), basedir + domain2pvalueFile);
@@ -169,32 +171,32 @@ public class TFpredDomainFeatureGenerator extends DomainFeatureGenerator{
 	public void writeFeatureFile() {
  
 		// parse output files from InterProScan
-		ArrayList<String[]> iprOutputTF = IPRrun.readIPRoutput(iprscanResultFileTF);
-		ArrayList<String[]> iprOutputNonTF = IPRrun.readIPRoutput(iprscanResultFileNonTF);
+		List<String[]> iprOutputTF = IPRrun.readIPRoutput(iprscanResultFileTF);
+		List<String[]> iprOutputNonTF = IPRrun.readIPRoutput(iprscanResultFileNonTF);
 		
 		// compute mapping from domain IDs to TF and Non-TF IDs, respectively
-		HashMap<String,ArrayList<String>> domain2seqTF = IPRextract.getDomain2SeqMap(iprOutputTF);
-		HashMap<String,ArrayList<String>> domain2seqNonTF = IPRextract.getDomain2SeqMap(iprOutputNonTF);
+		Map<String, List<String>> domain2seqTF = IPRextract.getDomain2SeqMap(iprOutputTF);
+		Map<String, List<String>> domain2seqNonTF = IPRextract.getDomain2SeqMap(iprOutputNonTF);
 		int numTFwithDomain = domain2seqTF.keySet().size();
 		int numNonTFwithDomain = domain2seqNonTF.keySet().size();
 		
 		// filter domains which 1) exist in current InterPro release and 2) were detected in sequences from training set 
-		ArrayList<String> currentDomains = downloadAllDomainIDs(); 
+		List<String> currentDomains = downloadAllDomainIDs(); 
 		
-		ArrayList<String> domainsTF = filterCurrentDomainsInSet(domain2seqTF.keySet(), currentDomains);
+		List<String> domainsTF = filterCurrentDomainsInSet(domain2seqTF.keySet(), currentDomains);
 		domain2seqTF = filterCurrentDomainsInDom2SeqMap(domain2seqTF, domainsTF);
 	    
-	    ArrayList<String> domainsNonTF = filterCurrentDomainsInSet(domain2seqNonTF.keySet(), currentDomains);
+	    List<String> domainsNonTF = filterCurrentDomainsInSet(domain2seqNonTF.keySet(), currentDomains);
 	    domain2seqNonTF = filterCurrentDomainsInDom2SeqMap(domain2seqNonTF, domainsNonTF);
 	    
 	    relevantDomainIDs = BasicTools.union(domainsTF, domainsNonTF);  
 	 
 	    // get domains which are unique for TFs or Non-TFs
-	    ArrayList<String> specificDomainsTF = BasicTools.setDiff(domainsTF, domainsNonTF);
-	    ArrayList<String> specificDomainsNonTF = BasicTools.setDiff(domainsNonTF, domainsTF);
+	    List<String> specificDomainsTF = BasicTools.setDiff(domainsTF, domainsNonTF);
+	    List<String> specificDomainsNonTF = BasicTools.setDiff(domainsNonTF, domainsTF);
 	    
-		BasicTools.writeArrayList2File(specificDomainsTF, basedir + specificDomainsTFfile);
-		BasicTools.writeArrayList2File(specificDomainsNonTF, basedir + specificDomainsNonTFfile);
+		BasicTools.writeList2File(specificDomainsTF, basedir + specificDomainsTFfile);
+		BasicTools.writeList2File(specificDomainsNonTF, basedir + specificDomainsNonTFfile);
 
 		// use four-field test to filter domains significantly correlated with class labels
 		filterDomainIDs(domain2seqTF, domain2seqNonTF);
@@ -209,8 +211,8 @@ public class TFpredDomainFeatureGenerator extends DomainFeatureGenerator{
 		filterCurrentDomainsInSeq2DomMap();
 		int[] numSeqPerClass = getNumSeqPerClass(true);
 		
-		BasicTools.writeArrayList2File(relevantDomainIDs, basedir + relevantDomainsFile);
-		BasicTools.writeArrayList2File(filteredDomainIDs, basedir + filteredDomainsFile);
+		BasicTools.writeList2File(relevantDomainIDs, basedir + relevantDomainsFile);
+		BasicTools.writeList2File(filteredDomainIDs, basedir + filteredDomainsFile);
 		
 		LibSVMOutfileWriter libsvmwriter = new LibSVMOutfileWriter();
 		int[] numFeatVecRelevant = libsvmwriter.write(relevantDomainIDs, seq2domain, libsvmOutfile);

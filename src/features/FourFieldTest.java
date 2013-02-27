@@ -24,8 +24,8 @@ package features;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -43,19 +43,19 @@ import org.apache.commons.math.stat.inference.TestUtils;
  */
 public class FourFieldTest {
 	
-	ArrayList<String> iprs_fft = new ArrayList<String>();
-	ArrayList<Double> pvalues = new ArrayList<Double>();
+	List<String> iprs_fft = new ArrayList<String>();
+	List<Double> pvalues = new ArrayList<Double>();
 	
-	public ArrayList<String> getDomainIDs() {
+	public List<String> getDomainIDs() {
 		return iprs_fft;
 	}
 
-	public ArrayList<Double> getPvalues() {
+	public List<Double> getPvalues() {
 		return pvalues;
 	}
 
 	
-	public void run(ArrayList<String> iprs, HashMap<String, ArrayList<String>> iprTF2ids, HashMap<String, ArrayList<String>> iprNONTF2ids) {
+	public void run(List<String> iprs, Map<String, List<String>> iprTF2ids, Map<String, List<String>> iprNONTF2ids) {
 		
 		System.out.println("Collecting data ...");
 		
@@ -96,13 +96,13 @@ public class FourFieldTest {
 
 	class Summon implements Runnable {
 		
-		ArrayList<String> iprs;
-		HashMap<String, ArrayList<String>> ipr2ids;
+		List<String> iprs;
+		Map<String, List<String>> ipr2ids;
 
 		// result
 		int res;
 		
-		public Summon(ArrayList<String> iprs, HashMap<String, ArrayList<String>> ipr2ids) {
+		public Summon(List<String> iprs, Map<String, List<String>> ipr2ids) {
 			this.iprs = iprs;
 			this.ipr2ids = ipr2ids;
 		}
@@ -114,9 +114,9 @@ public class FourFieldTest {
 		}
 		
 		// calculate number of unique TFs per ipr
-		private int summon(ArrayList<String> iprs, HashMap<String, ArrayList<String>> ipr2ids) {
+		private int summon(List<String> iprs, Map<String, List<String>> ipr2ids) {
 			
-			ArrayList<String> ids = new ArrayList<String>();
+			List<String> ids = new ArrayList<String>();
 			
 			for (int i = 0; i < iprs.size(); i++) {
 				
@@ -124,7 +124,7 @@ public class FourFieldTest {
 				
 				if (ipr2ids.containsKey(curr_ipr)) {
 					
-					ArrayList<String> curr_ids = ipr2ids.get(curr_ipr);
+					List<String> curr_ids = ipr2ids.get(curr_ipr);
 					
 					for (int j = 0; j < curr_ids.size(); j++) {
 						
@@ -223,9 +223,9 @@ public class FourFieldTest {
 	}
 	
 	
-	private void computeP(ArrayList<String> iprs,
-			HashMap<String, ArrayList<String>> iprTF2ids, int sum_tf,
-			HashMap<String, ArrayList<String>> iprNONTF2ids, int sum_nontf) {
+	private void computeP(List<String> iprs,
+			Map<String, List<String>> iprTF2ids, int sum_tf,
+			Map<String, List<String>> iprNONTF2ids, int sum_nontf) {
 		
 		Collection<Job> queue = new ArrayList<Job>();
 		

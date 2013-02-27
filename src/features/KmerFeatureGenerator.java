@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -47,11 +49,11 @@ public class KmerFeatureGenerator {
 	private int kMax = 2;
 	private int minNumOcc = 1;
 	
-	private HashMap<String, Integer> seq2label = new HashMap<String, Integer>();
-	private HashMap<String, String> sequences = new HashMap<String, String>();
-	HashMap<String, HashMap<String, Integer>> seq2kmerCounts = new HashMap<String, HashMap<String, Integer>>();
+	private Map<String, Integer> seq2label = new HashMap<String, Integer>();
+	private Map<String, String> sequences = new HashMap<String, String>();
+	Map<String, Map<String, Integer>> seq2kmerCounts = new HashMap<String, Map<String, Integer>>();
 	
-	private ArrayList<String> allKmers = new ArrayList<String>();
+	private List<String> allKmers = new ArrayList<String>();
 	
 	public KmerFeatureGenerator(String fastaFile, String featureFile, boolean superPred, int kMin, int kMax) {
 		
@@ -90,15 +92,15 @@ public class KmerFeatureGenerator {
 		// compute k-mer features for all sequences
 		for (String header: sequences.keySet()) {
 			
-			HashMap<String, Integer> fingerprint = getKmerCount(sequences.get(header), kMin, kMax);
+			Map<String, Integer> fingerprint = getKmerCount(sequences.get(header), kMin, kMax);
 			seq2kmerCounts.put(header, fingerprint);
 		}
 	}
 	
 	
-	private HashMap<String, Integer> getKmerCount(String sequence, int kMin, int kMax) {
+	private Map<String, Integer> getKmerCount(String sequence, int kMin, int kMax) {
 		
-		HashMap<String, Integer> kmer2count = new HashMap<String, Integer>();
+		Map<String, Integer> kmer2count = new HashMap<String, Integer>();
 		
 		for (int k=kMin; k<=kMax; k++) {
 			for (int startIdx=0; startIdx <= (sequence.length() - k); startIdx++) {;	
@@ -118,7 +120,7 @@ public class KmerFeatureGenerator {
 	private void getAllKmers() {
 		
 		HashSet<String> kmerSet = new HashSet<String>();
-		ArrayList<String> kmerList = new ArrayList<String>();
+		List<String> kmerList = new ArrayList<String>();
 		
 		for (String seqID: seq2kmerCounts.keySet()) {
 			kmerSet.addAll(seq2kmerCounts.get(seqID).keySet());
@@ -144,8 +146,8 @@ public class KmerFeatureGenerator {
 	
 	private void writeFeatureFile() {
 		
-		ArrayList<String> libSVMfeatures = new ArrayList<String>();
-		ArrayList<String> proteinNames = new ArrayList<String>();
+		List<String> libSVMfeatures = new ArrayList<String>();
+		List<String> proteinNames = new ArrayList<String>();
 		
 		int seqCnt= 0;
 		for (String seqID: seq2kmerCounts.keySet()) {
@@ -157,7 +159,7 @@ public class KmerFeatureGenerator {
 
 			int label = seq2label.get(seqID);
 			StringBuffer featureString = new StringBuffer("" + label);
-			HashMap<String, Integer> kmer2count = seq2kmerCounts.get(seqID);
+			Map<String, Integer> kmer2count = seq2kmerCounts.get(seqID);
 			
 			// sort feature indexes of contained k-mers
 			int[] indices = new int[kmer2count.size()];
@@ -177,7 +179,7 @@ public class KmerFeatureGenerator {
 			libSVMfeatures.add(featureString.toString());
 		}
 
-		BasicTools.writeArrayList2File(libSVMfeatures, featureFile);
-		BasicTools.writeArrayList2File(proteinNames, featureFile.replace(".txt", "_names.txt"));
+		BasicTools.writeList2File(libSVMfeatures, featureFile);
+		BasicTools.writeList2File(proteinNames, featureFile.replace(".txt", "_names.txt"));
 	}
 }

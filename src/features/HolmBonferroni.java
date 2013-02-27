@@ -24,6 +24,7 @@ package features;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * 
@@ -33,10 +34,10 @@ import java.util.Collections;
  */
 public class HolmBonferroni {
 
-	public ArrayList<Double> correct(ArrayList<String> iprs, ArrayList<Double> pvalues) {
+	public List<Double> correct(List<String> iprs, List<Double> pvalues) {
 		
 		// sort minimum to maximum on basis of pvalue
-		ArrayList<IprPsort> iprPsort = integrate(iprs, pvalues);
+		List<IprPsort> iprPsort = integrate(iprs, pvalues);
 
 		int size = iprPsort.size();
 		
@@ -67,10 +68,10 @@ public class HolmBonferroni {
 
 	
 	// sorts iprs and pvalues on the basis of pvalue
-	private ArrayList<IprPsort> integrate(ArrayList<String> iprs,
-			ArrayList<Double> pvalues) {
+	private List<IprPsort> integrate(List<String> iprs,
+			List<Double> pvalues) {
 
-		ArrayList<IprPsort> iprps = new ArrayList<IprPsort>();
+		List<IprPsort> iprps = new ArrayList<IprPsort>();
 		
 		// create sortable object
 		for (int i = 0; i < iprs.size(); i++) {
@@ -92,9 +93,9 @@ public class HolmBonferroni {
 	
 	
 	// unsort ipr and values, recreate pvalues-arraylist
-	private ArrayList<Double> deintegrate(ArrayList<IprPsort> iprps) {
+	private List<Double> deintegrate(List<IprPsort> iprps) {
 		
-		ArrayList<IprPunsort> iprPunsort = new ArrayList<IprPunsort>();
+		List<IprPunsort> iprPunsort = new ArrayList<IprPunsort>();
 		
 		for (int i = 0; i < iprps.size(); i++) {
 			
@@ -111,7 +112,7 @@ public class HolmBonferroni {
 		
 		Collections.sort(iprPunsort);
 		
-		ArrayList<Double> pvalues = new ArrayList<Double>();
+		List<Double> pvalues = new ArrayList<Double>();
 		// recreate pvalues-arraylist
 		for (int i = 0; i < iprPunsort.size(); i++) {
 			

@@ -27,21 +27,23 @@ import io.NoExitSecurityManager;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.rpc.ServiceException;
+
 import uk.ac.ebi.webservices.jaxws.IPRScanClient;
 
 /**
@@ -59,7 +61,7 @@ public class IPRrun {
 		
 		String SPACER_LINE = "SPACERLINESPACERLINESPACERLINESPACERLINESPACERLINESPACERLINE";
 		
-		HashMap<String,String> fastaSeqs = BasicTools.readFASTA(seqfile, true);
+		Map<String,String> fastaSeqs = BasicTools.readFASTA(seqfile, true);
 		for (String header: fastaSeqs.keySet()) {
 			String currSeq = fastaSeqs.get(header);
 			fastaSeqs.put(header, SPACER_LINE + currSeq);
@@ -76,7 +78,7 @@ public class IPRrun {
 	private boolean silent = false;
 
 	// gfx related map
-	private static HashMap<String, String> seq2job = new HashMap<String,String>();
+	private static Map<String, String> seq2job = new HashMap<String,String>();
 	
 	// default: use local installation of InterProScan and do not write output of tool to file
 	public ArrayList<String[]> run(String seqfile, String iprpath) {
@@ -295,7 +297,7 @@ public class IPRrun {
 		return jobids;
 	}
 
-	public HashMap<String, String> getSeq2job() {
+	public Map<String, String> getSeq2job() {
 		return seq2job;
 	}
 

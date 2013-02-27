@@ -45,6 +45,8 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
@@ -114,30 +116,30 @@ public class Predict {
 	
 	private Classifier tfClassifier;
 	private Classifier superClassifier;
-	private ArrayList<String> relDomains_TFclass;
-	private ArrayList<String> relDomains_Superclass;
-	private ArrayList<String> relGOterms;
-	private HashMap<String,String> tfName2class;
+	private List<String> relDomains_TFclass;
+	private List<String> relDomains_Superclass;
+	private List<String> relGOterms;
+	private Map<String,String> tfName2class;
 
-	private HashMap<String, IprEntry> seq2domain;
-	private HashMap<String, IprRaw> IPRdomains;
-	private HashMap<String, IprProcessed> seq2bindingDomain;
+	private Map<String, IprEntry> seq2domain;
+	private Map<String, IprRaw> IPRdomains;
+	private Map<String, IprProcessed> seq2bindingDomain;
 	
 	// gfx related mapping of seqid to jobid
-	private HashMap<String, String> seq2job;
+	private Map<String, String> seq2job;
 	
 	private String[] sequence_ids;
-	private HashMap<String, String> sequences = new HashMap<String, String>();
-	private HashMap<String, Double[]> probDist_TFclass  = new HashMap<String, Double[]>();
-	private HashMap<String, Double[]> probDist_Superclass = new HashMap<String, Double[]>();
-	private HashMap<String, Integer> predictedSuperclass  = new HashMap<String, Integer>();
-	private HashMap<String, String> annotatedClass  = new HashMap<String, String>();
-	private HashMap<String, String[]> bindingDomains  = new HashMap<String, String[]>();
+	private Map<String, String> sequences = new HashMap<String, String>();
+	private Map<String, Double[]> probDist_TFclass  = new HashMap<String, Double[]>();
+	private Map<String, Double[]> probDist_Superclass = new HashMap<String, Double[]>();
+	private Map<String, Integer> predictedSuperclass  = new HashMap<String, Integer>();
+	private Map<String, String> annotatedClass  = new HashMap<String, String>();
+	private Map<String, String[]> bindingDomains  = new HashMap<String, String[]>();
 	
-	private HashMap<String, Boolean> predictionPossible = new HashMap<String, Boolean>();
-	private HashMap<String, Boolean> seqIsTF = new HashMap<String, Boolean>();
-	private HashMap<String, Boolean> annotatedClassAvailable = new HashMap<String, Boolean>();
-	private HashMap<String, Boolean> domainsPredicted = new HashMap<String, Boolean>();
+	private Map<String, Boolean> predictionPossible = new HashMap<String, Boolean>();
+	private Map<String, Boolean> seqIsTF = new HashMap<String, Boolean>();
+	private Map<String, Boolean> annotatedClassAvailable = new HashMap<String, Boolean>();
+	private Map<String, Boolean> domainsPredicted = new HashMap<String, Boolean>();
 	
 	public static final int Non_TF = 0;
 	public static final int TF = 1;
@@ -185,12 +187,12 @@ public class Predict {
 	public static void testModelFiles() {
 		
 		// read relevant domains for TF/non-TF classification
-		ArrayList<String> relDomains = BasicTools.readResource2List("domainsTFpred.txt");
-		//ArrayList<String> relDomains = BasicTools.readResource2List("domainsSuperPred.txt");
+		List<String> relDomains = BasicTools.readResource2List("domainsTFpred.txt");
+		//List<String> relDomains = BasicTools.readResource2List("domainsSuperPred.txt");
 		
 		String[] domains = new String[] {"IPR001646", "IPR004065", "IPR015310", "IPR000510", "IPR020956"};
 		//String[] domains = new String[] {"IPR003604", "IPR008288", "IPR017970", "IPR010588", "IPR002546"};
-		ArrayList<String> currDomains = new ArrayList<String>();
+		List<String> currDomains = new ArrayList<String>();
 		currDomains.addAll(Arrays.asList(domains));
 		
 		String fvector = createIPRvector(currDomains, relDomains, featureOffset);
@@ -201,7 +203,7 @@ public class Predict {
 		System.out.println("Feature vector: " + fvector);
 	    Instance currInstance = getInst("0 " + fvector);
 	    
-		ArrayList<String> tfPredModelFiles = new ArrayList<String>();
+		List<String> tfPredModelFiles = new ArrayList<String>();
 		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
 			tfPredModelFiles.add("models/tfPred/" + classMethod.modelFileName);
 			//tfPredModelFiles.add("models/superPred/" + classMethod.modelFileName);
@@ -299,7 +301,7 @@ public class Predict {
 		
 		relDomains_TFclass = BasicTools.readResource2List(relDomainsTF_file);
 		relDomains_Superclass = BasicTools.readResource2List(relDomainsSuper_file);
-		tfName2class = (HashMap<String, String>) ObjectRW.readFromResource(tfName2class_file);
+		tfName2class = (Map<String, String>) ObjectRW.readFromResource(tfName2class_file);
 		
 		relGOterms = BasicTools.readResource2List(relGOterms_file);
 		
@@ -387,7 +389,7 @@ public class Predict {
 			an.setOutputStream(System.out);
 			an.showAnimatedChar();
 		}
-		ArrayList<String[]> IPRoutput = InterProScanRunner.run(input_file, iprpath, basedir, useWeb, standAloneMode);
+		List<String[]> IPRoutput = InterProScanRunner.run(input_file, iprpath, basedir, useWeb, standAloneMode);
 		seq2job = InterProScanRunner.getSeq2job();
 		if (standAloneMode) {
 			an.hideAnimatedChar();
@@ -396,7 +398,7 @@ public class Predict {
 		
 		// HACK: line can be included for testing purposes
 		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1771_files/";
-		//ArrayList<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(basedir + "/iprscan-S20120523-165354-0573-55042068-pg.out.txt");
+		//List<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(basedir + "/iprscan-S20120523-165354-0573-55042068-pg.out.txt");
 		
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
@@ -436,8 +438,8 @@ public class Predict {
 	private void performClassification() {
     
 		// create feature vectors
-		HashMap<String, Instance> seq2feat_TFclass = createFeatureVectors(seq2domain, relDomains_TFclass);
-		HashMap<String, Instance> seq2feat_Superclass = createFeatureVectors(seq2domain, relDomains_Superclass);
+		Map<String, Instance> seq2feat_TFclass = createFeatureVectors(seq2domain, relDomains_TFclass);
+		Map<String, Instance> seq2feat_Superclass = createFeatureVectors(seq2domain, relDomains_Superclass);
 		
 		// flag all sequences for which no prediction is possible
 		// (i.e., none of the IPRdomains which are relevant for TF/Non-TF classification was found)
@@ -792,7 +794,7 @@ public class Predict {
 		
 		String[] classOutcome = new String[probDist.length];
 		double maxProb = BasicTools.getMax(probDist);
-		ArrayList<Integer> winIdx = new ArrayList<Integer>();
+		List<Integer> winIdx = new ArrayList<Integer>();
 		int numWinners = 0;
 		
 		for (int i=0; i<probDist.length; i++) {
@@ -832,9 +834,9 @@ public class Predict {
 	/*
 	 * functions used to create the feature vectors for TF/Non-TF classification and superclass prediction
 	 */
-	private static HashMap<String, Instance> createFeatureVectors(HashMap<String, IprEntry> seq2domain, ArrayList<String> relIPRdomains) {
+	private static Map<String, Instance> createFeatureVectors(Map<String, IprEntry> seq2domain, List<String> relIPRdomains) {
 		
-		HashMap<String, Instance> seq2fvector = new HashMap<String, Instance>();
+		Map<String, Instance> seq2fvector = new HashMap<String, Instance>();
 		
 		for (String seq: seq2domain.keySet()) {
 	    	
@@ -855,8 +857,14 @@ public class Predict {
 		return seq2fvector;
 	}
 
-	
-	public static String createIPRvector(ArrayList<String> predIPRdomains, ArrayList<String> relIPRdomains, int start) {
+	/**
+	 * 
+	 * @param predIPRdomains
+	 * @param relIPRdomains
+	 * @param start
+	 * @return
+	 */
+	public static String createIPRvector(List<String> predIPRdomains, List<String> relIPRdomains, int start) {
 		String fvector = "";
 		
 		for (int i = 0; i < relIPRdomains.size(); i++) {
