@@ -206,18 +206,11 @@ public abstract class BLASTfeatureGenerator {
 	 * @param superPred
 	 */
 	public BLASTfeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
-		// TODO
-		path2BLAST = "/opt/blast/latest/"; 
-		if (BasicTools.isWindows()) {
-			path2BLAST = "C:/Programme/NCBI/blast-2.2.27+/";
-		}
-		// MAC???
+		path2BLAST = System.getenv("BLAST_DIR");
 		
 		this.fastaFile = fastaFile;
 		this.featureFile = featureFile;
 		this.superPred = superPred;
-		this.pssmFeat = true;
-		this.naiveFeat = false;
 	}
 	
 	protected void writeFeatureFile() {
