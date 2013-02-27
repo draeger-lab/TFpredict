@@ -8,6 +8,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class KmerFeatureGenerator {
 	
 	private static boolean silent = false;

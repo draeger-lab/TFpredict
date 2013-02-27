@@ -11,6 +11,12 @@ import java.util.Set;
 
 import data.TrainingDataGenerator;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public abstract class DomainFeatureGenerator {
 	
 	protected static final String domainDescriptionURL = "ftp://ftp.ebi.ac.uk/pub/databases/interpro/names.dat";

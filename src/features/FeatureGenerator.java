@@ -2,6 +2,12 @@ package features;
 
 import io.BasicTools;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class FeatureGenerator {
 
 	private static int kMin = 3;

@@ -6,6 +6,12 @@ import liblinear.WekaClassifier;
 import liblinear.WekaLauncher;
 import org.apache.commons.cli.CommandLine;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class Train {
 
 	private static boolean silent = false;

@@ -46,6 +46,12 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.instance.NonSparseToSparse;
 import weka.filters.unsupervised.instance.Normalize;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class WekaClassifier {
 
 	public void setMultithreading(boolean multithreading) {

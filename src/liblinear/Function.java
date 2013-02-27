@@ -1,6 +1,12 @@
 package liblinear;
 
-// origin: tron.h
+/**
+ * origin: tron.h
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 interface Function {
 
     double fun(double[] w);

@@ -42,6 +42,12 @@ import org.apache.commons.math.stat.descriptive.rank.Percentile;
 
 import resources.Resource;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class BasicTools {
 	
 	public static final String duplicatedHeaderKey = "duplicated";

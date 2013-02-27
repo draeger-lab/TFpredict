@@ -18,15 +18,16 @@
  */
 
 package ipr;
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2010
- * ===============================================
- */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
-
+/**
+ * 
+ * @author Florian Topf
+ * @version $Rev$
+ * @since 1.0
+ */
 public class IprEntry implements Serializable{
 
 

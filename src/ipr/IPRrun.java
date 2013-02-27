@@ -18,11 +18,7 @@
  */
 
 package ipr;
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2012
- * ===============================================
- */
+
 import io.BasicTools;
 import io.NoExitSecurityManager;
 
@@ -45,7 +41,12 @@ import java.util.HashMap;
 import javax.xml.rpc.ServiceException;
 import uk.ac.ebi.webservices.jaxws.IPRScanClient;
 
-
+/**
+ * 
+ * @author Florian Topf
+ * @version $Rev$
+ * @since 1.0
+ */
 public class IPRrun {
 	
 	public static boolean addSpacerLine = true;

@@ -1,13 +1,13 @@
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2010
- * ===============================================
- */
-
 package features;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * 
+ * @author Florian Topf
+ * @version $Rev$
+ * @since 1.0
+ */
 public class HolmBonferroni {
 
 	public ArrayList<Double> correct(ArrayList<String> iprs, ArrayList<Double> pvalues) {

@@ -23,13 +23,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
-/*
+/**
  * This class contains functions for the post-processing of the results obtained from InterProScan
  * - filters InterPro domains based on child GO terms of "DNA-binding" to identify DNA-binding domains
  * - uses static mapping from TF names to TransFac classes for structural class annotation
  *   (TF names are parsed from descriptions of predicted InterPro domains)
+ *
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
  */
-
 public class IPRprocess {
 
 	public static HashMap<String, IprProcessed> filterIPRdomains(HashMap<String,IprEntry> seq2domain, HashMap<String,IprRaw> IPRdomains, ArrayList<String> relGOterms, HashMap<String, String> tfName2class) {

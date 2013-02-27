@@ -4,6 +4,12 @@ import java.io.PrintStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class AnimatedChar {
     private final static String anim= "|/-\\";
     

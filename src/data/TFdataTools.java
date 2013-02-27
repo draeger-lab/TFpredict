@@ -13,6 +13,12 @@ import resources.Resource;
 
 import main.TFpredictMain;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class TFdataTools {
 	
 	

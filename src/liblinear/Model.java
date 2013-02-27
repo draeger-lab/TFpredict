@@ -14,6 +14,10 @@ import java.util.Arrays;
  * <p>Model stores the model obtained from the training procedure</p>
  *
  * <p>use {@link Linear#loadModel(String)} and {@link Linear#saveModel(String, Model)} to load/save it</p>
+ *
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
  */
 public final class Model implements Serializable {
 

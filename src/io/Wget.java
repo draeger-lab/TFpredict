@@ -18,15 +18,17 @@
  */
 
 package io;
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2010
- * ===============================================
- */
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URL;
 
+/**
+ * 
+ * @author Florian Topf
+ * @version $Rev$
+ * @since 1.0
+ */
 public class Wget {
 	
 	public String fetchbuffered(String url) {

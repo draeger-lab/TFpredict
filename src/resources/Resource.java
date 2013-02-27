@@ -19,6 +19,12 @@
 
 package resources;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public final class Resource {
 
 }

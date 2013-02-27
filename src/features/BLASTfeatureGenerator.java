@@ -6,17 +6,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 public abstract class BLASTfeatureGenerator {
 
 	protected static final String[] aminoAcids = new String[]{"A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"};
-	protected static String path2BLAST = "/opt/blast/latest/";
-	static { 
-		if (BasicTools.isWindows()) {
-			path2BLAST = "C:/Programme/NCBI/blast-2.2.27+/";
-		}
-	}
+	
+	protected String path2BLAST;
 	
 	protected static boolean silent = false;
 	
@@ -28,12 +25,12 @@ public abstract class BLASTfeatureGenerator {
 	protected String featureFile;
 	protected String database;
 	
-	protected HashMap<String, Integer> seq2label = new HashMap<String, Integer>();
-	protected HashMap<String, String> sequences = new HashMap<String, String>();
+	protected Map<String, Integer> seq2label = new HashMap<String, Integer>();
+	protected Map<String, String> sequences = new HashMap<String, String>();
 	
-	protected HashMap<String, HashMap<String, Double>> hits = new HashMap<String, HashMap<String, Double>>();
-	protected HashMap<String, int[][]> pssms = new HashMap<String, int[][]>();
-	protected HashMap<String, double[]> features = new HashMap<String, double[]>();
+	protected Map<String, Map<String, Double>> hits = new HashMap<String, Map<String, Double>>();
+	protected Map<String, int[][]> pssms = new HashMap<String, int[][]>();
+	protected Map<String, double[]> features = new HashMap<String, double[]>();
 	
 	static {
 		java.util.Locale.setDefault(java.util.Locale.ENGLISH);
@@ -109,14 +106,14 @@ public abstract class BLASTfeatureGenerator {
 	}
 	
 	
-	private HashMap<String, Double> getPsiBlastHits(String fastaFile, String database, String hitsOutfile, int numIter) {	
+	private Map<String, Double> getPsiBlastHits(String fastaFile, String database, String hitsOutfile, int numIter) {	
 
 		String cmd = path2BLAST + "bin/psiblast -query " + fastaFile + " -num_iterations " + numIter + " -db " + database + " -out " + hitsOutfile;
 		BasicTools.runCommand(cmd, false);
 		
 		// read PSI-BLAST output from temporary files
 		ArrayList<String> hitsTable = BasicTools.readFile2List(hitsOutfile, false);
-		HashMap<String, Double> currHits = new HashMap<String, Double>();
+		Map<String, Double> currHits = new HashMap<String, Double>();
 		
 		int lineIdx = 0;
 		String line;
@@ -180,6 +177,26 @@ public abstract class BLASTfeatureGenerator {
 	
 	protected abstract void computeFeaturesFromBlastResult();
 	
+	/**
+	 * 
+	 * @param fastaFile
+	 * @param featureFile
+	 * @param superPred
+	 */
+	public BLASTfeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
+		// TODO
+		path2BLAST = "/opt/blast/latest/"; 
+		if (BasicTools.isWindows()) {
+			path2BLAST = "C:/Programme/NCBI/blast-2.2.27+/";
+		}
+		// MAC???
+		
+		this.fastaFile = fastaFile;
+		this.featureFile = featureFile;
+		this.superPred = superPred;
+		this.pssmFeat = true;
+		this.naiveFeat = false;
+	}
 	
 	protected void writeFeatureFile() {
 		

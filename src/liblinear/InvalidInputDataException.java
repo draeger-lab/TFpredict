@@ -2,7 +2,12 @@ package liblinear;
 
 import java.io.File;
 
-
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 public class InvalidInputDataException extends Exception {
 
     private static final long serialVersionUID = 2945131732407207308L;

@@ -1,9 +1,3 @@
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2010
- * ===============================================
- */
-
 package features;
 
 
@@ -18,8 +12,12 @@ import io.BasicTools;
 import ipr.IprEntry;
 
 
-/*
+/**
  * writes data in libsvm-file-format
+ * 
+ * @author Florian Topf
+ * @version $Rev$
+ * @since 1.0
  */
 public class LibSVMOutfileWriter {
 

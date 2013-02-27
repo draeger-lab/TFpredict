@@ -1,5 +1,11 @@
 package liblinear;
 
+/**
+ * 
+ * @author Johannes Eichner
+ * @version $Rev$
+ * @since 1.0
+ */
 class L2R_L2_SvcFunction implements Function {
 
     private final Problem  prob;

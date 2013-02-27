@@ -1,9 +1,3 @@
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2010
- * ===============================================
- */
-
 package liblinear;
 
 import io.BasicTools;
@@ -21,7 +15,12 @@ import java.util.concurrent.Executors;
 
 import liblinear.WekaClassifier.ClassificationMethod;
 
-
+/**
+ * 
+ * @author Florian Topf
+ * @version $Rev$
+ * @since 1.0
+ */
 public class WekaLauncher {
 	
 	public WekaLauncher(String featureFile, String resultsDir, String modelFileDir, boolean computeClassProbabilities) {

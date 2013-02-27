@@ -20,9 +20,8 @@ package features;
  * There could be better ways to do this.
  *
  * @author Ed Buckler
- * @version $Id: FisherExact.java,v 1
+ * @version $Rev$
  */
-
 public class FisherExact {
     private static final boolean DEBUG = false;
     private double[] f;

@@ -18,13 +18,15 @@
  */
 
 package io;
-/*
- * ===============================================
- * (C) Florian Topf, University of Tuebingen, 2012
- * ===============================================
- */
+
 import java.security.Permission;
 
+/**
+ * 
+ * @author Florian Topf
+ * @version $Rev$
+ * @since 1.0
+ */
 public class NoExitSecurityManager extends SecurityManager {
 	
 	protected static class ExitException extends SecurityException 
