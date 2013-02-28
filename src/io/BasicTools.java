@@ -584,6 +584,19 @@ public class BasicTools {
 		}
 	}
 	
+	public static double[] concatenateArrays(double[] array1, double[] array2) {
+		
+		int arraySize = array1.length + array2.length;
+		double[] resArray = (double[]) new double[arraySize];
+		for (int i=0; i<array1.length; i++) {
+			resArray[i] = array1[i];
+		}
+		for (int i=0; i<array2.length; i++) {
+			resArray[array1.length+i] = array2[i];
+		}
+		return resArray;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <T> T[] concatenateArrays(T[] array1, T[] array2) {
 		

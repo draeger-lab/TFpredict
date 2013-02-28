@@ -189,11 +189,11 @@ public class FeatureGenerator {
 		//generateKmerFeaturesSuperPred(fastaFileTF, superFeatureDir);
 		
 		// generate naive features
-		generateNaiveFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
-		generateNaiveFeaturesSuperPred(fastaFileTF, superFeatureDir);
+		//generateNaiveFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
+		//generateNaiveFeaturesSuperPred(fastaFileTF, superFeatureDir);
 		
 		// generate PSSM-based features
-		generatePssmFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
+		//generatePssmFeaturesTFpred(fastaFileTFnonTF, tfFeatureDir);
 		//generatePssmFeaturesSuperPred(fastaFileTF, superFeatureDir);
 
 		// generate pseudo-amino-acid features

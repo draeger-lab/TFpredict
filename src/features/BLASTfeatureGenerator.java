@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import data.TrainingDataGenerator;
+
 /**
  * 
  * @author Johannes Eichner
@@ -39,6 +41,7 @@ import java.util.StringTokenizer;
  * @version $Rev$
  * @since 1.0
  */
+
 public abstract class BLASTfeatureGenerator {
 	
 	protected static final String[] aminoAcids = new String[]{"A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"};
@@ -64,6 +67,27 @@ public abstract class BLASTfeatureGenerator {
 
 	private String pathForTmpDir;
 	
+	/**
+	 * 
+	 * @param fastaFile
+	 * @param featureFile
+	 * @param superPred
+	 */
+	public BLASTfeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
+		path2BLAST = System.getenv("BLAST_DIR");
+		if ((path2BLAST == null) || (path2BLAST.length() == 0)) {
+			throw new RuntimeException("Cannot execute the BLAST tool, because no path to its local installation has been defined. Please define the environment variable BLAST_DIR to point to the BLAST directory on your OS and run this program again.");
+		}
+
+		this.fastaFile = fastaFile;
+		this.featureFile = featureFile;
+		this.superPred = superPred;
+
+		// TODO
+		this.pathForTmpDir = "/rascratch/user/eichner/tmp/";
+	}
+		
+	
 	public void generateFeatures() {
 		
 		preparePsiBlast();
@@ -85,6 +109,15 @@ public abstract class BLASTfeatureGenerator {
 		BasicTools.runCommand(cmd, false);
 		
 		database = path2BLAST + "db/" + dbName;
+	}
+	
+	protected HashMap<String, Integer> getSeq2LabelMapWithShortenedIDs() {
+		
+		HashMap<String, Integer> shortSeq2Label = new HashMap<String, Integer>();
+		for (String seqID: seq2label.keySet()) {
+			shortSeq2Label.put(seqID.split(" ")[0], seq2label.get(seqID));
+		}
+		return(shortSeq2Label);
 	}
 	
 	
@@ -123,21 +156,35 @@ public abstract class BLASTfeatureGenerator {
 			// run PSI-BLAST current sequence
 			if (!silent) System.out.println("Processing sequence: " + seqID + "\t(" + seqCnt++ + "/" + sequences.size() + ")");
 			
+			String uniprotID = seqID.split("\\|")[TrainingDataGenerator.UniProtIDField];
 			if (pssmFeat) {
-
-				pssms.put(seqID, getPsiBlastPSSM(infileFasta, database, outfileHits, outfilePSSM, numIter).toArray(new int[][]{}));
+				String pssmFile = localTempDir + "/psiblast_" + uniprotID + "_pssm.txt";
+				boolean pssmFileExists = false;
+				if (new File(pssmFile).exists()) {
+					outfilePSSM = pssmFile;
+					pssmFileExists = true;
+				} 
+				pssms.put(seqID, getPsiBlastPSSM(infileFasta, database, outfileHits, outfilePSSM, numIter, pssmFileExists).toArray(new int[][]{}));
 			
 			} else {
-				hits.put(seqID, getPsiBlastHits(infileFasta, database, outfileHits, numIter));
+				String hitsFile = localTempDir + "/psiblast_" + uniprotID + "_hits.txt";
+				boolean hitsFileExists = false;
+				if (new File(hitsFile).exists()) {
+					outfileHits = hitsFile;
+					hitsFileExists = true;
+				} 
+				hits.put(seqID, getPsiBlastHits(infileFasta, database, outfileHits, numIter, hitsFileExists));
 			}
  		}
 	}
 	
 	
-	private Map<String, Double> getPsiBlastHits(String fastaFile, String database, String hitsOutfile, int numIter) {	
-
-		String cmd = path2BLAST + "bin/psiblast -query " + fastaFile + " -num_iterations " + numIter + " -db " + database + " -out " + hitsOutfile;
-		BasicTools.runCommand(cmd, false);
+	private Map<String, Double> getPsiBlastHits(String fastaFile, String database, String hitsOutfile, int numIter, boolean useExistingHitsFile) {	
+		
+		if (! useExistingHitsFile) {
+			String cmd = path2BLAST + "bin/psiblast -query " + fastaFile + " -num_iterations " + numIter + " -db " + database + " -out " + hitsOutfile;
+			BasicTools.runCommand(cmd, false);
+		}
 		
 		// read PSI-BLAST output from temporary files
 		List<String> hitsTable = BasicTools.readFile2List(hitsOutfile, false);
@@ -156,10 +203,13 @@ public abstract class BLASTfeatureGenerator {
 			
 			StringTokenizer strtok = new StringTokenizer(line);
 			String hitID = strtok.nextToken();
+			// correct wrong UniProt ID for T03281 in factor.dat
+			if (hitID.equals("T03281|41817|TF|3.1.|TransFac")) {
+				hitID = "T03281|P41817|TF|3.1.|TransFac";
+			}
 			String nextToken;
-			while ((nextToken = strtok.nextToken()).startsWith("GO:"));   // skip GO terms in non-TF headers
+			while ((nextToken = strtok.nextToken()).startsWith("GO:"));  // skip GO terms in non-TF headers
 			double hitScore = Double.parseDouble(nextToken); 
-
 			currHits.put(hitID, hitScore);
 			lineIdx++;
 		}
@@ -167,10 +217,13 @@ public abstract class BLASTfeatureGenerator {
 	}
 	
 	
-	private List<int[]> getPsiBlastPSSM(String fastaFile, String database, String hitsOutfile, String pssmOutfile, int numIter) {	
+
+	private List<int[]> getPsiBlastPSSM(String fastaFile, String database, String hitsOutfile, String pssmOutfile, int numIter, boolean useExistingPssmFile) {	
 		
-		String cmd = path2BLAST + "bin/psiblast -query " + fastaFile + " -num_iterations " + numIter + " -db " + database + " -out " + hitsOutfile + " -out_ascii_pssm " + pssmOutfile;
-		BasicTools.runCommand(cmd, false);
+		if (! useExistingPssmFile) {
+			String cmd = path2BLAST + "bin/psiblast -query " + fastaFile + " -num_iterations " + numIter + " -db " + database + " -out " + hitsOutfile + " -out_ascii_pssm " + pssmOutfile;
+			BasicTools.runCommand(cmd, false);
+		}
 
 		// read PSI-BLAST output from temporary files
 		List<String[]> pssmTable = BasicTools.readFile2ListSplitLines(pssmOutfile, true);
@@ -205,26 +258,7 @@ public abstract class BLASTfeatureGenerator {
 	
 	protected abstract void computeFeaturesFromBlastResult();
 	
-	/**
-	 * 
-	 * @param fastaFile
-	 * @param featureFile
-	 * @param superPred
-	 */
-	public BLASTfeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
-		path2BLAST = System.getenv("BLAST_DIR");
-		if ((path2BLAST == null) || (path2BLAST.length() == 0)) {
-			throw new RuntimeException("Cannot execute the BLAST tool, because no path to its local installation has been defined. Please define the environment variable BLAST_DIR to point to the BLAST directory on your OS and run this program again.");
-		}
-		
-		this.fastaFile = fastaFile;
-		this.featureFile = featureFile;
-		this.superPred = superPred;
-		
-		// TODO
-		this.pathForTmpDir = "/rascratch/user/eichner/tmp/";
-	}
-	
+
 	/**
 	 * 
 	 */

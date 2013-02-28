@@ -49,6 +49,8 @@ public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
 	 */
 	protected void computeFeaturesFromBlastResult() {
 		
+		Map<String, Integer> shortSeqID2label = getSeq2LabelMapWithShortenedIDs();
+		
 		for (String seqID: hits.keySet()) {
 			
 			// obtain class of best hit in sequence database
@@ -63,9 +65,16 @@ public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
 					bestHit = hit;
 				}
 			}
-			// TODO: fix null pointer exception
-			int predClass = seq2label.get(bestHit);
-			features.put(seqID, new double[] {predClass});
+			if (shortSeqID2label.containsKey(bestHit)) {
+				int predClass = shortSeqID2label.get(bestHit);
+				features.put(seqID, new double[] {predClass});
+				
+			} else if (bestHit.isEmpty()) {
+				System.out.println("Warning. No BLAST hits found for sequence: " + seqID);
+				
+			} else {
+				System.out.println("Error. No label found for sequence: " + bestHit);
+			}
 		}
 	}
 }
