@@ -49,6 +49,8 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 	
 	protected void computeFeaturesFromBlastResult() {
 		
+		Map<String, Integer> shortSeqID2label = getSeq2LabelMapWithShortenedIDs();
+		
 		for (String seqID: hits.keySet()) {
 			
 			Map<String, Double> currHits = hits.get(seqID); 
@@ -116,10 +118,14 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 					if (hit.equals(seqID)) {
 						continue;
 					}
-					if (seq2label.get(hit) == 1) {
+					if (!shortSeqID2label.containsKey(hit)) {
+						System.out.println("Error. No label found for sequence: " + hit);
+						System.exit(0);
+					}
+					if (shortSeqID2label.get(hit) == 1) {
 						scoresTF.add(currHits.get(hit));
 						
-					} else if (seq2label.get(hit) == -1) {
+					} else if (shortSeqID2label.get(hit) == -1) {
 						scoresNonTF.add(currHits.get(hit));
 						
 					} else {
@@ -128,17 +134,24 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 					}
 				}
 				
-				Percentile percObj = new Percentile();
+				if (scoresTF.isEmpty() && scoresNonTF.isEmpty()) {
+					System.out.println("Warning. No BLAST hits found for sequence: " + seqID);
+					continue;
+				}
+				
 				double[] bitScoresTF = BasicTools.Double2double(scoresTF.toArray(new Double[]{}));
 				double[] bitScoresNonTF = BasicTools.Double2double(scoresNonTF.toArray(new Double[]{}));
+				if (bitScoresTF.length == 0) bitScoresTF = new double[] {0};
+				if (bitScoresNonTF.length == 0) bitScoresNonTF = new double[] {0};
+
 				
-				Double[] percentilesTF = new Double[percentiles.length];
-				Double[] percentilesNonTF = new Double[percentiles.length];
+				double[] percentilesTF = new double[percentiles.length];
+				double[] percentilesNonTF = new double[percentiles.length];
 				for (int p=0; p<percentiles.length; p++) {
-					percentilesTF[p] = percObj.evaluate(bitScoresTF, percentiles[p]);
-					percentilesNonTF[p] = percObj.evaluate(bitScoresNonTF, percentiles[p]);
+					percentilesTF[p] = BasicTools.computePercentile(bitScoresTF, percentiles[p]);
+					percentilesNonTF[p] = BasicTools.computePercentile(bitScoresNonTF, percentiles[p]);
 				}
-				percFeatVec = BasicTools.Double2double(BasicTools.concatenateArrays(percentilesTF, percentilesNonTF));
+				percFeatVec = BasicTools.concatenateArrays(percentilesTF, percentilesNonTF);
 			}
 			features.put(seqID, percFeatVec);
 		}
