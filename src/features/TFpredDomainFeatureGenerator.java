@@ -144,7 +144,7 @@ public class TFpredDomainFeatureGenerator extends DomainFeatureGenerator{
 		List<Double> pvalues = fourFieldTest.getPvalues();
 
 		// write InterPro Domain IDs and corresponding p-values to file 
-		BasicTools.writeSplittedArrayList2File(BasicTools.combineLists(filteredDomainIDs, pvalues), basedir + domain2pvalueFile);
+		BasicTools.writeSplittedList2File(BasicTools.combineLists(filteredDomainIDs, pvalues), basedir + domain2pvalueFile);
 
 		// correct pvalues using Holm-Bonferroni method
 		if(useBonferroniHolm) {
@@ -165,7 +165,7 @@ public class TFpredDomainFeatureGenerator extends DomainFeatureGenerator{
 		}
 		
 		// write InterPro Domain IDs and corresponding p-values to file 
-		BasicTools.writeSplittedArrayList2File(BasicTools.combineLists(filteredDomainIDs, pvalues), basedir + domain2pvalueCorrectedFile);
+		BasicTools.writeSplittedList2File(BasicTools.combineLists(filteredDomainIDs, pvalues), basedir + domain2pvalueCorrectedFile);
 	}
 
 	public void writeFeatureFile() {

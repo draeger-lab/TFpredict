@@ -55,16 +55,34 @@ import resources.Resource;
  */
 public class BasicTools {
 	
+	/**
+	 * 
+	 */
 	public static final String duplicatedHeaderKey = "duplicated";
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public static boolean isWindows() {
-		return(System.getProperty("os.name").startsWith("Windows"));
+		return(System.getProperty("os.name").contains("Windows"));
 	}
 	
+	/**
+	 * 
+	 * @param string
+	 * @return
+	 */
 	public static String[] wrapString(String string) {
 		return(wrapString(string, 60));
 	}
 	
+	/**
+	 * 
+	 * @param string
+	 * @param max_line_length
+	 * @return
+	 */
 	public static String[] wrapString(String string, int max_line_length) {
 
 		List<String> lines = new ArrayList<String>();
@@ -81,6 +99,13 @@ public class BasicTools {
 		return(lines.toArray(new String[]{}));
 	}
 	
+	/**
+	 * 
+	 * @param string
+	 * @param start
+	 * @param end
+	 * @return
+	 */
 	public static String[] getSubarray(String[] string, int start, int end) {
 		
 		int resLength = end-start+1;
@@ -92,12 +117,17 @@ public class BasicTools {
 		return(res);
 	}
 	
-	public static void writeSplittedArrayList2File(List<String[]> arraylist, String outfile) {
+	/**
+	 * 
+	 * @param list
+	 * @param outfile
+	 */
+	public static void writeSplittedList2File(List<String[]> list, String outfile) {
 		
 		List<String> collapsedList = new ArrayList<String>();
-		for (int i=0; i<arraylist.size(); i++) {
+		for (int i=0; i<list.size(); i++) {
 			StringBuffer currLine = new StringBuffer();
-			for (String token: arraylist.get(i)) {
+			for (String token: list.get(i)) {
 				currLine.append(token + "\t");
 			}
 			collapsedList.add(currLine.toString().trim());
@@ -105,16 +135,30 @@ public class BasicTools {
 		writeList2File(collapsedList, outfile);
 	}
 	
-	public static void writeList2File(List<String> arraylist, String outfile) {
-		String[] array = arraylist.toArray(new String[] {});
+	/**
+	 * 
+	 * @param list
+	 * @param outfile
+	 */
+	public static void writeList2File(List<String> list, String outfile) {
+		String[] array = list.toArray(new String[] {});
 		writeArray2File(array, outfile);
 	}
 	
+	/**
+	 * 
+	 * @param lines
+	 * @param outfile
+	 */
 	public static void writeString2File(String lines, String outfile) {
-		
 		writeArray2File(lines.split("\\n"), outfile);
 	}
-	
+
+	/**
+	 * 
+	 * @param array
+	 * @param outfile
+	 */
 	public static void writeArray2File(String[] array, String outfile) {
 		
 		try {
@@ -131,6 +175,11 @@ public class BasicTools {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param doubleArray
+	 * @return
+	 */
 	public static Double[] double2Double(double[] doubleArray) {
 		
 		Double[] res = new Double[doubleArray.length];
@@ -140,6 +189,11 @@ public class BasicTools {
 		return(res);
 	}
 	
+	/**
+	 * 
+	 * @param intArray
+	 * @return
+	 */
 	public static int[] Integer2int(Integer[] intArray) {
 		
 		int[] res = new int[intArray.length];
@@ -149,6 +203,11 @@ public class BasicTools {
 		return(res);
 	}
 	
+	/**
+	 * 
+	 * @param doubleArray
+	 * @return
+	 */
 	public static double[] Double2double(Double[] doubleArray) {
 		
 		double[] res = new double[doubleArray.length];
@@ -158,14 +217,30 @@ public class BasicTools {
 		return(res);
 	}
 	
+	/**
+	 * 
+	 * @param doubleArray
+	 * @return
+	 */
 	public static double getMax(double[] doubleArray) {
 		return getMax(doubleArray, false);
 	}
 	
+	/**
+	 * 
+	 * @param doubleArray
+	 * @return
+	 */
 	public static int getMaxIndex(double[] doubleArray) {
 		return (int) getMax(doubleArray, true);
 	}
 	
+	/**
+	 * 
+	 * @param doubleArray
+	 * @param returnIndex
+	 * @return
+	 */
 	public static double getMax(double[] doubleArray, boolean returnIndex) {
 		
 		double max = doubleArray[0];
@@ -183,11 +258,21 @@ public class BasicTools {
 	    }
 	}
 
-	
+	/**
+	 * 
+	 * @param fasta_file
+	 * @return
+	 */
 	public static Map<String, String> readFASTA(String fasta_file) {
 		return readFASTA(fasta_file, false);
 	}
 	
+	/**
+	 * 
+	 * @param fasta_file
+	 * @param readFullHeader
+	 * @return
+	 */
 	public static Map<String, String> readFASTA(String fasta_file, boolean readFullHeader) {
 		
 		Map<String, String> sequences = new HashMap<String, String>();
@@ -245,7 +330,12 @@ public class BasicTools {
 		return(sequences);
 	}
 	
-	
+	/**
+	 * 
+	 * @param header
+	 * @param sequence
+	 * @param output_file
+	 */
 	public static void writeFASTA(String header, String sequence, String output_file) {
 		
 		Map<String, String> sequenceMap = new HashMap<String, String>();
@@ -253,6 +343,11 @@ public class BasicTools {
 		writeFASTA(sequenceMap, output_file);
 	}
 	
+	/**
+	 * 
+	 * @param sequences
+	 * @param output_file
+	 */
 	public static void writeFASTA(Map<String, String> sequences, String output_file) {
 		
 		try {
@@ -342,7 +437,11 @@ public class BasicTools {
 		return(fileContent);
 	}
 	
-	
+	/**
+	 * 
+	 * @param infile
+	 * @return
+	 */
 	public static Map<String, String> readFile2Map(String infile) {
 		
 		List<String[]> keyValueList = readFile2ListSplitLines(infile);
@@ -361,7 +460,11 @@ public class BasicTools {
 		return (keyValueMap);
 	}
 	
-	
+	/**
+	 * 
+	 * @param infile
+	 * @return
+	 */
 	public static String readFile2String(String infile) {
 		
 		String lines = "";
@@ -380,10 +483,21 @@ public class BasicTools {
 		return lines;
 	}
 	
+	/**
+	 * 
+	 * @param infile
+	 * @return
+	 */
 	public static List<String[]> readFile2ListSplitLines(String infile) {
 		return readFile2ListSplitLines(infile, false);
 	}
 	
+	/**
+	 * 
+	 * @param infile
+	 * @param useTokenizer
+	 * @return
+	 */
 	public static List<String[]> readFile2ListSplitLines(String infile, boolean useTokenizer) {
 		
 		List<String[]> splittedLines = new ArrayList<String[]>();
@@ -421,6 +535,12 @@ public class BasicTools {
 		return splittedLines;
 	}	
 	
+	/**
+	 * 
+	 * @param list1
+	 * @param list2
+	 * @return
+	 */
 	public static List<String> union(List<String> list1, List<String> list2) {
 		
 		HashSet<String> unionSet = new HashSet<String>();
@@ -436,10 +556,22 @@ public class BasicTools {
 		return(union);
 	}
 	
+	/**
+	 * 
+	 * @param list1
+	 * @param list2
+	 * @return
+	 */
 	public static List<String> union(String[] list1, String[] list2) {
 		return(union(new ArrayList<String>(Arrays.asList(list1)), new ArrayList<String>(Arrays.asList(list2))));
 	}
 	
+	/**
+	 * 
+	 * @param list1
+	 * @param list2
+	 * @return
+	 */
 	public static List<String> intersect(List<String> list1, List<String> list2) {
 		
 		HashSet<String> intersectionSet = new HashSet<String>();
@@ -454,10 +586,22 @@ public class BasicTools {
 		return(intersection);
 	}
 	
+	/**
+	 * 
+	 * @param list1
+	 * @param list2
+	 * @return
+	 */
 	public static List<String> setDiff(String[] list1, String[] list2) {
 		return(setDiff(new ArrayList<String>(Arrays.asList(list1)), new ArrayList<String>(Arrays.asList(list2))));
 	}
 	
+	/**
+	 * 
+	 * @param list1
+	 * @param list2
+	 * @return
+	 */
 	public static List<String> setDiff(List<String> list1, List<String> list2) {
 		HashSet<String> diffSet = new HashSet<String>();
 		for (String element: list1) {
@@ -471,6 +615,12 @@ public class BasicTools {
 		return(diff);
 	}
 	
+	/**
+	 * 
+	 * @param ids
+	 * @param values
+	 * @return
+	 */
 	public static List<String[]> combineLists(List<String> ids, List<Double> values) {
 		
 		if (ids.size() != values.size()) {
@@ -485,6 +635,11 @@ public class BasicTools {
 		return(mergedList);
 	}
 	
+	/**
+	 * 
+	 * @param matrix
+	 * @return
+	 */
 	public static double[] getColMeans(double[][] matrix) {
 		
 		double[] colMeans = new double[matrix[0].length];
@@ -498,18 +653,32 @@ public class BasicTools {
 		return(colMeans);
 	}
 	
+	/**
+	 * 
+	 * @param s
+	 * @param n
+	 * @return
+	 */
 	public static String padRight(String s, int n) {
 	     return String.format("%1$-" + n + "s", s);  
 	}
 
+	/**
+	 * 
+	 * @param s
+	 * @param n
+	 * @return
+	 */
 	public static String padLeft(String s, int n) {
 	    return String.format("%1$#" + n + "s", s);  
 	}
 	
-	public static void main(String args[]) {
-		
-		String fasta_file = "/rahome/eichner/web_home/test_seq.fasta";
-		Map<String, String> sequences = readFASTA(fasta_file);
+	/**
+	 * 
+	 * @param args path to a FASTA file.
+	 */
+	public static void main(String args[]) {		
+		Map<String, String> sequences = readFASTA(args[0]); // /rahome/eichner/web_home/test_seq.fasta
 		
 		for (String header: sequences.keySet()) {
 			System.out.println("> " + header);
@@ -517,11 +686,21 @@ public class BasicTools {
 		}
 	}
 	
-	
+	/**
+	 * 
+	 * @param cmd
+	 * @return
+	 */
 	public static String[] runCommand(String cmd) {
 		return runCommand(cmd, true);
 	}
 	
+	/**
+	 * 
+	 * @param cmd
+	 * @param parseOutput
+	 * @return
+	 */
 	public static String[] runCommand(String cmd, boolean parseOutput) {
 		
 		String[] consoleOutput = null;
@@ -550,11 +729,22 @@ public class BasicTools {
 		return consoleOutput;
 	}
 	
+	/**
+	 * 
+	 * @param stringArray
+	 * @return
+	 */
 	public static String collapseStringArray(String[] stringArray) {
 		
 		return collapseStringArray(stringArray, "\t");
 	}
 	
+	/**
+	 * 
+	 * @param stringArray
+	 * @param separator
+	 * @return
+	 */
 	public static String collapseStringArray(String[] stringArray, String separator) {
 		
 		StringBuffer stringBuffer = new StringBuffer(stringArray[0]);
@@ -564,6 +754,12 @@ public class BasicTools {
 		return stringBuffer.toString();
 	}
 
+	/**
+	 * 
+	 * @param string
+	 * @param substring
+	 * @return
+	 */
 	public static int[] getAllIndicesOf(String string, String substring) {
 		
 		List<Integer> indices = new ArrayList<Integer>();
@@ -575,6 +771,10 @@ public class BasicTools {
 		return Integer2int(indices.toArray(new Integer[]{}));
 	}
 	
+	/**
+	 * 
+	 * @param file
+	 */
 	public static void createDir4File(String file) {
 		
 		String directory = new File(file).getParent();
@@ -584,6 +784,12 @@ public class BasicTools {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param array1
+	 * @param array2
+	 * @return
+	 */
 	public static double[] concatenateArrays(double[] array1, double[] array2) {
 		
 		int arraySize = array1.length + array2.length;
@@ -597,6 +803,12 @@ public class BasicTools {
 		return resArray;
 	}
 	
+	/**
+	 * 
+	 * @param array1
+	 * @param array2
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T[] concatenateArrays(T[] array1, T[] array2) {
 		
@@ -611,6 +823,11 @@ public class BasicTools {
 		return resArray;
 	}
 	
+	/**
+	 * 
+	 * @param array
+	 * @return
+	 */
 	public static double[] transform2zScores(double[] array) {
 		
 		Mean mean = new Mean();
@@ -626,7 +843,12 @@ public class BasicTools {
 		return(zScores);
 	}
 	
-	
+	/**
+	 * 
+	 * @param array
+	 * @param perc
+	 * @return
+	 */
 	public static double computePercentile(double[] array, double perc) {
 		
 		double res = 0;

@@ -158,9 +158,16 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 	}
 
 	/**
-	 * Generation of feature files
+	 * <p>
+	 * Generation of feature files.
+	 * <p>
+	 * Please note that in order to use this class, the environment variable
+	 * {@code BLAST_DIR} must be defined and point to your (local) installation
+	 * folder of the BLAST program.
 	 * 
-	 * @param args tfFastaFile (FASTA format) and tfFeatureFile (TXT format)
+	 * @param args
+	 *            {@code tfFastaFile} (FASTA format) and {@code tfFeatureFile}
+	 *            (TXT format)
 	 */
 	public static void main(String[] args) {
 		// generate feature file for TF prediction

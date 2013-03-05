@@ -345,7 +345,7 @@ public class TrainingDataGenerator {
 		}
 		System.out.println("Number of parsed interpro domains after filtering: " + iprOutput.size());
 		
-		BasicTools.writeSplittedArrayList2File(iprOutput, outputFile);
+		BasicTools.writeSplittedList2File(iprOutput, outputFile);
 	}	
 	
 	
@@ -439,7 +439,7 @@ public class TrainingDataGenerator {
 		}
 		System.out.println("Number of parsed interpro domains after filtering: " + iprOutput.size());
 		
-		BasicTools.writeSplittedArrayList2File(iprOutput, outputFile);
+		BasicTools.writeSplittedList2File(iprOutput, outputFile);
 	}
 	
 	public static void main(String args[]) {
