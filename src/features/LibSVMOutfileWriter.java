@@ -146,7 +146,7 @@ public class LibSVMOutfileWriter {
 		for (int i=0; i<feat2seq.size(); i++) {
 			namesList.add(feat2seq.get(i).toArray(new String[]{}));
 		}
-		BasicTools.writeSplittedArrayList2File(namesList, namesFile);
+		BasicTools.writeSplittedList2File(namesList, namesFile);
 		
 		// write names of proteins for which no feature vectors were generated to file
 		String excludedNamesFile = outfile.replace(".txt", "_excluded.txt");
