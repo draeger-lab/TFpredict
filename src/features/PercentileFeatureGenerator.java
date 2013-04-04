@@ -47,9 +47,14 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 		this.naiveFeat = false;
 	}
 	
-	protected void computeFeaturesFromBlastResult() {
-		
-		Map<String, Integer> shortSeqID2label = getSeq2LabelMapWithShortenedIDs();
+	public PercentileFeatureGenerator(Map<String, Map<String,Double>> hits, Map<String, Integer> seq2label, boolean superPred) {
+		super();
+		this.hits = hits;
+		this.seq2label = seq2label;
+		this.superPred = superPred;
+	}
+	
+	public void computeFeaturesFromBlastResult() {
 		
 		for (String seqID: hits.keySet()) {
 			
@@ -118,14 +123,10 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 					if (hit.equals(seqID)) {
 						continue;
 					}
-					if (!shortSeqID2label.containsKey(hit)) {
-						System.out.println("Error. No label found for sequence: " + hit);
-						System.exit(0);
-					}
-					if (shortSeqID2label.get(hit) == 1) {
+					if (seq2label.get(hit) == Predict.TF) {
 						scoresTF.add(currHits.get(hit));
 						
-					} else if (shortSeqID2label.get(hit) == -1) {
+					} else if (seq2label.get(hit) == Predict.Non_TF) {
 						scoresNonTF.add(currHits.get(hit));
 						
 					} else {
