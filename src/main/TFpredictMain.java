@@ -52,7 +52,7 @@ public class TFpredictMain {
 	private static boolean standAloneMode = false;
 	private static boolean trainMode = false;
 	
-	private static final int[] validClassifierIdx = new int[] {3,4,5,6}; 
+	private static final int[] validClassifierIdx = new int[] {3,4,5}; 
 	private static final String version = "1.1";
 	
 	public static final String sabineSpeciesList = "organism_list.txt";
@@ -205,6 +205,7 @@ public class TFpredictMain {
 			options.addOption("basedir", true, "directory for temporary files");
 			options.addOption("species", true, "organism (e.g. Homo sapiens)");
 			options.addOption("useWeb", false, "use InterProScan webservice");
+			options.addOption("blastPath", true, "path to BLAST");
 			
 			// optional arguments
 			options.addOption("tfClassifier", true, "file containing TF/Non-TF classifier");
@@ -232,6 +233,7 @@ public class TFpredictMain {
 			options.addOption("tfClassifier", true, "file containing TF/Non-TF classifier");
 			options.addOption("superClassifier", true, "file containing Superclass classifier");
 			options.addOption("iprscanPath", true, "path to InterProScan");
+			options.addOption("blastPath", true, "path to BLAST");
 			options.addOption("basedir", true, "directory for temporary files");
 			options.addOption("standAloneMode", false, "directory for temporary files");
 		}
@@ -349,6 +351,7 @@ public class TFpredictMain {
 		System.out.println("            -tfClassifier <classifier_name>     (possible values: SVM_linear, NaiveBayes, KNN, Kstar)");
 		System.out.println("            -superClassifier <classifier_name>  (possible values: SVM_linear, NaiveBayes, KNN, Kstar)");	
 		System.out.println("            -iprscanPath <path_to_iprscan>      (e.g., \"/opt/iprscan/bin/iprscan\")\n");
+		System.out.println("            -blastPath <path_to_blast>          (e.g., \"/opt/blast/latest\")\n");
 		System.exit(0);
 		
 	}

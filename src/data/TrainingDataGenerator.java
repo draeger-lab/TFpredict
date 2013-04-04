@@ -442,6 +442,42 @@ public class TrainingDataGenerator {
 		BasicTools.writeSplittedList2File(iprOutput, outputFile);
 	}
 	
+	private static void removeFalseNegativeNonTFs(String tfFastaFile, String nontfFastaFile, String outputFile) {
+		
+		Map<String, String> tfSeqs = BasicTools.readFASTA(tfFastaFile, true);
+		Map<String, String> nontfSeqs = BasicTools.readFASTA(nontfFastaFile, true);
+		
+		ArrayList<String> tfNames = new ArrayList<String>(tfSeqs.keySet());
+		for (int i=0; i<tfNames.size(); i++) {
+			tfNames.set(i, tfNames.get(i).split("\\|")[1]);
+		}
+		
+		// rewrite NonTF.fasta
+		Map<String, String> correctedNontfSeqs = new HashMap<String, String>();
+		for (String nontfID: nontfSeqs.keySet()) {
+			if (!tfNames.contains(nontfID.split("\\|")[1])) {
+				correctedNontfSeqs.put(nontfID, nontfSeqs.get(nontfID));
+			}
+		}	
+		BasicTools.writeFASTA(correctedNontfSeqs, outputFile);
+	}
+	
+	private static void generateFastaSubsetFile(String fastaFile, String uniprotIDfile, String fastaSubsetFile) {
+		
+		List<String> uniprotIDs = BasicTools.readFile2List(uniprotIDfile, false);
+		
+		Map<String, String> seqs = BasicTools.readFASTA(fastaFile, true);
+		Map<String, String> seqsSubset = new HashMap<String, String>(); 
+		
+		for (String seqID: seqs.keySet()) {
+			if (uniprotIDs.contains(seqID.split("\\|")[1])) {
+				seqsSubset.put(seqID, seqs.get(seqID));
+			}
+		}
+		BasicTools.writeFASTA(seqsSubset, fastaSubsetFile);
+	}
+	
+	
 	public static void main(String args[]) {
 		
 		/*
@@ -557,13 +593,12 @@ public class TrainingDataGenerator {
 		String tfTrainInterpro = interproDir + "TF_cdhit80.fasta.out";				 // 23155 Domains
 		 */
 		 
+		
 		/*
 		 *  Add superclass annotation to TF fastafile headers
 		 */
 		String sabineTrainFlatfile = baseDir + "sabine_files/29.11.2012/TF_cdhit80.txt";
 		String sabineTrainFlatfileWithSuper = baseDir + "sabine_files/29.11.2012/TF_cdhit80_withSuper.txt";      
-		String tfTrainFasta = baseDir + "fasta_files/29.11.2012/TF_cdhit80.fasta"; 
-		String nontfTrainFasta = baseDir + "fasta_files/latest/NonTF.fasta"; 
 		String tfTrainFastaWithSuper = baseDir + "fasta_files/29.11.2012/TF_cdhit80_withSuper.fasta";
 		String tfTrainFastaWithSuperAndUniProt = baseDir + "fasta_files/12.02.2013/TF.fasta";
 		String tfTrainInterpro = baseDir + "interpro_files/29.11.2012/TF_cdhit80.fasta.out";
@@ -572,14 +607,26 @@ public class TrainingDataGenerator {
 		String tfTrainInterproFiltered = baseDir + "interpro_files/29.11.2012/TF_cdhit80_filtered.fasta.out";
 		String tfTrainInterproFilteredWithUniProt = baseDir + "interpro_files/29.11.2012/TF_cdhit80_filtered_uniprot.fasta.out";
 		
+		
+		String tfTrainFasta = baseDir + "fasta_files/12.02.2013/TF.fasta"; 
+		String nontfTrainFasta = baseDir + "fasta_files/12.02.2013/NonTF.fasta"; 
+		String nontfTrainFastaCorrected = baseDir + "fasta_files/20.03.2013/NonTF.fasta"; 
+		
+		String trainFasta = baseDir + "fasta_files/20.03.2013/TFnonTF.fasta"; 
+		String trainFastaSubset = baseDir + "fasta_files/20.03.2013/TFnonTFpercNA.fasta"; 
+		String NAseqIDsPercFeatFile = "/rahome/eichner/Desktop/na_seqIDs_percFeat.txt"; 
+		
 		/*
 		addSuperclass2Fasta(sabineTrainFlatfile, tfTrainFasta, tfTrainFastaWithSuper);
 		filterFlatfileUsingFasta(sabineTrainFlatfile, tfTrainFastaWithSuper,  sabineTrainFlatfileWithSuper);
 		*/
-		filterIPRscanFileUsingFasta(nontfTrainInterpro, nontfTrainFasta, nontfTrainInterproFiltered);
+		//filterIPRscanFileUsingFasta(nontfTrainInterpro, nontfTrainFasta, nontfTrainInterproFiltered);
 		
 		//adjustHeadersInIPRscanFile(tfTrainInterproFiltered, tfTrainFastaWithSuperAndUniProt, tfTrainInterproFilteredWithUniProt);
 
+		//removeFalseNegativeNonTFs(tfTrainFasta, nontfTrainFasta, nontfTrainFastaCorrected);
+		
+		generateFastaSubsetFile(trainFasta, NAseqIDsPercFeatFile, trainFastaSubset);
 		
 	}
 }

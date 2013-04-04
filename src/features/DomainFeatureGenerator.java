@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import modes.Predict;
+
 import data.TrainingDataGenerator;
 
 /**
@@ -157,9 +159,9 @@ public abstract class DomainFeatureGenerator {
 			} else {
 				labelField = splittedHeader[TrainingDataGenerator.ProteinClassField];
 				if (labelField.equals("TF")) {
-					classLabel = 1;
+					classLabel = Predict.TF;
 				} else if (labelField.equals("NonTF")) {
-					classLabel = -1;
+					classLabel = Predict.Non_TF;
 				} else {
 					System.out.println("Error. Unknown label in FASTA header: " + labelField);
 					System.exit(0);

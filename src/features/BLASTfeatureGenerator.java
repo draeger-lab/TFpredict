@@ -73,6 +73,13 @@ public abstract class BLASTfeatureGenerator {
 	 * @param featureFile
 	 * @param superPred
 	 */
+	
+	public Map<String, double[]> getFeatures() {
+		return features;
+	}
+	
+	public BLASTfeatureGenerator() {}
+	
 	public BLASTfeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
 		path2BLAST = System.getenv("BLAST_DIR");
 		if ((path2BLAST == null) || (path2BLAST.length() == 0)) {
@@ -267,8 +274,7 @@ public abstract class BLASTfeatureGenerator {
 		List<String> sequenceNames = new ArrayList<String>();
 		
 		for (String seqID: features.keySet()) {
-			
-			sequenceNames.add(seqID);
+
 			double[] featureVector = features.get(seqID);
 			int label = seq2label.get(seqID);
 			StringBuffer featureString = new StringBuffer("" + label);
@@ -276,7 +282,14 @@ public abstract class BLASTfeatureGenerator {
 				if (!naiveFeat && featureVector[i] == 0) continue;     // skip features with value zero
 				featureString.append( " " + (i+1) + ":" + (featureVector[i] + "").replaceFirst("\\.0$", ""));
 			}
-			libSVMfeatures.add(featureString.toString());
+			
+			int featVecIdx = libSVMfeatures.indexOf(featureString.toString());
+			if (naiveFeat || featVecIdx == -1) {
+				libSVMfeatures.add(featureString.toString());
+				sequenceNames.add(seqID);
+			} else {
+				sequenceNames.set(featVecIdx, sequenceNames.get(featVecIdx) + "\t" + seqID);
+			}
 		}
 		BasicTools.writeList2File(libSVMfeatures, featureFile);
 		BasicTools.writeList2File(sequenceNames, featureFile.replace(".txt", "_names.txt"));

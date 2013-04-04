@@ -22,6 +22,8 @@
  */
 package modes;
 
+import features.DomainFeatureGenerator;
+import features.PercentileFeatureGenerator;
 import io.AnimatedChar;
 import io.BasicTools;
 import io.ObjectRW;
@@ -45,8 +47,10 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
@@ -60,8 +64,10 @@ import org.apache.commons.cli.CommandLine;
 
 import resources.Resource;
 import weka.classifiers.Classifier;
+import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.SparseInstance;
 import weka.core.converters.LibSVMLoader;
 
 /**
@@ -96,12 +102,18 @@ public class Predict {
 
 	// static arguments required by TFpredict
 	public static String iprpath = "";
+	public static String blastpath = "";
+	private static final int numBlastIter = 2;
 	public static String tfClassifier_file = "models/tfPred/svmLinear.model";
 	public static String superClassifier_file = "models/superPred/svmLinear.model";
 	public static String relDomainsTF_file = "domainsTFpred.txt";
 	public static String relDomainsSuper_file = "domainsSuperPred.txt";
 	public static String relGOterms_file = "DNA.go";
 	public static String tfName2class_file = "transHMan";
+	public static String tfPredBlastFasta = "blast_db/TFnonTF.fasta";
+	public static String superPredBlastFasta = "blast_db/TF.fasta";
+	public static String tfPredBlastDB = "blast_db/TFnonTF.db";
+	public static String superPredBlastDB = "blast_db/TF.db";
 	
 	// arguments passed from Galaxy to TFpredict
 	static String basedir = "";
@@ -114,6 +126,8 @@ public class Predict {
 	static String uniprot_id;
 	static String fasta_file;
 	
+	private String tfnontfDBfastaFile;
+	private String tfDBfastaFile;
 	private Classifier tfClassifier;
 	private Classifier superClassifier;
 	private List<String> relDomains_TFclass;
@@ -140,6 +154,8 @@ public class Predict {
 	private Map<String, Boolean> seqIsTF = new HashMap<String, Boolean>();
 	private Map<String, Boolean> annotatedClassAvailable = new HashMap<String, Boolean>();
 	private Map<String, Boolean> domainsPredicted = new HashMap<String, Boolean>();
+	Map<String, Map<String, Double>> seq2blastHitsTF = new HashMap<String, Map<String, Double>>();
+	Map<String, Map<String, Double>> seq2blastHitsSuper = new HashMap<String, Map<String, Double>>();
 	
 	public static final int Non_TF = 0;
 	public static final int TF = 1;
@@ -149,6 +165,7 @@ public class Predict {
 	public static final int Beta_scaffold = 4;
 	public static final int Other = 0;
 	private static final String[] superclassNames = new String[] {"Other", "Basic domain", "Zinc finger", "Helix-turn-helix", "Beta scaffold"};
+
 	
 	static DecimalFormat df = new DecimalFormat("0.00");
 	static {
@@ -165,6 +182,7 @@ public class Predict {
 		TFpredictor.prepareInput();
 		TFpredictor.prepareClassifiers();
 		TFpredictor.runInterproScan();
+		TFpredictor.runPsiBlast();
 	    TFpredictor.performClassification();
 
 	    if (standAloneMode) {
@@ -275,6 +293,22 @@ public class Predict {
 			iprpath = cmd.getOptionValue("iprscanPath");
 			useWeb = false;
 		}
+		
+		// set BLAST path from argument (if given)
+		if(cmd.hasOption("blastPath")) {
+			blastpath = cmd.getOptionValue("blastPath");
+				
+		// set BLAST path from environment variable (if given)
+		} else if (System.getenv("BLAST_DIR") != null && System.getenv("BLAST_DIR").length() > 0) {
+			blastpath = System.getenv("BLAST_DIR");
+		
+		} else {
+			throw new RuntimeException("TFpredict requires BLAST which is available from the NCBI FTP site (ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)." +
+					"After downloading a path to the local BLAST installation has to be passed to TFpredict. " +
+					"Please define the environment variable BLAST_DIR to point to the BLAST directory on your OS and run this program again. " +
+					"Alternatively you can use the command line argument -blastPath <pathToBlast>.");
+		}
+		if (!blastpath.endsWith(File.separator)) blastpath += File.separator;
 		
 		if(cmd.hasOption("standAloneMode")) {
 			standAloneMode = true;
@@ -397,8 +431,8 @@ public class Predict {
 		}
 		
 		// HACK: line can be included for testing purposes
-		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1771_files/";
-		//List<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(basedir + "/iprscan-S20120523-165354-0573-55042068-pg.out.txt");
+		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1878_files/";
+		//List<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(basedir + "/iprscan-S20130402-123505-0456-82243043-oy.out.txt");
 		
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
@@ -435,26 +469,105 @@ public class Predict {
 		}
 	}
 	
+	// generates databases, runs BLAST on query sequence and extracts hits 
+	private void runPsiBlast() {
+		
+		// copy FASTA files from Jar to temporary directory
+		String blast_db_dir = basedir + "blast_db/";
+		if (! new File(blast_db_dir).exists() && ! new File(blast_db_dir).mkdir()) {
+			System.out.println("Error. Could not create directory for BLAST database.");
+		}
+		tfnontfDBfastaFile = blast_db_dir + new File(tfPredBlastFasta).getName();
+		tfDBfastaFile = blast_db_dir + new File(superPredBlastFasta).getName();
+		BasicTools.copy(tfPredBlastFasta, tfnontfDBfastaFile, true);
+		BasicTools.copy(superPredBlastFasta, tfDBfastaFile, true);
+		
+		// generate PSI-BLAST databases from FASTA files
+		String createDB_cmdTF = blastpath + "bin/makeblastdb -in " + tfnontfDBfastaFile + " -out " + tfnontfDBfastaFile + ".db" + " -dbtype prot";
+		String createDB_cmdSuper = blastpath + "bin/makeblastdb -in " + tfDBfastaFile + " -out " + tfDBfastaFile + ".db" + " -dbtype prot";
+		BasicTools.runCommand(createDB_cmdTF , false);
+		BasicTools.runCommand(createDB_cmdSuper, false);
+		
+		// blast query sequences against TF and TF/non-TF database
+		String blastHitsFileTF = input_file.replace(".fasta", ".tf.hits");
+		String blastHitsFileSuper = input_file.replace(".fasta", ".super.hits");
+		
+		// if given FASTA file contains multiple sequences --> split into single sequences
+		Map<String, String> seq2fasta = new HashMap<String, String>();
+		if (batchMode) {
+			int seqCnt = 1;
+			for (String seqID: sequence_ids) {
+				String currFastaFile = input_file.replace(".fasta", ".seq" + seqCnt++ + ".fasta");
+				BasicTools.writeFASTA(seqID, sequences.get(seqID), currFastaFile);
+				seq2fasta.put(seqID, currFastaFile);
+			}
+		} else {
+			seq2fasta.put(sequence_ids[0], input_file);
+		}
+			
+		for (String seqID: sequence_ids) {
+			String runBLAST_cmdTF = blastpath + "bin/psiblast -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileTF + " -db " +  tfnontfDBfastaFile + ".db";
+			String runBLAST_cmdSuper = blastpath + "bin/psiblast -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileSuper + " -db " +  tfDBfastaFile + ".db";
+			BasicTools.runCommand(runBLAST_cmdTF, false);
+			BasicTools.runCommand(runBLAST_cmdSuper, false);
+			seq2blastHitsTF.put(seqID, getBlastHits(blastHitsFileTF));
+			seq2blastHitsSuper.put(seqID, getBlastHits(blastHitsFileSuper));
+		}
+	}
+	
+	// read PSI-BLAST output from temporary files
+	private Map<String, Double> getBlastHits(String blastHitsFile) { 
+			
+		List<String> hitsTable = BasicTools.readFile2List(blastHitsFile, false);
+
+			// skip header
+			int lineIdx = 0;
+			String line;
+			while (lineIdx < hitsTable.size() && !(line = hitsTable.get(lineIdx)).startsWith("Sequences producing significant alignments")) {
+				lineIdx++;
+			}
+			lineIdx = lineIdx + 2; 
+			
+			// read hits and corresponding bit scores
+			Map<String, Double> blastHits = new HashMap<String, Double>();
+			while (lineIdx < hitsTable.size() && !hitsTable.get(lineIdx).isEmpty() && !(line = hitsTable.get(lineIdx)).startsWith(">")) {
+
+				StringTokenizer strtok = new StringTokenizer(line);
+				String hitID = strtok.nextToken();
+				String nextToken;
+				while ((nextToken = strtok.nextToken()).startsWith("GO:"));  // skip GO terms in non-TF headers
+				double hitScore = Double.parseDouble(nextToken); 
+				blastHits.put(hitID, hitScore);
+				lineIdx++;
+			}
+			return blastHits;
+	}
+	
+	
 	private void performClassification() {
     
-		// create feature vectors
-		Map<String, Instance> seq2feat_TFclass = createFeatureVectors(seq2domain, relDomains_TFclass);
-		Map<String, Instance> seq2feat_Superclass = createFeatureVectors(seq2domain, relDomains_Superclass);
+		// create Bit score percentile feature vectors
+		Map<String, String> sequencesTF = BasicTools.readFASTA(tfnontfDBfastaFile, true);
+		Map<String, String> sequencesSuper = BasicTools.readFASTA(tfDBfastaFile, true);
+		Map<String, Integer> seq2labelTF = DomainFeatureGenerator.getLabelsFromFastaHeaders(sequencesTF.keySet(), false, false);
+		Map<String, Integer> seq2labelSuper = DomainFeatureGenerator.getLabelsFromFastaHeaders(sequencesSuper.keySet(), true, false);
+		Map<String, Instance> seq2percFeatTF = createPercentileFeatureVectors(seq2blastHitsTF, seq2labelTF, false);
+		Map<String, Instance> seq2percFeatSuper = createPercentileFeatureVectors(seq2blastHitsSuper, seq2labelSuper, true);
 		
 		// flag all sequences for which no prediction is possible
 		// (i.e., none of the IPRdomains which are relevant for TF/Non-TF classification was found)
 		for (String seq: sequence_ids) {
 			predictionPossible.put(seq, false);
 		}
-		for (String seq: seq2domain.keySet()) {
-			if (seq2feat_TFclass.get(seq) != null) {
+		for (String seq: seq2percFeatTF.keySet()) {
+			if (seq2percFeatTF.get(seq) != null) {
 				predictionPossible.put(seq, true);
 			}
 		}
 		
 		// perform all classification steps if feature vector could be created
 		try {
-			for (String seq: seq2feat_TFclass.keySet()) {
+			for (String seq: seq2percFeatTF.keySet()) {
 				if (predictionPossible.get(seq)) {
 											
 					seqIsTF.put(seq, false);
@@ -462,17 +575,19 @@ public class Predict {
 					domainsPredicted.put(seq, false);
 					
 					// perform TF/Non-TF classification
-					Instance featVectorTF = seq2feat_TFclass.get(seq);
+					Instance featVectorTF = seq2percFeatTF.get(seq);
 					double[] currProbDistTF = tfClassifier.distributionForInstance(featVectorTF);
+					if (currProbDistTF.length == 1) {
+						currProbDistTF = new double[] {currProbDistTF[0], 1-currProbDistTF[0]};
+					}
 					probDist_TFclass.put(seq, BasicTools.double2Double(currProbDistTF));
-					
-					if (currProbDistTF[TF] >= currProbDistTF[Non_TF] && seq2feat_Superclass.containsKey(seq)) {
+					if (currProbDistTF[TF] >= currProbDistTF[Non_TF] && seq2percFeatSuper.containsKey(seq)) {
 						seqIsTF.put(seq, true);
 					}
 		    		
 					// if sequence was classified as TF --> predict superclass
 					if (seqIsTF.get(seq)) {
-						Instance featVectorSuper = seq2feat_Superclass.get(seq);
+						Instance featVectorSuper = seq2percFeatSuper.get(seq);
 						double[] currProbDistSuper = superClassifier.distributionForInstance(featVectorSuper);
 						probDist_Superclass.put(seq, BasicTools.double2Double(currProbDistSuper));
 						
@@ -643,7 +758,7 @@ public class Predict {
 					}
 			    } else {
 			    	bw.write("<h3>No prediction possible.</h3>");
-			    	bw.write("InterProScan did not detect any of the domains relevant for TF-/Non-TF classification in the given sequence. Consequently, TFpredict could not perform the prediction task.");
+			    	bw.write("BLAST did not find any significant hits in the protein sequence database. Consequently, TFpredict could not perform the prediction task.");
 			    }
 			}
 			
@@ -832,9 +947,9 @@ public class Predict {
     }
 	
 	/*
-	 * functions used to create the feature vectors for TF/Non-TF classification and superclass prediction
+	 * function used to create the functional domain feature vectors for DBD prediction
 	 */
-	private static Map<String, Instance> createFeatureVectors(Map<String, IprEntry> seq2domain, List<String> relIPRdomains) {
+	private static Map<String, Instance> createDomainFeatureVectors(Map<String, IprEntry> seq2domain, List<String> relIPRdomains) {
 		
 		Map<String, Instance> seq2fvector = new HashMap<String, Instance>();
 		
@@ -856,7 +971,7 @@ public class Predict {
 	    }
 		return seq2fvector;
 	}
-
+	
 	/**
 	 * 
 	 * @param predIPRdomains
@@ -878,11 +993,27 @@ public class Predict {
 		return fvector.trim();
 	}
 	
-	
+	/*
+	 * function used to create the bit score percentile feature vectors for TF/non-TF and superclass prediction
+	 */
+	private static Map<String, Instance> createPercentileFeatureVectors(Map<String, Map<String, Double>> seq2blastHits, Map<String, Integer> seq2label, boolean superPred) {
+		
+		PercentileFeatureGenerator percFeatGen = new PercentileFeatureGenerator(seq2blastHits, seq2label, superPred);
+		percFeatGen.computeFeaturesFromBlastResult();
+		Map<String, double[]> seq2feat = percFeatGen.getFeatures();
+		
+		Map<String, Instance> seq2fvector = new HashMap<String, Instance>();
+		for  (String seqID: seq2feat.keySet()) {
+			String currFeatVec = BasicTools.doubleArrayToLibSVM(seq2feat.get(seqID));
+			seq2fvector.put(seqID, getInst("0 " + currFeatVec));
+		}
+		return seq2fvector;
+	}
+
 	private static Instance getInst(String fvector) {
 
 		Instance inst = null;
-		
+	
 		LibSVMLoader lsl = new LibSVMLoader();
 		
 		Instances tmp = null;
@@ -900,6 +1031,7 @@ public class Predict {
 		}
 		
 		inst = tmp.firstInstance();
+		System.out.println(inst.numClasses());
 		
 		return inst;
 	}

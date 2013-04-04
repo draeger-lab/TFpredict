@@ -866,7 +866,44 @@ public class BasicTools {
 		}
 		return(res);
 	}
+	
+	public static void copy(String infile, String outfile) {
+		copy(infile, outfile, false);
+	}
+			
+	public static void copy(String infile, String outfile, boolean isResource) {
+		
+		try {
+			BufferedReader br = null;
+			if (isResource) {
+				br = new BufferedReader(new InputStreamReader(Resource.class.getResourceAsStream(infile)));
+			} else {
+				br = new BufferedReader(new FileReader(new File(infile)));
+			}
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
+			
+			
+			String line;
+			while ((line = br.readLine()) != null) {
+				bw.write(line + "\n");
+			}
+			br.close();
+			bw.flush();
+			bw.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
+	public static String doubleArrayToLibSVM(double[] doubleArray) {
+		
+		StringBuffer doubleString = new StringBuffer();
+		for (int i=0; i<doubleArray.length; i++) {
+			doubleString.append((i+1) + ":" + doubleArray[i] + " ");
+		}
+		return doubleString.toString().trim();
+	}
 } 
 
 

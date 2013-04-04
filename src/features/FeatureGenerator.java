@@ -32,8 +32,8 @@ import io.BasicTools;
  */
 public class FeatureGenerator {
 
-	private static int kMin = 3;
-	private static int kMax = 3;
+	private static int kMin = 2;
+	private static int kMax = 2;
 	
 	private enum FeatureType {
 		
@@ -172,7 +172,7 @@ public class FeatureGenerator {
 		
 		String fastaFileTF =  dataDir + "tf_pred/fasta_files/latest/TF.fasta"; 
 		String fastaFileNonTF =  dataDir + "tf_pred/fasta_files/latest/NonTF.fasta"; 
-		String fastaFileTFnonTF =  dataDir + "tf_pred/fasta_files/latest/TFnonTF.fasta"; 
+		String fastaFileTFnonTF =  dataDir + "tf_pred/fasta_files/latest/TFnonTF.fasta";
 
 		String interproResultFileTF =  dataDir + "tf_pred/interpro_files/latest/TF.fasta.out"; 
 		String interproResultFileNonTF = dataDir + "tf_pred/interpro_files/latest/NonTF.fasta.out";
