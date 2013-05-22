@@ -303,10 +303,13 @@ public class Predict {
 			blastpath = System.getenv("BLAST_DIR");
 		
 		} else {
-			throw new RuntimeException("TFpredict requires BLAST which is available from the NCBI FTP site (ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)." +
-					"After downloading a path to the local BLAST installation has to be passed to TFpredict. " +
-					"Please define the environment variable BLAST_DIR to point to the BLAST directory on your OS and run this program again. " +
-					"Alternatively you can use the command line argument -blastPath <pathToBlast>.");
+			System.out.println("TFpredict requires BLAST which is available from the NCBI FTP site\n" +
+							   "(ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/).\n" +
+							   "After downloading a path to the local BLAST installation has to be passed to TFpredict.\n" +
+							   "Please define the environment variable BLAST_DIR to point to the BLAST directory on\n" +
+							   "your OS and run this program again.\n" +
+							   "Alternatively you can use the command line argument -blastPath <pathToBlast>.\n");
+			System.exit(0);
 		}
 		if (!blastpath.endsWith(File.separator)) blastpath += File.separator;
 		
@@ -1029,9 +1032,7 @@ public class Predict {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		
 		inst = tmp.firstInstance();
-		System.out.println(inst.numClasses());
 		
 		return inst;
 	}
