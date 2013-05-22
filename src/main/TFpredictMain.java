@@ -52,7 +52,7 @@ public class TFpredictMain {
 	private static boolean standAloneMode = false;
 	private static boolean trainMode = false;
 	
-	private static final int[] validClassifierIdx = new int[] {3,4,5}; 
+	private static final String[] validClassifiers = new String[] {"SVM_linear", "KNN", "NaiveBayes"}; 
 	private static final String version = "1.1";
 	
 	public static final String sabineSpeciesList = "organism_list.txt";
@@ -280,7 +280,7 @@ public class TFpredictMain {
 			System.out.println("  SABINE output file:     " + cmd.getOptionValue("sabineOutfile"));
 			System.out.println("  Organism:               " + cmd.getOptionValue("species"));
 		} else {
-			System.out.println("  SABINE output file:     not generated.");
+			System.out.println("  SABINE output file:     not generated");
 		} 
 		String tfClassifier = ClassificationMethod.valueOf("SVM_linear").printName; 
 		if (cmd.hasOption("tfClassifier")) {
@@ -297,15 +297,15 @@ public class TFpredictMain {
  	public static void checkClassifier(String classifierType, String givenClassifier) {
 
  		ArrayList<String> classificationMethods = new ArrayList<String>();
- 		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
- 			classificationMethods.add(classMethod.name());
+ 		for (String classMethod: validClassifiers) {
+ 			classificationMethods.add(classMethod);
  		}
 
  		if (!classificationMethods.contains(givenClassifier)) {
  			System.out.println("  Error. Unknown classifier: \"" + givenClassifier + "\". The following values are possible for the argument \"" + classifierType + "\":");
- 			System.out.print("  " + classificationMethods.get(validClassifierIdx[0]));
- 			for (int i=1; i<validClassifierIdx.length; i++) {
- 				System.out.print(", " + classificationMethods.get(validClassifierIdx[i]));
+ 			System.out.print("  " + classificationMethods.get(0));
+ 			for (int i=1; i<classificationMethods.size(); i++) {
+ 				System.out.print(", " + classificationMethods.get(i));
  			}
  			System.out.println("\n"); 
  			usage();
@@ -348,8 +348,8 @@ public class TFpredictMain {
 		System.out.println("  Usage   : java -jar TFpredict.jar <fasta_file> [OPTIONS]\n");
 		System.out.println("  OPTIONS : -sabineOutfile <output_file_name>");
 		System.out.println("            -species <organism_name>            (e.g., \"Homo sapiens\")");
-		System.out.println("            -tfClassifier <classifier_name>     (possible values: SVM_linear, NaiveBayes, KNN, Kstar)");
-		System.out.println("            -superClassifier <classifier_name>  (possible values: SVM_linear, NaiveBayes, KNN, Kstar)");	
+		System.out.println("            -tfClassifier <classifier_name>     (possible values: SVM_linear, NaiveBayes, KNN)");
+		System.out.println("            -superClassifier <classifier_name>  (possible values: SVM_linear, NaiveBayes, KNN)");	
 		System.out.println("            -iprscanPath <path_to_iprscan>      (e.g., \"/opt/iprscan/bin/iprscan\")\n");
 		System.out.println("            -blastPath <path_to_blast>          (e.g., \"/opt/blast/latest\")\n");
 		System.exit(0);
