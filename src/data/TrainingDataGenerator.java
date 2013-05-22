@@ -477,6 +477,20 @@ public class TrainingDataGenerator {
 		BasicTools.writeFASTA(seqsSubset, fastaSubsetFile);
 	}
 	
+	private static void convertSabineFlatfile2Inputfile(String sabineFlatfile, String sabineInputfile) {
+		
+		// read SABINE flatfile
+		SabineTrainingSetParser parser = new SabineTrainingSetParser();
+		parser.parseTrainingset(sabineFlatfile);
+		
+		// remove PFMs
+		for (int i=0; i<parser.pfm_names.size(); i++) {
+			parser.pfm_names.set(i, null);
+			parser.pfms.set(i, null);
+		}
+		parser.writeTrainingset(sabineInputfile);
+	}
+	
 	
 	public static void main(String args[]) {
 		
@@ -626,7 +640,11 @@ public class TrainingDataGenerator {
 
 		//removeFalseNegativeNonTFs(tfTrainFasta, nontfTrainFasta, nontfTrainFastaCorrected);
 		
-		generateFastaSubsetFile(trainFasta, NAseqIDsPercFeatFile, trainFastaSubset);
+		//generateFastaSubsetFile(trainFasta, NAseqIDsPercFeatFile, trainFastaSubset);
+		
+		String sabineFlatfile = "/rahome/eichner/projects/sabine/data/trainingsets/latest/trainingset_public.txt";
+		String sabineInputFile = "/rahome/eichner/projects/sabine/data/trainingsets/latest/inputset_public.txt";
+		convertSabineFlatfile2Inputfile(sabineFlatfile, sabineInputFile);
 		
 	}
 }
