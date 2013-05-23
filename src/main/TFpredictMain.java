@@ -339,18 +339,12 @@ public class TFpredictMain {
 	
 	private static void usage() {
 		
-		/*
-		 * Alternative zu fester Usage:
-		 * HelpFormatter lvFormater = new HelpFormatter();
-		 * lvFormater.printHelp("Available options: ", options);
-		 */
-		
 		System.out.println("  Usage   : java -jar TFpredict.jar <fasta_file> [OPTIONS]\n");
 		System.out.println("  OPTIONS : -sabineOutfile <output_file_name>");
 		System.out.println("            -species <organism_name>            (e.g., \"Homo sapiens\")");
 		System.out.println("            -tfClassifier <classifier_name>     (possible values: SVM_linear, NaiveBayes, KNN)");
 		System.out.println("            -superClassifier <classifier_name>  (possible values: SVM_linear, NaiveBayes, KNN)");	
-		System.out.println("            -iprscanPath <path_to_iprscan>      (e.g., \"/opt/iprscan/bin/iprscan\")\n");
+		System.out.println("            -iprscanPath <path_to_iprscan>      (e.g., \"/opt/iprscan/bin/iprscan\")");
 		System.out.println("            -blastPath <path_to_blast>          (e.g., \"/opt/blast/latest\")\n");
 		System.exit(0);
 		

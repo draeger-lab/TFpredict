@@ -2,7 +2,7 @@
   -----------------------------------------------------------------------------------
   TFpredict - Identification and structural characterization of transcription factors
   -----------------------------------------------------------------------------------
-  (version 1.1, Copyright (C) 2012 Florian Topf and Johannes Eichner)
+  (version 1.1, Copyright (C) 2013 Florian Topf and Johannes Eichner)
 
 
   Contents:
@@ -41,9 +41,9 @@ ________________________________________________________________________________
 
     tar -xzf tf_predict.tar.gz
 
-  TFpredict is completely implemented in Java and provided as a runnable JAR file. 
-  All platforms (Windows, Mac, Linux) are supported provided that Java (JDK 1.6 or later) is installed. 
-  The tool runs out of the box, i.e., it does not require any additional installation.
+  TFpredict is completely implemented in Java and provided as a runnable JAR file. All platforms (Windows, Mac, Linux) 
+  are supported provided that Java (JDK 1.6 or later) and BLAST (NCBI BLAST 2.2.27+ or later) is installed. 
+  You can download the latest version of BLAST from ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/. 
 
   ____________________________________________________________________________________________________________________________
 
@@ -54,19 +54,20 @@ ________________________________________________________________________________
 
   DESCRIPTION:  TFpredict is a tool which implements a novel three-step classification method which expects 
   		a protein sequence as input and 
-		(1) distinguishes transcription factors (TF) from other proteins (Non-TF), 
+		(1) distinguishes transcription factors (TF) from other proteins (non-TF), 
 		(2) predicts the structural superclass of TFs (see TransFac classification), and 
 		(3) identifies the DNA-binding domains of TFs. 
 		Obviously, the latter two classification steps can only be performed if the given 
-		protein sequence corresponds to a TF. For the TF/Non-TF classification the tool 
-		converts the given protein sequence into a feature vector representing the 
-		domains detected in the query sequence using the tool InterProScan. 
+		protein sequence corresponds to a TF. For the TF/non-TF classification the tool 
+		converts the given protein sequence into a feature vector built from the BLAST alignment score  
+		distributions with annotated TFs and non-TFs.		 
 		Next, a supervised machine learning-based classifier is used to discriminate 
-		TFs from Non-TFs based on the computed domain features. Another classifier is 
+		TFs from non-TFs based on the computed feature representation. Another classifier is 
 		then used to predict the structural superclass for protein sequences classified as TFs. 
-		In the last step, the domains detected by IPRscan are filtered under consideration of 
-		relevant GO-terms to identify the DNA-binding domains of a given TF. TFpredict 
-		is particularly useful in combination with SABINE, a related tool which predicts the 
+		In the last step, the domain composition of the sequence is inferred by the tool InterProScan 
+		and the results are filtered under consideration of relevant GO-terms to identify the 
+		DNA-binding domains of a given TF. 
+		TFpredict is particularly useful in combination with SABINE, a related tool which predicts the 
 		DNA-motif bound by a transcription factor, given its amino acid sequence, superclass, 
 		DNA-binding domains and organism. 
 
@@ -88,14 +89,18 @@ ________________________________________________________________________________
 													http://www.cogsys.cs.uni-tuebingen.de/software/SABINE/doc/organism_list.txt
 
 				-tfClassifier <classifier_name>     Classifier used for TF/non-TF classification
-													possible values: SVM_linear, NaiveBayes, KNN, Kstar
+													possible values: SVM_linear, NaiveBayes, KNN
 				
 				-superClassifier <classifier_name>  Classifier used for superclass prediction
-													possible values: SVM_linear, NaiveBayes, KNN, Kstar	
+													possible values: SVM_linear, NaiveBayes, KNN
 
             	-iprscanPath    <path_to_iprscan>   Path to "iprscan" executable from local InterProScan installation.
 													Only needed if you have a local installation of InterProScan which 
 													shall be used by TFpredict.
+				
+				-blastPath      <path_to_blast>     Path to "bin" directory containing BLAST executables (e.g. /opt/blast/latest). 
+													Only needed if environment variable BLAST_PATH is not set. 
+													
 
   A full documentation including a tutorial is available at the supplementary website of TFpredict:
   http://www.cogsys.cs.uni-tuebingen.de/software/TFpredict/ 
