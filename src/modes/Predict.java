@@ -47,7 +47,6 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -64,10 +63,8 @@ import org.apache.commons.cli.CommandLine;
 
 import resources.Resource;
 import weka.classifiers.Classifier;
-import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.SparseInstance;
 import weka.core.converters.LibSVMLoader;
 
 /**
@@ -311,7 +308,7 @@ public class Predict {
 							   "Alternatively you can use the command line argument -blastPath <pathToBlast>.\n");
 			System.exit(0);
 		}
-		if (!blastpath.endsWith(File.separator)) blastpath += File.separator;
+		if (!blastpath.endsWith("/")) blastpath += "/";
 		
 		if(cmd.hasOption("standAloneMode")) {
 			standAloneMode = true;
@@ -486,8 +483,8 @@ public class Predict {
 		BasicTools.copy(superPredBlastFasta, tfDBfastaFile, true);
 		
 		// generate PSI-BLAST databases from FASTA files
-		String createDB_cmdTF = blastpath + "bin/makeblastdb -in " + tfnontfDBfastaFile + " -out " + tfnontfDBfastaFile + ".db" + " -dbtype prot";
-		String createDB_cmdSuper = blastpath + "bin/makeblastdb -in " + tfDBfastaFile + " -out " + tfDBfastaFile + ".db" + " -dbtype prot";
+		String createDB_cmdTF = "\"" + blastpath + "bin/makeblastdb\" -in " + tfnontfDBfastaFile + " -out " + tfnontfDBfastaFile + ".db" + " -dbtype prot";
+		String createDB_cmdSuper = "\"" + blastpath + "bin/makeblastdb\" -in " + tfDBfastaFile + " -out " + tfDBfastaFile + ".db" + " -dbtype prot";
 		BasicTools.runCommand(createDB_cmdTF , false);
 		BasicTools.runCommand(createDB_cmdSuper, false);
 		
@@ -509,8 +506,8 @@ public class Predict {
 		}
 			
 		for (String seqID: sequence_ids) {
-			String runBLAST_cmdTF = blastpath + "bin/psiblast -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileTF + " -db " +  tfnontfDBfastaFile + ".db";
-			String runBLAST_cmdSuper = blastpath + "bin/psiblast -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileSuper + " -db " +  tfDBfastaFile + ".db";
+			String runBLAST_cmdTF = "\"" + blastpath + "bin/psiblast\" -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileTF + " -db " +  tfnontfDBfastaFile + ".db";
+			String runBLAST_cmdSuper = "\"" + blastpath + "bin/psiblast\" -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileSuper + " -db " +  tfDBfastaFile + ".db";
 			BasicTools.runCommand(runBLAST_cmdTF, false);
 			BasicTools.runCommand(runBLAST_cmdSuper, false);
 			seq2blastHitsTF.put(seqID, getBlastHits(blastHitsFileTF));
@@ -825,7 +822,7 @@ public class Predict {
 						}
 					
 					} else {
-						System.out.println("  DNA-binding domain could be predicted.\n");
+						System.out.println("  DNA-binding domain could not be predicted.\n");
 					}
 				}
 				
