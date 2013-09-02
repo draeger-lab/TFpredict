@@ -140,6 +140,7 @@ public class TFpredictMain {
 		try {
 			tempDir = File.createTempFile("TFpredict_", "_basedir");
 			tempDir.delete();
+			
 			if (!tempDir.mkdir()) {
 				System.out.println("Error. Directory to save temporary files could not be created.");
 				System.exit(0);

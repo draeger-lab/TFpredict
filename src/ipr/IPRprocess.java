@@ -60,6 +60,10 @@ public class IPRprocess {
 						has_relevant_go = true;
 					}
 				}
+				// additionally check for GO-Term "nucleic acid binding" (GO:0003676) to support C2H2 zinc finger TFs  
+				if (!has_relevant_go && iprDomain.go_terms != null && iprDomain.go_terms.contains("GO:0003676")) {
+					has_relevant_go = true;
+				}
 				
 				if (has_relevant_go) {
 					
