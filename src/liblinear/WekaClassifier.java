@@ -37,8 +37,10 @@ import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -76,6 +78,11 @@ import weka.filters.unsupervised.instance.Normalize;
  * @since 1.0
  */
 public class WekaClassifier {
+	
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(WekaClassifier.class.getName());
 
 	public void setMultithreading(boolean multithreading) {
 		this.multithreading = multithreading;
@@ -144,6 +151,9 @@ public class WekaClassifier {
 	WekaClassifierResult[] classResult = null;
 	String classifierPrintName;
 	
+	/**
+	 * A list of applicable machine-learning methods.
+	 */
 	public enum ClassificationMethod {
 		RandomForest("Random Forest", "randomForest.model"),
 		DecisionTree("Decision Tree", "decisionTree.model"),
@@ -151,7 +161,8 @@ public class WekaClassifier {
 		SVM_linear("SVM linear kernel", "svmLinear.model"),
 		NaiveBayes("Naive Bayes", "naiveBayes.model"),
 		Kstar("K*", "kStar.model"),
-		KNN("kNN", "knn.model");
+		KNN("kNN", "knn.model"),
+		ECOC("ECOC", "Error-correcting output coding");
 		
 		public String printName;
 		public String modelFileName;
@@ -208,9 +219,15 @@ public class WekaClassifier {
 	private void prepareNestedCV() {
 		
 		// create directories for output files (if necessary)
-		BasicTools.createDir4File(summaryFile);
-		BasicTools.createDir4File(modelFile);
-		BasicTools.createDir4File(classProbabilityFile);
+		if (summaryFile != null) {
+			BasicTools.createDir4File(summaryFile);
+		}
+		if (modelFile != null) {
+			BasicTools.createDir4File(modelFile);
+		}
+		if (classProbabilityFile != null) {
+			BasicTools.createDir4File(classProbabilityFile);
+		}
 		
 		// read data from libsvm format
 		data = readData(featureFile, folds, featureFileFormat);
@@ -235,7 +252,9 @@ public class WekaClassifier {
 		classifierPrintName = ClassificationMethod.valueOf(selectedClassifier).printName;
 	}
 	
-	
+	/**
+	 * 
+	 */
 	private void runNestedCV() {
 		
 		
@@ -262,13 +281,49 @@ public class WekaClassifier {
 		
 		} else if (selectedClassifier == RegressionMethod.GaussianProcesses.name()) {
 			classResult = runNestedCVGaussianProcesses();
-		
+			
+		} else if (selectedClassifier == ClassificationMethod.ECOC.name()) {
+			classResult = runECOC();
+			
 		} else {
-			System.out.println("Please select a valid classifier.");
+			logger.severe("Please select a valid classifier.");
 			System.exit(1);
 		}
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
+	private WekaClassifierResult[] runECOC() {
+		String classes[] = {
+			"111111111111111", // 32767
+			"000000001111111", // 127
+			"000011110000111", // 1927
+			"001100110011001", // 6553
+			"010101010101010", // 10922	
+		};
+		
+		// TODO Auto-generated method stub
+		String word = "001100100010011";
+		
+		Hamming hamming = new Hamming();
+		int distances[] = new int[classes.length];
+		int y = Integer.parseInt(word, 2);
+		int minPos = 0;
+		for (int i = 0; i < distances.length; i++) {
+			distances[i] = hamming.distance(Integer.parseInt(classes[i], 2), y);
+			if (distances[i] < distances[minPos]) {
+				minPos = i;
+			}
+		}
+		
+		System.out.println(Arrays.toString(distances));
+		System.out.println(minPos);
+
+		return null;
+	}
+
 	private synchronized void writeEvaluationResults() {
 		
 		if (summaryFile == null) {
@@ -430,7 +485,7 @@ public class WekaClassifier {
 		final Option optFile = (OptionBuilder.isRequired(true).withDescription("InFile").hasArg(true).create("f"));
 		final Option optRepetitions = (OptionBuilder.isRequired(false).withDescription("Repetitions").hasArg(true).create("r"));
 		final Option optFolds = (OptionBuilder.isRequired(false).withDescription("Folds (default = 2)").hasArg(true).create("v"));
-		final Option optModelFile = (OptionBuilder.isRequired(false).withDescription("Model file)").hasArg(true).create("m"));
+		final Option optModelFile = (OptionBuilder.isRequired(false).withDescription("Model file").hasArg(true).create("m"));
 		final Option optNestedCV = (OptionBuilder.isRequired(false).withDescription("Nested cross-validation (default = true)").hasArg(true).create("n"));
 		final Option optSummaryFile = (OptionBuilder.isRequired(false).withDescription("Results file").hasArg(true).create("s"));
 		final Option optClassProbFile = (OptionBuilder.isRequired(false).withDescription("Class probability file").hasArg(true).create("p"));
@@ -1536,13 +1591,22 @@ public class WekaClassifier {
 	}
 }
 
-// object to save decision values, labels, and performance scores for Weka classifiers
+/**
+ * Object to save decision values, labels, and performance scores for Weka
+ * classifiers
+ */
 class WekaClassifierResult {
 	
 	Evaluation evaluation;
 	double[][] classProbabilities;
 	int[] classLabels;
 	
+	/**
+	 * 
+	 * @param eval
+	 * @param classProb
+	 * @param classLab
+	 */
 	WekaClassifierResult(Evaluation eval, double[][] classProb, int[] classLab) {
 		evaluation = eval;
 		classProbabilities = classProb;
