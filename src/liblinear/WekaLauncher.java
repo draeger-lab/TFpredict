@@ -46,6 +46,13 @@ import liblinear.WekaClassifier.ClassificationMethod;
  */
 public class WekaLauncher {
 	
+	/**
+	 * 
+	 * @param featureFile
+	 * @param resultsDir
+	 * @param modelFileDir
+	 * @param computeClassProbabilities if {@code true} the {@link #resultsDir} is also used as {@link #classProbFileDir}
+	 */
 	public WekaLauncher(String featureFile, String resultsDir, String modelFileDir, boolean computeClassProbabilities) {
 		this(featureFile, resultsDir, modelFileDir);
 		if (computeClassProbabilities) {
@@ -53,16 +60,31 @@ public class WekaLauncher {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param featureFile
+	 * @param resultsDir
+	 * @param modelFileDir
+	 */
 	public WekaLauncher(String featureFile, String resultsDir, String modelFileDir) {
 		this(featureFile, resultsDir);
 		this.modelFileDir = modelFileDir;
 	}
 	
+	/**
+	 * 
+	 * @param featureFile
+	 * @param resultsDir
+	 */
 	public WekaLauncher(String featureFile, String resultsDir) {
 		this(featureFile);
 		this.resultsDir = resultsDir;
 	}
 	
+	/**
+	 * 
+	 * @param featureFile
+	 */
 	public WekaLauncher(String featureFile) {
 		libsvmFeatureFile = featureFile;
 	}
@@ -196,7 +218,7 @@ public class WekaLauncher {
 		BasicTools.writeList2File(cvSplitList, cvSplitFile);
 	}
 	
-	public double[][] runWekaClassifier(Boolean multithreading) {
+	public double[][] runWekaClassifier(boolean multithreading) {
 		
 		//save cross-validation split used by Weka
 		if (resultsDir != null) {
@@ -224,7 +246,10 @@ public class WekaLauncher {
 		
 		// run classifiers in single thread
 		} else {
-			for (ClassificationMethod classMethod: ClassificationMethod.values()) {
+			// TODO: For test exchange next line and for loop
+			//ClassificationMethod classMethod = ClassificationMethod.ECOC;
+			for (ClassificationMethod classMethod : ClassificationMethod.values()) 
+			{
 				String[] argsClassifier = getClassifierArguments(classMethod.name(), multithreading);
 				try {
 					WekaClassifier.main(argsClassifier);
@@ -319,9 +344,9 @@ public class WekaLauncher {
 	
 	public static void main(String[] args) {
 		
-		String feature_file = "/rahome/eichner/projects/tfpredict/data/super_pred/feature_files/latest/libsvm_featurefile_small.txt";
-		String results_dir = "/rahome/eichner/Desktop/tmp/class_dir/";
-		String model_dir = "/rahome/eichner/Desktop/tmp/model_dir/";
+		String feature_file = "test/libsvm_featurefile_small.txt";
+		String results_dir = "test/class_dir/";
+		String model_dir = "test/model_dir/";
 		
 		WekaLauncher launcher = new WekaLauncher(feature_file, results_dir, model_dir, true);
 		launcher.printConfiguration();
