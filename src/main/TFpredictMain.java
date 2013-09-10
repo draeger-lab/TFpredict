@@ -53,7 +53,7 @@ public class TFpredictMain {
 	private static boolean trainMode = false;
 	
 	private static final String[] validClassifiers = new String[] {"SVM_linear", "KNN", "NaiveBayes"}; 
-	private static final String version = "1.1";
+	private static final String version = "1.2";
 	
 	public static final String sabineSpeciesList = "organism_list.txt";
 	public static final String classMappingFile = "class_mapping.txt"; 
@@ -207,6 +207,7 @@ public class TFpredictMain {
 			options.addOption("species", true, "organism (e.g. Homo sapiens)");
 			options.addOption("useWeb", false, "use InterProScan webservice");
 			options.addOption("blastPath", true, "path to BLAST");
+			options.addOption("useCharacteristicDomains", false, "use characteristic InterPro domains for classification");
 			
 			// optional arguments
 			options.addOption("tfClassifier", true, "file containing TF/Non-TF classifier");
@@ -237,6 +238,7 @@ public class TFpredictMain {
 			options.addOption("blastPath", true, "path to BLAST");
 			options.addOption("basedir", true, "directory for temporary files");
 			options.addOption("standAloneMode", false, "directory for temporary files");
+			options.addOption("useCharacteristicDomains", false, "use characteristic InterPro domains for classification");
 		}
 		return options;
 	}
@@ -344,8 +346,9 @@ public class TFpredictMain {
 		System.out.println("  OPTIONS : -sabineOutfile <output_file_name>");
 		System.out.println("            -species <organism_name>            (e.g., \"Homo sapiens\")");
 		System.out.println("            -tfClassifier <classifier_name>     (possible values: SVM_linear, NaiveBayes, KNN)");
-		System.out.println("            -superClassifier <classifier_name>  (possible values: SVM_linear, NaiveBayes, KNN)");	
+		System.out.println("            -superClassifier <classifier_name>  (possible values: SVM_linear, NaiveBayes, KNN)");
 		System.out.println("            -iprscanPath <path_to_iprscan>      (e.g., \"/opt/iprscan/bin/iprscan\")");
+		System.out.println("            -ignoreCharacteristicDomains        (No classification based on predefined InterPro domains.");
 		System.out.println("            -blastPath <path_to_blast>          (e.g., \"/opt/blast/latest\")\n");
 		System.exit(0);
 		
