@@ -96,6 +96,7 @@ public class Predict {
 	static boolean standAloneMode = false;
 	static boolean batchMode = false;
 	static boolean silent = false;
+	static boolean useCharacteristicDomains = true;
 
 	// static arguments required by TFpredict
 	public static String iprpath = "";
@@ -105,6 +106,10 @@ public class Predict {
 	public static String superClassifier_file = "models/superPred/svmLinear.model";
 	public static String relDomainsTF_file = "domainsTFpred.txt";
 	public static String relDomainsSuper_file = "domainsSuperPred.txt";
+	public static String characteristicTFdomains_file = "domainsTF.txt";
+	public static String[] characteristicDomains_files = new String[] {
+		"domainsClass0.txt", "domainsClass1.txt", "domainsClass2.txt", "domainsClass3.txt", "domainsClass4.txt"
+	};
 	public static String relGOterms_file = "DNA.go";
 	public static String tfName2class_file = "transHMan";
 	public static String tfPredBlastFasta = "blast_db/TFnonTF.fasta";
@@ -131,7 +136,9 @@ public class Predict {
 	private List<String> relDomains_Superclass;
 	private List<String> relGOterms;
 	private Map<String,String> tfName2class;
-
+	private Map<String, Integer> domain2tf;
+	private Map<String, Integer> domain2superclass;
+	
 	private Map<String, IprEntry> seq2domain;
 	private Map<String, IprRaw> IPRdomains;
 	private Map<String, IprProcessed> seq2bindingDomain;
@@ -148,6 +155,7 @@ public class Predict {
 	private Map<String, String[]> bindingDomains  = new HashMap<String, String[]>();
 	
 	private Map<String, Boolean> predictionPossible = new HashMap<String, Boolean>();
+	private Map<String, Boolean> predictionTrivial = new HashMap<String, Boolean>();
 	private Map<String, Boolean> seqIsTF = new HashMap<String, Boolean>();
 	private Map<String, Boolean> annotatedClassAvailable = new HashMap<String, Boolean>();
 	private Map<String, Boolean> domainsPredicted = new HashMap<String, Boolean>();
@@ -291,6 +299,10 @@ public class Predict {
 			useWeb = false;
 		}
 		
+		if (cmd.hasOption("ignoreCharacteristicDomains")) {
+			useCharacteristicDomains = false;
+		}
+		
 		// set BLAST path from argument (if given)
 		if(cmd.hasOption("blastPath")) {
 			blastpath = cmd.getOptionValue("blastPath");
@@ -358,6 +370,24 @@ public class Predict {
 			species = fasta_seq.substring(fasta_seq.indexOf("OS=")+3, fasta_seq.indexOf("GN=")-1);
 			sequence = fasta_seq.replaceFirst(">.*\\n", "").replaceAll("\\n", "");
 		} 
+		
+		// read characteristic domains (if desired)
+		if (useCharacteristicDomains) {
+			
+			domain2tf = new HashMap<String, Integer>();
+			List<String> tfDomains = BasicTools.readResource2List(characteristicTFdomains_file);
+			for (String domainID: tfDomains) {
+				domain2tf.put(domainID, TF);
+			}
+			
+			domain2superclass = new HashMap<String, Integer>();
+			for (int i=0; i<characteristicDomains_files.length; i++) {
+				List<String> currDomains = BasicTools.readResource2List(characteristicDomains_files[i]);
+				for (String domainID: currDomains) {
+					domain2superclass.put(domainID, i);
+				}
+			}
+		}
 		
 		if (batchMode) {
 			// BatchMode --> parse sequences from given FASTA file (and shorten long headers)
@@ -546,6 +576,29 @@ public class Predict {
 	
 	private void performClassification() {
     
+		// check if trivial prediction is possible based on characteristic domains detected by InterProScan
+		for (String seq: sequence_ids) {
+			predictionTrivial.put(seq, false);
+		}
+		if (useCharacteristicDomains) {
+			for (String seqID: seq2domain.keySet()) {
+				ArrayList<String> currDomainIDs = seq2domain.get(seqID).domain_ids;
+				for (String domainID: currDomainIDs) {
+					if (domain2superclass.containsKey(domainID)) {
+						int predSuperClass = domain2superclass.get(domainID);
+						predictionTrivial.put(seqID, true);
+						seqIsTF.put(seqID, true);
+						probDist_TFclass.put(seqID, new Double[] {0.0, 1.0});
+						predictedSuperclass.put(seqID, predSuperClass);
+						Double[] superClassDist = new Double[] {0.0, 0.0, 0.0, 0.0, 0.0};
+						superClassDist[predSuperClass] = 1.0;
+						probDist_Superclass.put(seqID, superClassDist);
+						break;
+					}
+				}
+			}
+		}
+		
 		// create Bit score percentile feature vectors
 		Map<String, String> sequencesTF = BasicTools.readFASTA(tfnontfDBfastaFile, true);
 		Map<String, String> sequencesSuper = BasicTools.readFASTA(tfDBfastaFile, true);
@@ -557,7 +610,11 @@ public class Predict {
 		// flag all sequences for which no prediction is possible
 		// (i.e., none of the IPRdomains which are relevant for TF/Non-TF classification was found)
 		for (String seq: sequence_ids) {
-			predictionPossible.put(seq, false);
+			if (predictionTrivial.get(seq)) {
+				predictionPossible.put(seq, true);
+			} else {
+				predictionPossible.put(seq, false);
+			}
 		}
 		for (String seq: seq2percFeatTF.keySet()) {
 			if (seq2percFeatTF.get(seq) != null) {
@@ -568,31 +625,40 @@ public class Predict {
 		// perform all classification steps if feature vector could be created
 		try {
 			for (String seq: seq2percFeatTF.keySet()) {
-				if (predictionPossible.get(seq)) {
-											
-					seqIsTF.put(seq, false);
+				if (predictionPossible.get(seq)) {				
+					if (!predictionTrivial.get(seq)) {
+						seqIsTF.put(seq, false);
+					}
 					annotatedClassAvailable.put(seq, false);
 					domainsPredicted.put(seq, false);
 					
 					// perform TF/Non-TF classification
-					Instance featVectorTF = seq2percFeatTF.get(seq);
-					double[] currProbDistTF = tfClassifier.distributionForInstance(featVectorTF);
-					if (currProbDistTF.length == 1) {
-						currProbDistTF = new double[] {currProbDistTF[0], 1-currProbDistTF[0]};
-					}
-					probDist_TFclass.put(seq, BasicTools.double2Double(currProbDistTF));
-					if (currProbDistTF[TF] >= currProbDistTF[Non_TF] && seq2percFeatSuper.containsKey(seq)) {
-						seqIsTF.put(seq, true);
+					if (!predictionTrivial.get(seq)) {
+						Instance featVectorTF = seq2percFeatTF.get(seq);
+						double[] currProbDistTF = tfClassifier.distributionForInstance(featVectorTF);
+						if (currProbDistTF.length == 1) {
+							currProbDistTF = new double[] {currProbDistTF[0], 1-currProbDistTF[0]};
+						}
+						probDist_TFclass.put(seq, BasicTools.double2Double(currProbDistTF));
+						if (currProbDistTF[TF] >= currProbDistTF[Non_TF] && seq2percFeatSuper.containsKey(seq)) {
+							seqIsTF.put(seq, true);
+						
+						} else if (domain2tf.containsKey(seq) && domain2tf.get(seq) == TF) {
+							seqIsTF.put(seq, true);
+							probDist_TFclass.put(seq, new Double[] {0.0, 1.0});
+						}
 					}
 		    		
 					// if sequence was classified as TF --> predict superclass
 					if (seqIsTF.get(seq)) {
-						Instance featVectorSuper = seq2percFeatSuper.get(seq);
-						double[] currProbDistSuper = superClassifier.distributionForInstance(featVectorSuper);
-						probDist_Superclass.put(seq, BasicTools.double2Double(currProbDistSuper));
-						
-						int maxIndex = BasicTools.getMaxIndex(currProbDistSuper);
-						predictedSuperclass.put(seq, maxIndex);
+						if (!predictionTrivial.get(seq)) {
+							Instance featVectorSuper = seq2percFeatSuper.get(seq);
+							double[] currProbDistSuper = superClassifier.distributionForInstance(featVectorSuper);
+							probDist_Superclass.put(seq, BasicTools.double2Double(currProbDistSuper));
+
+							int maxIndex = BasicTools.getMaxIndex(currProbDistSuper);
+							predictedSuperclass.put(seq, maxIndex);
+						}
 						
 						// predict DNA-binding domain
 				    	IprProcessed ipr_res = seq2bindingDomain.get(seq);
@@ -945,32 +1011,6 @@ public class Predict {
     private static String getAnnotatedSuperclass(String transfac_class) {
     	return(superclassNames[Integer.parseInt(transfac_class.substring(0,1))]);
     }
-	
-	/*
-	 * function used to create the functional domain feature vectors for DBD prediction
-	 */
-	private static Map<String, Instance> createDomainFeatureVectors(Map<String, IprEntry> seq2domain, List<String> relIPRdomains) {
-		
-		Map<String, Instance> seq2fvector = new HashMap<String, Instance>();
-		
-		for (String seq: seq2domain.keySet()) {
-	    	
-	    	IprEntry entry = seq2domain.get(seq);
-	    	
-	    	String fvector = createIPRvector(entry.domain_ids, relIPRdomains, featureOffset);
-	    	
-	    	// append last feature to avoid bug in WEKA libsvm wrapper
-			int lastFeatureIdx = relIPRdomains.size() + featureOffset;
-			if (!fvector.endsWith(lastFeatureIdx + ":1")) {
-				fvector += " " + lastFeatureIdx + ":0";
-			}
-	    	
-	    	if (!fvector.isEmpty()) {
-	    		seq2fvector.put(entry.sequence_id, getInst("0 " + fvector));
-	    	}
-	    }
-		return seq2fvector;
-	}
 	
 	/**
 	 * 
