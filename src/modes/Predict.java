@@ -78,7 +78,8 @@ public class Predict {
 	public static final int featureOffset = 10;
 	
 	private static final String interproPrefix = "http://www.ebi.ac.uk/interpro/ISearch?query=";
-	private static final String transfacURL = "http://www.gene-regulation.com/pub/databases/transfac/clSM.html";
+	private static final String transfacPublicURL = "http://www.gene-regulation.com/pub/databases.html";
+	private static final String transfacClassURL = "http://www.gene-regulation.com/pub/databases/transfac/clSM.html";
 	private static final int maxNumSequencesBatchMode = 10;
 	
 	private static final byte DuplicatedHeaderError = 1;
@@ -513,8 +514,10 @@ public class Predict {
 		BasicTools.copy(superPredBlastFasta, tfDBfastaFile, true);
 		
 		// generate PSI-BLAST databases from FASTA files
-		String createDB_cmdTF = "\"" + blastpath + "bin/makeblastdb\" -in " + tfnontfDBfastaFile + " -out " + tfnontfDBfastaFile + ".db" + " -dbtype prot";
-		String createDB_cmdSuper = "\"" + blastpath + "bin/makeblastdb\" -in " + tfDBfastaFile + " -out " + tfDBfastaFile + ".db" + " -dbtype prot";
+		String createDB_cmd = blastpath + "bin/makeblastdb";
+		if (BasicTools.isWindows()) createDB_cmd = "\"" + createDB_cmd + "\"";
+		String createDB_cmdTF = createDB_cmd +  " -in " + tfnontfDBfastaFile + " -out " + tfnontfDBfastaFile + ".db" + " -dbtype prot";
+		String createDB_cmdSuper = createDB_cmd + " -in " + tfDBfastaFile + " -out " + tfDBfastaFile + ".db" + " -dbtype prot";
 		BasicTools.runCommand(createDB_cmdTF , false);
 		BasicTools.runCommand(createDB_cmdSuper, false);
 		
@@ -536,8 +539,10 @@ public class Predict {
 		}
 			
 		for (String seqID: sequence_ids) {
-			String runBLAST_cmdTF = "\"" + blastpath + "bin/psiblast\" -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileTF + " -db " +  tfnontfDBfastaFile + ".db";
-			String runBLAST_cmdSuper = "\"" + blastpath + "bin/psiblast\" -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileSuper + " -db " +  tfDBfastaFile + ".db";
+			String runBLAST_cmd = blastpath + "bin/psiblast";
+			if (BasicTools.isWindows()) runBLAST_cmd = "\"" + runBLAST_cmd + "\"";
+			String runBLAST_cmdTF = runBLAST_cmd + " -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileTF + " -db " +  tfnontfDBfastaFile + ".db";
+			String runBLAST_cmdSuper = runBLAST_cmd + " -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileSuper + " -db " +  tfDBfastaFile + ".db";
 			BasicTools.runCommand(runBLAST_cmdTF, false);
 			BasicTools.runCommand(runBLAST_cmdSuper, false);
 			seq2blastHitsTF.put(seqID, getBlastHits(blastHitsFileTF));
@@ -784,11 +789,13 @@ public class Predict {
 						
 						bw.write("<h2>Annotated structural class:</h2>\n");
 			    		if (annotatedClassAvailable.get(seq)) {	
-							bw.write("<h3>" + getAnnotatedSuperclass(annotatedClass.get(seq)) + " (<a href=\"" + transfacURL + "\" target=\"_blank\">" + annotatedClass.get(seq) + "</a>) </h3>\n");
-							bw.write("<br>\n\n");
+							bw.write("<h3>" + getAnnotatedSuperclass(annotatedClass.get(seq)) + " (<a href=\"" + transfacClassURL + "\" target=\"_blank\">" + annotatedClass.get(seq) + "</a>) </h3>\n");
+							bw.write("The annotated structual class was obtained from the <a href=\"" + transfacPublicURL + "\" target=\"_blank\">TRANSFAC Public</a> database.\n");
+							bw.write("<br><br><br>\n\n");
 						} else {
-				    		bw.write("<h3>Not available.</h3>\n");
-				    		bw.write("<br>\n\n");
+				    		bw.write("<h3>Not available</h3>\n");
+				    		bw.write("The annotated structural class could not be obtained from the <a href=\"" + transfacPublicURL + "\" target=\"_blank\">TRANSFAC Public</a> database.");
+				    		bw.write("<br><br><br>\n\n");
 				    	}
 					    
 			    		// include result image from InterProScan into HTML report
