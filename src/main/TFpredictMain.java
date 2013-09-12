@@ -207,7 +207,7 @@ public class TFpredictMain {
 			options.addOption("species", true, "organism (e.g. Homo sapiens)");
 			options.addOption("useWeb", false, "use InterProScan webservice");
 			options.addOption("blastPath", true, "path to BLAST");
-			options.addOption("useCharacteristicDomains", false, "use characteristic InterPro domains for classification");
+			options.addOption("ignoreCharacteristicDomains", false, "use characteristic InterPro domains for classification");
 			
 			// optional arguments
 			options.addOption("tfClassifier", true, "file containing TF/Non-TF classifier");
@@ -238,7 +238,7 @@ public class TFpredictMain {
 			options.addOption("blastPath", true, "path to BLAST");
 			options.addOption("basedir", true, "directory for temporary files");
 			options.addOption("standAloneMode", false, "directory for temporary files");
-			options.addOption("useCharacteristicDomains", false, "use characteristic InterPro domains for classification");
+			options.addOption("ignoreCharacteristicDomains", false, "use characteristic InterPro domains for classification");
 		}
 		return options;
 	}
