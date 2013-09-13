@@ -348,7 +348,7 @@ public class TFpredictMain {
 		System.out.println("            -tfClassifier <classifier_name>     (possible values: SVM_linear, NaiveBayes, KNN)");
 		System.out.println("            -superClassifier <classifier_name>  (possible values: SVM_linear, NaiveBayes, KNN)");
 		System.out.println("            -iprscanPath <path_to_iprscan>      (e.g., \"/opt/iprscan/bin/iprscan\")");
-		System.out.println("            -ignoreCharacteristicDomains        (No classification based on predefined InterPro domains.");
+		System.out.println("            -ignoreCharacteristicDomains        (No classification based on predefined InterPro domains.)");
 		System.out.println("            -blastPath <path_to_blast>          (e.g., \"/opt/blast/latest\")\n");
 		System.exit(0);
 		

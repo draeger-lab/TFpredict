@@ -904,6 +904,36 @@ public class BasicTools {
 		}
 		return doubleString.toString().trim();
 	}
+	
+	public static int getHammingDistance(String string1, String string2) {
+		
+		int hammingDist = 0;
+		for (int i=0; i<string1.length(); i++) {
+			if (string1.charAt(i) != string2.charAt(i)) {
+				hammingDist += 1;
+			}
+		}
+		return hammingDist;
+	}
+	
+	public static int[] getMinPositions(int[] array) {
+	
+		int minDist = Integer.MAX_VALUE;
+		ArrayList<Integer> minPos = null;
+
+		for (int i=0; i<array.length; i++) {
+
+			if (array[i] < minDist) {
+				minDist = array[i];
+				minPos = new ArrayList<Integer>();
+				minPos.add(i);
+
+			} else if (array[i] == minDist) {
+				minPos.add(i);
+			}
+		}
+		return Integer2int(minPos.toArray(new Integer[]{}));
+	}
 } 
 
 

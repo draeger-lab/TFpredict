@@ -171,6 +171,7 @@ public class SabineTrainingSetParser extends TFdataParser {
 					br.readLine();									  	  // XX
 				}	
 			 }
+			 br.close();
 		}
 		catch(IOException ioe) {
 			System.out.println(ioe.getMessage());
