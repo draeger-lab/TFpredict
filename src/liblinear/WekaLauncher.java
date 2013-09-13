@@ -247,9 +247,8 @@ public class WekaLauncher {
 		// run classifiers in single thread
 		} else {
 			// TODO: For test exchange next line and for loop
-			//ClassificationMethod classMethod = ClassificationMethod.ECOC;
-			for (ClassificationMethod classMethod : ClassificationMethod.values()) 
-			{
+			ClassificationMethod classMethod = ClassificationMethod.SVM_ecoc;
+			// for (ClassificationMethod classMethod : ClassificationMethod.values()) {
 				String[] argsClassifier = getClassifierArguments(classMethod.name(), multithreading);
 				try {
 					WekaClassifier.main(argsClassifier);
@@ -257,7 +256,7 @@ public class WekaLauncher {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			}
+			// }
 		}
 		
 		// return results from evaluation of classifiers
@@ -273,17 +272,21 @@ public class WekaLauncher {
 	
 	private void mergeResultsFiles() {
 		String mergedClassResults = "";
-		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
+		// TODO: For test exchange next line and for loop
+		ClassificationMethod classMethod = ClassificationMethod.SVM_ecoc;
+		//for (ClassificationMethod classMethod: ClassificationMethod.values()) {
 			String classResultFile = resultsDir + classMethod.modelFileName.replace(".model", ".eval");
 			mergedClassResults = mergedClassResults.concat(BasicTools.readFile2String(classResultFile));
-		}
+		//}
 		BasicTools.writeString2File(mergedClassResults, resultsDir + mergedResultsFileName);
 	}
 	
 	private double[][] parseResultsFile() {
 		
 		int numScores = folds * multiruns;
-		int numMethods = ClassificationMethod.values().length;
+		// TODO: For test exchange next line and for loop
+		int numMethods = 1;
+		// int numMethods = ClassificationMethod.values().length;
 		double[][] classResults = new double[numScores][numMethods];
 		List<String[]> resultsTable = BasicTools.readFile2ListSplitLines(resultsDir + mergedResultsFileName);
 		int lineIdx = 0;

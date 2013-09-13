@@ -291,11 +291,12 @@ public class TransFacParser extends TFdataParser {
 						matrix_parsed = false;
 					
 					} else {
-						System.out.println("Parse Error. Matrix entry could not be parsed.");
+						System.out.println("Parse Error. Matrix entry " + entry_counter + " could not be parsed.");
 						System.exit(0);
 					}
 				}
 			}
+			br.close();
 			
 		} catch (IOException ioe) {
 			ioe.printStackTrace();

@@ -162,7 +162,7 @@ public class WekaClassifier {
 		NaiveBayes("Naive Bayes", "naiveBayes.model"),
 		Kstar("K*", "kStar.model"),
 		KNN("kNN", "knn.model"),
-		ECOC("ECOC", "Error-correcting output coding");
+		SVM_ecoc("SVM ECOC", "svmECOC.model");
 		
 		public String printName;
 		public String modelFileName;
@@ -282,8 +282,8 @@ public class WekaClassifier {
 		} else if (selectedClassifier == RegressionMethod.GaussianProcesses.name()) {
 			classResult = runNestedCVGaussianProcesses();
 			
-		} else if (selectedClassifier == ClassificationMethod.ECOC.name()) {
-			classResult = runECOC();
+		} else if (selectedClassifier == ClassificationMethod.SVM_ecoc.name()) {
+			classResult = runNestedCVLIBLINEARECOC();
 			
 		} else {
 			logger.severe("Please select a valid classifier.");
@@ -291,38 +291,7 @@ public class WekaClassifier {
 		}
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
-	private WekaClassifierResult[] runECOC() {
-		String classes[] = {
-			"111111111111111", // 32767
-			"000000001111111", // 127
-			"000011110000111", // 1927
-			"001100110011001", // 6553
-			"010101010101010", // 10922	
-		};
-		
-		// TODO Auto-generated method stub
-		String word = "001100100010011";
-		
-		Hamming hamming = new Hamming();
-		int distances[] = new int[classes.length];
-		int y = Integer.parseInt(word, 2);
-		int minPos = 0;
-		for (int i = 0; i < distances.length; i++) {
-			distances[i] = hamming.distance(Integer.parseInt(classes[i], 2), y);
-			if (distances[i] < distances[minPos]) {
-				minPos = i;
-			}
-		}
-		
-		System.out.println(Arrays.toString(distances));
-		System.out.println(minPos);
 
-		return null;
-	}
 
 	private synchronized void writeEvaluationResults() {
 		
@@ -436,6 +405,17 @@ public class WekaClassifier {
 		return Insts_filtered;
 	}
 
+	private static synchronized void writeDataToLibsvm(Instances instances, String featureFile) {
+		LibSVMSaver lss = new LibSVMSaver();
+		lss.setInstances(instances);
+		try {
+			lss.setFile(new File(featureFile));
+			lss.writeBatch();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	private static synchronized String[] convertInstances2featureVectors(Instances instances) {
 
@@ -1089,7 +1069,7 @@ public class WekaClassifier {
 				
 				instancesTraining.sort(instancesTraining.get(0).numAttributes() - 1);
 				buildClassifier(libsvm, instancesTraining);
-
+				
 				classResults[run]  = predictAndEvaluate(libsvm, splits[splitIndex]);
 				if (!silent) System.out.println("\nExternal prediction at fold = " + splitIndex);
 				// System.out.println(externalEvals[run].toSummaryString());
@@ -1108,7 +1088,100 @@ public class WekaClassifier {
 		}
 		return classResults;
 	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	private WekaClassifierResult[] runNestedCVLIBLINEARECOC() {
+		
+		// prepare ECOC code words
+		String[] codeWords = null;
+		if (data.numClasses() == 5) {
+			codeWords = new String[] {
+				"111111111111111",
+				"000000001111111",
+				"000011110000111",
+				"001100110011001",
+				"010101010101010",	
+			};
+		} else {
+			System.out.println("Error. ECOC is not yet implemented for " + data.numClasses() + "-class problems.");
+			System.exit(0);
+		}
+		
+		// prepare and run binary SVM classifiers
+		int numSVMs = codeWords[0].length();
+		int numFoldsAndRep = folds * repetitions;
+		writeModelFile = false;
+		WekaClassifierResult[][] allClassResults = new WekaClassifierResult[numSVMs][numFoldsAndRep];
+		
+		int[] originalLabels = getClassLabels(data);
+		for (int i=0; i<numSVMs; i++) {
+			
+			// adjust labels for current SVM
+			for (int j=0; j<data.numInstances(); j++) {
+				int newLabel = Integer.parseInt(codeWords[originalLabels[j]].substring(i,i+1));
+				data.instance(j).setClassValue(newLabel);
+			}
+			
+			// HACK: write labels to file and read them again to fix problem with number of classes
+			writeDataToLibsvm(data, featureFile + ".svm" + (i+1));
+			data = readDataFromLibsvm(featureFile + ".svm" + (i+1), folds);
+			
+			allClassResults[i] = runNestedCVLIBLINEAR();
+		}
+		
+		// compute code word for each instance
+		String[][] predCodeWords = new String[numFoldsAndRep][];
+		for (int i=0; i<numFoldsAndRep; i++) {
+			int numInstances = allClassResults[0][i].classProbabilities.length;
+			String[] currCodeWords = new String[numInstances];
+			
+			for (int j=0; j<numInstances; j++) {
+				StringBuffer currCodeWord = new StringBuffer();
+				for (int k=0; k<numSVMs; k++) {
+					double currClassProb = allClassResults[k][i].classProbabilities[j][0];
+					currCodeWord.append((Math.round(currClassProb) + "").charAt(0));
+				}
+				currCodeWords[j] = currCodeWord.toString();
+			}
+			predCodeWords[i] = currCodeWords;
+		}
+		
+		// decode predicted code words and infer class probabilities
+		WekaClassifierResult[] classResults = new WekaClassifierResult[numFoldsAndRep];
+		for (int i=0; i<predCodeWords.length; i++) {
+			
+			// HACK: Use evaluation object from first two-class SVM (use only if ROC scores are calculated externally)
+			classResults[i] = new WekaClassifierResult(allClassResults[i][0].evaluation, allClassResults[i][0].classProbabilities, allClassResults[i][0].classLabels);
+			
+			for (int j=0; j<predCodeWords[i].length; j++) {
+				
+				int [] currHammingDists = new int[codeWords.length];
+				for (int k=0; k<codeWords.length; k++) {
+					currHammingDists[k] = BasicTools.getHammingDistance(predCodeWords[i][j], codeWords[k]);
+				}
+				classResults[i].classProbabilities[j] = getClassProbsFromHammingDists(currHammingDists);
+			}
+		}
+		return classResults;
+	}
 
+	// compute class probabilities based on hamming distances
+	private static double[] getClassProbsFromHammingDists(int[] hammingDists) {
+		
+		double[] classProbs = new double[hammingDists.length];
+		int[] minPos = BasicTools.getMinPositions(hammingDists);
+		
+		for (int pos: minPos) {
+			classProbs[pos] = 1.0 / minPos.length;
+		}
+		return classProbs;
+	}
+	
+	
 	/**
 	 * tunes GaussianProcesses
 	 * 
