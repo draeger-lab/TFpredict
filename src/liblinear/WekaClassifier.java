@@ -37,7 +37,7 @@ import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -116,7 +116,7 @@ public class WekaClassifier {
 	
 	WekaClassifier(){};
 	
-	public boolean silent = true;
+	public boolean silent = false;
 	private boolean multithreading = false;
 	
 	private String featureFile;
@@ -150,6 +150,8 @@ public class WekaClassifier {
 	private Instances data;
 	WekaClassifierResult[] classResult = null;
 	String classifierPrintName;
+	
+	private Instances[] predefinedSplit = null;
 	
 	/**
 	 * A list of applicable machine-learning methods.
@@ -400,8 +402,10 @@ public class WekaClassifier {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Insts_filtered.randomize(new Random(1));
-		Insts_filtered.stratify(numFolds);
+		if (numFolds != 0) {
+			Insts_filtered.randomize(new Random(1));
+			Insts_filtered.stratify(numFolds);
+		}
 		return Insts_filtered;
 	}
 
@@ -1028,7 +1032,10 @@ public class WekaClassifier {
 		for (int rep = 0; rep < repetitions; rep++) {
 
 			// generate new splits for cross-validation
-			Instances[] splits = getSplits(data, folds, rep);
+			Instances[] splits = predefinedSplit;
+			if (splits == null) {
+				splits = getSplits(data, folds, rep);
+			}
 
 			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
 				Instances instancesTraining = new Instances(data, 1);
@@ -1106,6 +1113,7 @@ public class WekaClassifier {
 				"001100110011001",
 				"010101010101010",	
 			};
+			
 		} else {
 			System.out.println("Error. ECOC is not yet implemented for " + data.numClasses() + "-class problems.");
 			System.exit(0);
@@ -1115,21 +1123,40 @@ public class WekaClassifier {
 		int numSVMs = codeWords[0].length();
 		int numFoldsAndRep = folds * repetitions;
 		writeModelFile = false;
-		WekaClassifierResult[][] allClassResults = new WekaClassifierResult[numSVMs][numFoldsAndRep];
 		
-		int[] originalLabels = getClassLabels(data);
+		// get CV split (only works for 1 multirun)
+		int[][] cvSplit = WekaLauncher.getCVSplit(featureFile, folds, repetitions)[0];		
+		Instances[][] splits = new Instances[numSVMs][folds];
+		
 		for (int i=0; i<numSVMs; i++) {
 			
 			// adjust labels for current SVM
+			data = readDataFromLibsvm(featureFile, 0);
+			normalizeData(data);
 			for (int j=0; j<data.numInstances(); j++) {
-				int newLabel = Integer.parseInt(codeWords[originalLabels[j]].substring(i,i+1));
+				
+				int newLabel = Integer.parseInt(codeWords[(int) data.instance(j).classValue()].substring(i,i+1));
 				data.instance(j).setClassValue(newLabel);
 			}
 			
-			// HACK: write labels to file and read them again to fix problem with number of classes
+			// HACK: write/read feature file for each SVM to file to fix problem with number of classes
 			writeDataToLibsvm(data, featureFile + ".svm" + (i+1));
-			data = readDataFromLibsvm(featureFile + ".svm" + (i+1), folds);
+			data = readDataFromLibsvm(featureFile + ".svm" + (i+1), 0);
 			
+			for (int j=0; j<folds; j++) {
+				splits[i][j] = new Instances(data);
+				splits[i][j].clear();
+				for (int k=0; k<cvSplit[j].length; k++) {
+					splits[i][j].add(k, data.get(cvSplit[j][k]));
+				}
+			}
+
+		}
+		
+		WekaClassifierResult[][] allClassResults = new WekaClassifierResult[numSVMs][numFoldsAndRep];
+		for (int i=0; i<numSVMs; i++) {
+			data = readDataFromLibsvm(featureFile + ".svm" + (i+1), 0);
+			predefinedSplit = splits[i];
 			allClassResults[i] = runNestedCVLIBLINEAR();
 		}
 		
@@ -1152,11 +1179,11 @@ public class WekaClassifier {
 		
 		// decode predicted code words and infer class probabilities
 		WekaClassifierResult[] classResults = new WekaClassifierResult[numFoldsAndRep];
+		int instCnt = 0;
 		for (int i=0; i<predCodeWords.length; i++) {
 			
 			// HACK: Use evaluation object from first two-class SVM (use only if ROC scores are calculated externally)
 			classResults[i] = new WekaClassifierResult(allClassResults[i][0].evaluation, allClassResults[i][0].classProbabilities, allClassResults[i][0].classLabels);
-			
 			for (int j=0; j<predCodeWords[i].length; j++) {
 				
 				int [] currHammingDists = new int[codeWords.length];

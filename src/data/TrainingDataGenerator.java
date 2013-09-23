@@ -55,6 +55,13 @@ public class TrainingDataGenerator {
 	
 	private static final String[] unmappedClasses = new String[]{"C0047; GRAS."};
 	
+	private static void generateTransFac2UniProtMapping(String factorFile, String outputFile) {
+		
+		TransFacParser parser = new TransFacParser();
+		parser.parseFactors(factorFile);
+		parser.writeTransFacID2UniProtMapping(outputFile);
+	}
+	
 	private static void generateTransfacFlatfile(String factorFile, String matrixFile, String outputFile) {
 		
 		TransFacParser parser = new TransFacParser();
@@ -644,7 +651,11 @@ public class TrainingDataGenerator {
 		
 		String sabineFlatfile = "/rahome/eichner/projects/sabine/data/trainingsets/latest/trainingset_public.txt";
 		String sabineInputFile = "/rahome/eichner/projects/sabine/data/trainingsets/latest/inputset_public.txt";
-		convertSabineFlatfile2Inputfile(sabineFlatfile, sabineInputFile);
+		// convertSabineFlatfile2Inputfile(sabineFlatfile, sabineInputFile);
+		
+		String factorFile = "/rahome/eichner/data/biobase/transfac_2012.2/dat/factor.dat";
+		String mappingFile = "/rahome/eichner/projects/tfpredict/failed_inputs/transfac2uniprot.txt";
+		//generateTransFac2UniProtMapping(factorFile, mappingFile);
 		
 	}
 }
