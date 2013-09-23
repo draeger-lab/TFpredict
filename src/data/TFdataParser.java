@@ -272,6 +272,25 @@ public abstract class TFdataParser {
 		}
 	}
 	
+	protected void writeTransFacID2UniProtMapping(String outfile) {
+		
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
+			
+			for (int i=0; i<tf_names.size(); i++) {
+				bw.write(tf_names.get(i) + "\t" + crossrefs.get(i) + "\n");
+			}
+			bw.flush();
+			bw.close();
+		
+			System.out.println(tf_names.size() + " factors written to mapping file.");
+			
+		} catch(IOException ioe) {
+			System.out.println(ioe.getMessage());
+			System.out.println("IOException occurred while parsing transcription factors.");
+		}
+	}
+	
 	protected void writeFastafile(String outfile) {
 		writeFastafile(outfile, null);
 	}

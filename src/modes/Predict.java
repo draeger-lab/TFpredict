@@ -462,8 +462,8 @@ public class Predict {
 		}
 		
 		// HACK: line can be included for testing purposes
-		//basedir = "/rahome/eichner/web_home/galaxy_test/database/files/001/dataset_1878_files/";
-		//List<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(basedir + "/iprscan-S20130402-123505-0456-82243043-oy.out.txt");
+		//basedir = "/rahome/eichner/projects/tfpredict/failed_inputs/";
+		//List<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(basedir + "allTFs_iprscan_output.txt");
 		
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
@@ -527,8 +527,8 @@ public class Predict {
 		
 		// if given FASTA file contains multiple sequences --> split into single sequences
 		Map<String, String> seq2fasta = new HashMap<String, String>();
+		int seqCnt = 1;
 		if (batchMode) {
-			int seqCnt = 1;
 			for (String seqID: sequence_ids) {
 				String currFastaFile = input_file.replace(".fasta", ".seq" + seqCnt++ + ".fasta");
 				BasicTools.writeFASTA(seqID, sequences.get(seqID), currFastaFile);
@@ -538,15 +538,22 @@ public class Predict {
 			seq2fasta.put(sequence_ids[0], input_file);
 		}
 			
+		seqCnt = 1;
 		for (String seqID: sequence_ids) {
 			String runBLAST_cmd = blastpath + "bin/psiblast";
 			if (BasicTools.isWindows()) runBLAST_cmd = "\"" + runBLAST_cmd + "\"";
-			String runBLAST_cmdTF = runBLAST_cmd + " -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileTF + " -db " +  tfnontfDBfastaFile + ".db";
-			String runBLAST_cmdSuper = runBLAST_cmd + " -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + blastHitsFileSuper + " -db " +  tfDBfastaFile + ".db";
+			String currHitsFileTF = blastHitsFileTF;
+			String currHitsFileSuper = blastHitsFileSuper;
+			if (batchMode) {
+				currHitsFileTF = blastHitsFileTF.replace(".tf.hits", ".seq" + seqCnt++ + ".tf.hits");
+				currHitsFileSuper = blastHitsFileSuper.replace(".super.hits", ".seq" + seqCnt + ".super.hits");
+			}
+			String runBLAST_cmdTF = runBLAST_cmd + " -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + currHitsFileTF + " -db " +  tfnontfDBfastaFile + ".db";
+			String runBLAST_cmdSuper = runBLAST_cmd + " -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + currHitsFileSuper + " -db " +  tfDBfastaFile + ".db";
 			BasicTools.runCommand(runBLAST_cmdTF, false);
 			BasicTools.runCommand(runBLAST_cmdSuper, false);
-			seq2blastHitsTF.put(seqID, getBlastHits(blastHitsFileTF));
-			seq2blastHitsSuper.put(seqID, getBlastHits(blastHitsFileSuper));
+			seq2blastHitsTF.put(seqID, getBlastHits(currHitsFileTF));
+			seq2blastHitsSuper.put(seqID, getBlastHits(currHitsFileSuper));
 		}
 	}
 	
