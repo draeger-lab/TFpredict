@@ -461,7 +461,7 @@ public class Predict {
 			System.out.println();
 		}
 		
-		// HACK: line can be included for testing purposes
+		// HACK: lines can be included for testing purposes
 		//basedir = "/rahome/eichner/projects/tfpredict/failed_inputs/";
 		//List<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(basedir + "allTFs_iprscan_output.txt");
 		
@@ -654,10 +654,21 @@ public class Predict {
 						probDist_TFclass.put(seq, BasicTools.double2Double(currProbDistTF));
 						if (currProbDistTF[TF] >= currProbDistTF[Non_TF] && seq2percFeatSuper.containsKey(seq)) {
 							seqIsTF.put(seq, true);
-						
-						} else if (domain2tf.containsKey(seq) && domain2tf.get(seq) == TF) {
-							seqIsTF.put(seq, true);
-							probDist_TFclass.put(seq, new Double[] {0.0, 1.0});
+						} 
+					}
+					
+					// if not yet identified as TF, try identification via characteristic domains
+					if (!seqIsTF.get(seq) && useCharacteristicDomains) {
+						IprEntry seq2DomainEntry = seq2domain.get(seq);
+						if (seq2DomainEntry != null) {
+							ArrayList<String> currDomainIDs = seq2DomainEntry.domain_ids;
+							for (String domainID: currDomainIDs) {
+								if (domain2tf.containsKey(domainID)) {
+									seqIsTF.put(seq, true);
+									probDist_TFclass.put(seq, new Double[] {0.0, 1.0});
+									break;
+								}
+							}
 						}
 					}
 		    		
@@ -885,7 +896,7 @@ public class Predict {
 					System.out.println("  Helix-turn-helix    " + df.format(probDist_Superclass.get(seq)[Helix_turn_helix]));
 					System.out.println("  Beta scaffold       " + df.format(probDist_Superclass.get(seq)[Beta_scaffold]));
 					System.out.println("  Other               " + df.format(probDist_Superclass.get(seq)[Other]) + "\n");
-				
+					
 					if (annotatedClassAvailable.get(seq)) {	
 						System.out.println("  Annotated structural class:");
 						System.out.println(hline);
