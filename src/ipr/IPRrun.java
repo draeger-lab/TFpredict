@@ -4,7 +4,7 @@
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
  *  
- * Copyright (C) 2010-2013 Center for Bioinformatics Tuebingen (ZBIT),
+ * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
  * This program is free software: you can redistribute it and/or modify

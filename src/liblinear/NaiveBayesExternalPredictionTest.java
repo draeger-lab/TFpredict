@@ -1,10 +1,10 @@
-/*  
+/*
  * $Id$
  * $URL$
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
- *  
- * Copyright (C) 2010-2013 Center for Bioinformatics Tuebingen (ZBIT),
+ * 
+ * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
  * This program is free software: you can redistribute it and/or modify
@@ -89,7 +89,7 @@ public class NaiveBayesExternalPredictionTest {
 				e.printStackTrace();
 			}
 
-			 prob = naivebayes.predictData(classifyInsts);
+			prob = naivebayes.predictData(classifyInsts);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
@@ -167,7 +167,7 @@ public class NaiveBayesExternalPredictionTest {
 			e1.printStackTrace();
 		}
 		try {
-			eTest.evaluateModel(this.cModel, classifyInsts);
+			eTest.evaluateModel(cModel, classifyInsts);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
@@ -188,17 +188,17 @@ public class NaiveBayesExternalPredictionTest {
 		for (int i = 0; i < classifyInsts.numInstances(); i++) {
 
 			final Instance iUse = classifyInsts.instance(i);
-			iUse.setDataset(this.trainInsts);
+			iUse.setDataset(trainInsts);
 
 			// Get the likelihood of each classes
-			// fDistribution[0] is the probability of being “positive”
-			// fDistribution[1] is the probability of being “negative”
+			// fDistribution[0] is the probability of being ï¿½positiveï¿½
+			// fDistribution[1] is the probability of being ï¿½negativeï¿½
 			try {
-				final double[] fDistribution = this.cModel.distributionForInstance(iUse);
+				final double[] fDistribution = cModel.distributionForInstance(iUse);
 				System.out.println("prob(-) = " + fDistribution[0] + " prob(+) = " + fDistribution[1]
 						+ " (true class of instance i = " + i + " " + iUse.value(iUse.numAttributes() - 1) + ")");
 				prob[i] = fDistribution[1];
-				System.out.println("Classification = " + this.cModel.classifyInstance(iUse));
+				System.out.println("Classification = " + cModel.classifyInstance(iUse));
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
@@ -215,10 +215,10 @@ public class NaiveBayesExternalPredictionTest {
 
 	public void trainOnData(Instances trainInsts) {
 
-		// Create a naïve bayes classifier
-		this.cModel = new RandomForest();
+		// Create a naï¿½ve bayes classifier
+		cModel = new RandomForest();
 		try {
-			this.cModel.buildClassifier(trainInsts);
+			cModel.buildClassifier(trainInsts);
 		} catch (final Exception e2) {
 			e2.printStackTrace();
 		}
