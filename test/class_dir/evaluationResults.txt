@@ -1,0 +1,6 @@
+#SVM ECOC
+#AvgAreaUnderROC	AvgFMeasure	AvgMatthewsCorrelation	AvgAccuracy	AvgBalancedAccuracy
+0.998	0.69	0.49	0.959	0.979
+0.989	0.917	0.846	0.959	0.977
+0.977	0.946	0.893	0.946	0.948
+0.965	0.928	0.856	0.932	0.931
