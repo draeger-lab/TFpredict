@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 import data.TrainingDataGenerator;
 
@@ -64,6 +65,8 @@ public abstract class BLASTfeatureGenerator {
 	protected Map<String, Map<String, Double>> hits = new HashMap<String, Map<String, Double>>();
 	protected Map<String, int[][]> pssms = new HashMap<String, int[][]>();
 	protected Map<String, double[]> features = new HashMap<String, double[]>();
+	
+	private static final Logger logger = Logger.getLogger(BLASTfeatureGenerator.class.getName());
 
 	private String pathForTmpDir;
 	
@@ -91,7 +94,7 @@ public abstract class BLASTfeatureGenerator {
 		this.superPred = superPred;
 
 		// TODO
-		this.pathForTmpDir = "/rascratch/user/eichner/tmp/";
+		this.pathForTmpDir = System.getProperty("user.dir") + "/resources/tmp/";
 	}
 		
 	
@@ -161,7 +164,7 @@ public abstract class BLASTfeatureGenerator {
 			BasicTools.writeFASTA(seqID, sequences.get(seqID), infileFasta);
 			
 			// run PSI-BLAST current sequence
-			if (!silent) System.out.println("Processing sequence: " + seqID + "\t(" + seqCnt++ + "/" + sequences.size() + ")");
+			logger.info("Processing sequence: " + seqID + "\t(" + seqCnt++ + "/" + sequences.size() + ")");
 			
 			String uniprotID = seqID.split("\\|")[TrainingDataGenerator.UniProtIDField];
 			if (pssmFeat) {
@@ -211,11 +214,11 @@ public abstract class BLASTfeatureGenerator {
 			StringTokenizer strtok = new StringTokenizer(line);
 			String hitID = strtok.nextToken();
 			// correct wrong UniProt ID for T03281 in factor.dat
-			if (hitID.equals("T03281|41817|TF|3.1.|TransFac")) {
-				hitID = "T03281|P41817|TF|3.1.|TransFac";
+			if (hitID.contains("|41817|TF|")) {
+				hitID = hitID.replace("|41817|TF|", "|P41817|TF|");
 			}
-			String nextToken;
-			while ((nextToken = strtok.nextToken()).startsWith("GO:"));  // skip GO terms in non-TF headers
+			String nextToken = null;
+			while (strtok.hasMoreTokens() && (nextToken = strtok.nextToken()).startsWith("GO:"));  // skip GO terms in non-TF headers
 			double hitScore = Double.parseDouble(nextToken); 
 			currHits.put(hitID, hitScore);
 			lineIdx++;

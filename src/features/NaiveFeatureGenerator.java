@@ -23,6 +23,7 @@
 package features;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -32,6 +33,8 @@ import java.util.Map;
  */
 public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
 
+	private static final transient Logger logger = Logger.getLogger(NaiveFeatureGenerator.class.getName());
+	
 	/**
 	 * 
 	 * @param fastaFile
@@ -50,6 +53,9 @@ public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
 	protected void computeFeaturesFromBlastResult() {
 		
 		Map<String, Integer> shortSeqID2label = getSeq2LabelMapWithShortenedIDs();
+		
+		int numErrors = 0;
+		int numWarnings = 0;
 		
 		for (String seqID: hits.keySet()) {
 			
@@ -70,11 +76,20 @@ public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
 				features.put(seqID, new double[] {predClass});
 				
 			} else if (bestHit.isEmpty()) {
-				System.out.println("Warning. No BLAST hits found for sequence: " + seqID);
+				logger.warning("No BLAST hits found for sequence: " + seqID);
+				numWarnings++;
 				
 			} else {
-				System.out.println("Error. No label found for sequence: " + bestHit);
+				logger.severe("No label found for sequence: " + bestHit);
+				numErrors++;
 			}
+		}
+		
+		if (numErrors > 0) {
+			logger.info("Number of errors: " + numErrors);
+		}
+		if (numWarnings > 0) {
+			logger.info("Number of warnings: " + numWarnings);
 		}
 	}
 }
