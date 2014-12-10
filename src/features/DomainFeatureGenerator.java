@@ -160,7 +160,7 @@ public abstract class DomainFeatureGenerator {
 				labelField = splittedHeader[TrainingDataGenerator.ProteinClassField];
 				if (labelField.equals("TF")) {
 					classLabel = Predict.TF;
-				} else if (labelField.equals("NonTF")) {
+				} else if (labelField.equalsIgnoreCase("NonTF")) {
 					classLabel = Predict.Non_TF;
 				} else {
 					System.out.println("Error. Unknown label in FASTA header: " + labelField);
