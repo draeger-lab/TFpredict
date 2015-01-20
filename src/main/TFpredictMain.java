@@ -66,7 +66,7 @@ public class TFpredictMain {
 	 */
 	public static void main(String[] args) throws FileNotFoundException {
 
-		System.setOut(new PrintStream(new File("/home/jtyurkovich/output.txt")));
+		System.setOut(new PrintStream(new File("/home/jtyurkovich/git/TFPredict/resultsFileDir/output.txt")));
 
 		final long time = System.currentTimeMillis();
 
@@ -126,7 +126,7 @@ public class TFpredictMain {
 			}
 		}
 
-		System.out.println("Time elapsed: " + ((System.currentTimeMillis() - time)/3600) + " minutes");
+		System.out.println("Time elapsed: " + ((System.currentTimeMillis() - time)/1000) + " seconds");
 	}
 
 	// returns the correct mode based on the string passed as first argument
