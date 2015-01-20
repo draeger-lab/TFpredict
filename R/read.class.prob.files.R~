@@ -1,0 +1,50 @@
+# probably doesn't make sense for binary classification, but used for 5 class problem - JTY
+# adapt for 2 classes!
+
+read.class.prob.files <- function(class.prob.file.dir) {
+
+  class.prob.files <- list.files(class.prob.file.dir, full.names=TRUE, pattern="*.prob")
+  #kstar.idx <- grep("kStar", class.prob.files)
+  #if (length(kstar.idx) > 0) {
+  #  class.prob.files <- class.prob.files[-kstar.idx]
+  #}
+
+  class.probs <- list()
+  for (file in class.prob.files) {
+    classifier.name <- sub(".prob", "", sub(".*/", "", file), fixed=TRUE)
+    class.probs[[classifier.name]] <- read.class.prob.file(file)
+  }
+
+  return(class.probs)
+}
+
+
+read.class.prob.file <- function(class.prob.file) {
+
+  class.prob.table <- as.matrix(read.table(class.prob.file, sep="\t"))
+
+  # parse class probabilities for all instances
+  class.probs <- do.call(rbind, strsplit(gsub("(\\(|\\))", "", class.prob.table[,1]), ", "))
+  storage.mode(class.probs) <- "numeric"
+
+  rownames(class.probs) <- paste("instance", 1:nrow(class.probs), sep="_")
+  colnames(class.probs) <- paste("class", 1:ncol(class.probs), sep="_")
+
+  # parse labels
+  class.labels <- as.numeric(class.prob.table[,2])
+
+  # multiple classes (0,1,2,3 --> 1,2,3,4)
+  if (min(class.labels) == 0) {
+    class.labels = class.labels + 1
+
+  # two classes (-1,1 --> 1,2)
+  } else if (length(unique(class.labels)) == 2 && min(class.labels) == -1) {
+    class.labels[class.labels == 1] <- 2
+    class.labels[class.labels == -1] <- 1
+
+  } else {
+    stop("Error. Invalid labels.")
+  }
+
+  return(list(class.probs=class.probs, class.labels=class.labels))
+}

@@ -1,0 +1,30 @@
+import.function("get.colormap.R")
+
+plot.boxes <- function (data, text.angle=35, text.font=1, text.cex=1.0, title=NULL, ylab=NULL, ylim=NULL, log.yaxis=FALSE, colormap=NULL, use.default.names=FALSE) {
+
+
+  box.names <- NULL
+  if (is.matrix(data)) {
+    num.boxes <- ncol(data)
+    box.names <- colnames(data)
+    
+  } else {
+    num.boxes <- length(data)
+    box.names <- names(data)
+  }
+
+  log.y <- ""
+  if (log.yaxis) {
+    log.y <- "y"
+  }
+  
+  if (is.null(colormap)) {
+    colormap <- rep(get.colormap(col.scheme="classes", num.classes=3)[2], num.boxes)
+  }
+  
+  if (use.default.names) names <- box.names else names <- NA
+  boxplot(data, col=colormap, names=names, las=1, main=title, cex.main=text.cex, cex.axis=text.cex, ylab=ylab, ylim=ylim, log=log.y)
+  if (!use.default.names && !is.null(box.names)) {
+    text(1:num.boxes, par("usr")[3]-0.05, srt=text.angle, adj=1, labels=box.names, xpd=TRUE, font=text.font, cex=text.cex)
+  }
+}
