@@ -1,9 +1,9 @@
-/*  
+/*
  * $Id: BasicTools.java 99 2014-01-09 21:57:51Z draeger $
  * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/io/BasicTools.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
- *  
+ * 
  * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
@@ -54,12 +54,12 @@ import resources.Resource;
  * @since 1.0
  */
 public class BasicTools {
-	
+
 	/**
 	 * 
 	 */
 	public static final String duplicatedHeaderKey = "duplicated";
-	
+
 	/**
 	 * 
 	 * @return
@@ -67,7 +67,7 @@ public class BasicTools {
 	public static boolean isWindows() {
 		return(System.getProperty("os.name").contains("Windows"));
 	}
-	
+
 	/**
 	 * 
 	 * @param string
@@ -76,7 +76,7 @@ public class BasicTools {
 	public static String[] wrapString(String string) {
 		return(wrapString(string, 60));
 	}
-	
+
 	/**
 	 * 
 	 * @param string
@@ -91,14 +91,14 @@ public class BasicTools {
 		for (int i=0; i < numFullLines; i++) {
 			lines.add(string.toUpperCase().substring(i * max_line_length, (i+1) * max_line_length));
 		}
-		
+
 		int writtenStringLength = (string.length() / max_line_length) * max_line_length;
 		if (string.length() - writtenStringLength > 0) {
 			lines.add(string.toUpperCase().substring(writtenStringLength, string.length()));
 		}
 		return(lines.toArray(new String[]{}));
 	}
-	
+
 	/**
 	 * 
 	 * @param string
@@ -107,7 +107,7 @@ public class BasicTools {
 	 * @return
 	 */
 	public static String[] getSubarray(String[] string, int start, int end) {
-		
+
 		int resLength = end-start+1;
 		String[] res = new String[resLength];
 		int idx = 0;
@@ -116,14 +116,14 @@ public class BasicTools {
 		}
 		return(res);
 	}
-	
+
 	/**
 	 * 
 	 * @param list
 	 * @param outfile
 	 */
 	public static void writeSplittedList2File(List<String[]> list, String outfile) {
-		
+
 		List<String> collapsedList = new ArrayList<String>();
 		for (int i=0; i<list.size(); i++) {
 			StringBuffer currLine = new StringBuffer();
@@ -134,7 +134,7 @@ public class BasicTools {
 		}
 		writeList2File(collapsedList, outfile);
 	}
-	
+
 	/**
 	 * 
 	 * @param list
@@ -144,7 +144,7 @@ public class BasicTools {
 		String[] array = list.toArray(new String[] {});
 		writeArray2File(array, outfile);
 	}
-	
+
 	/**
 	 * 
 	 * @param lines
@@ -160,63 +160,63 @@ public class BasicTools {
 	 * @param outfile
 	 */
 	public static void writeArray2File(String[] array, String outfile) {
-		
+
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
-		
+
 			for (String line: array) {
 				bw.write(line + "\n");
 			}
 			bw.flush();
 			bw.close();
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param doubleArray
 	 * @return
 	 */
 	public static Double[] double2Double(double[] doubleArray) {
-		
+
 		Double[] res = new Double[doubleArray.length];
 		for (int i=0; i<res.length; i++) {
 			res[i] = new Double(doubleArray[i]);
 		}
 		return(res);
 	}
-	
+
 	/**
 	 * 
 	 * @param intArray
 	 * @return
 	 */
 	public static int[] Integer2int(Integer[] intArray) {
-		
+
 		int[] res = new int[intArray.length];
 		for (int i=0; i<res.length; i++) {
 			res[i] = intArray[i].intValue();
 		}
 		return(res);
 	}
-	
+
 	/**
 	 * 
 	 * @param doubleArray
 	 * @return
 	 */
 	public static double[] Double2double(Double[] doubleArray) {
-		
+
 		double[] res = new double[doubleArray.length];
 		for (int i=0; i<res.length; i++) {
 			res[i] = doubleArray[i].doubleValue();
 		}
 		return(res);
 	}
-	
+
 	/**
 	 * 
 	 * @param doubleArray
@@ -225,7 +225,7 @@ public class BasicTools {
 	public static double getMax(double[] doubleArray) {
 		return getMax(doubleArray, false);
 	}
-	
+
 	/**
 	 * 
 	 * @param doubleArray
@@ -234,7 +234,7 @@ public class BasicTools {
 	public static int getMaxIndex(double[] doubleArray) {
 		return (int) getMax(doubleArray, true);
 	}
-	
+
 	/**
 	 * 
 	 * @param doubleArray
@@ -242,20 +242,20 @@ public class BasicTools {
 	 * @return
 	 */
 	public static double getMax(double[] doubleArray, boolean returnIndex) {
-		
+
 		double max = doubleArray[0];
-	    int maxIndex = 0;
-	    for (int i=1; i<doubleArray.length; i++) {
-	        if (doubleArray[i] > max) {
-	            max = doubleArray[i];
-	            maxIndex = i;
-	        }
-	    }
-	    if (returnIndex) {
-	    	return maxIndex;
-	    } else {
-	    	return max;
-	    }
+		int maxIndex = 0;
+		for (int i=1; i<doubleArray.length; i++) {
+			if (doubleArray[i] > max) {
+				max = doubleArray[i];
+				maxIndex = i;
+			}
+		}
+		if (returnIndex) {
+			return maxIndex;
+		} else {
+			return max;
+		}
 	}
 
 	/**
@@ -266,7 +266,7 @@ public class BasicTools {
 	public static Map<String, String> readFASTA(String fasta_file) {
 		return readFASTA(fasta_file, false);
 	}
-	
+
 	/**
 	 * 
 	 * @param fasta_file
@@ -274,19 +274,20 @@ public class BasicTools {
 	 * @return
 	 */
 	public static Map<String, String> readFASTA(String fasta_file, boolean readFullHeader) {
-		
+
 		Map<String, String> sequences = new HashMap<String, String>();
-		
+
+		BufferedReader br = null;
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(new File(fasta_file)));
-		
+			br = new BufferedReader(new FileReader(new File(fasta_file)));
+
 			StringBuffer curr_seq = new StringBuffer();
 			String line;
 			String header = "";
 			boolean first = true;
-			
+
 			while ((line = br.readLine()) != null) {
-					
+
 				// new header ?
 				if (line.startsWith(">")) {
 					// add last sequence
@@ -296,9 +297,9 @@ public class BasicTools {
 					// read new header
 					if (readFullHeader) {
 						header = line.replaceFirst(">", "").trim();
-					
-					// generate headers as done by InterProScan 
-					// ">sp|P04637|P53_HUMAN Cellular tumor..." --> "P53_HUMAN" 
+
+						// generate headers as done by InterProScan
+						// ">sp|P04637|P53_HUMAN Cellular tumor..." --> "P53_HUMAN"
 					} else {
 						header = new StringTokenizer(line.replaceFirst(">\\s*", "")).nextToken();
 						if (header.contains("|")) {
@@ -312,7 +313,7 @@ public class BasicTools {
 					curr_seq.append(line);
 				}
 			}
-			
+
 			// If FASTA file contains duplicated headers --> mark HashTable
 			if (sequences.containsKey(header)) {
 				System.out.println(header);
@@ -322,15 +323,23 @@ public class BasicTools {
 			if (!seq.matches("^[A-IK-NP-Za-ik-np-z\\s]*$")) {
 				System.out.println("\nWarning. Given protein sequence \"" + header + "\" contains invalid symbols.");
 			}
-			
+
 			sequences.put(header, seq);
-			
+
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return(sequences);
 	}
-	
+
 	/**
 	 * 
 	 * @param header
@@ -338,22 +347,22 @@ public class BasicTools {
 	 * @param output_file
 	 */
 	public static void writeFASTA(String header, String sequence, String output_file) {
-		
+
 		Map<String, String> sequenceMap = new HashMap<String, String>();
 		sequenceMap.put(header, sequence);
 		writeFASTA(sequenceMap, output_file);
 	}
-	
+
 	/**
 	 * 
 	 * @param sequences
 	 * @param output_file
 	 */
 	public static void writeFASTA(Map<String, String> sequences, String output_file) {
-		
+
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(output_file)));
-			
+
 			for (String header: sequences.keySet()) {
 				bw.write(">" + header + "\n");
 				String[] curr_seq = BasicTools.wrapString(sequences.get(header));
@@ -364,7 +373,7 @@ public class BasicTools {
 			}
 			bw.flush();
 			bw.close();
-			
+
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
@@ -378,7 +387,7 @@ public class BasicTools {
 	public static List<String> readResource2List(String resourceName) {
 		return(readResource2List(resourceName, false));
 	}
-	
+
 	/**
 	 * 
 	 * @param resourceName
@@ -396,18 +405,18 @@ public class BasicTools {
 	 * @return
 	 */
 	public static List<String> readFile2List(String fileName, boolean upperCase) {
-		
+
 		List<String> fileContent = null;
-		
+
 		try {
 			fileContent = readStream2List(new FileInputStream(new File(fileName)), upperCase);
-		
+
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		return fileContent;
 	}
-	
+
 	/**
 	 * 
 	 * @param stream
@@ -415,12 +424,12 @@ public class BasicTools {
 	 * @return
 	 */
 	public static List<String> readStream2List(InputStream stream, boolean upperCase) {
-		
+
 		List<String> fileContent = new ArrayList<String>();
-		
+
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-			
+
 			String line;
 			while ((line = br.readLine()) != null) {
 				if (upperCase) {
@@ -430,29 +439,29 @@ public class BasicTools {
 				}
 			}
 			br.close();
-			
+
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-		
+
 		return(fileContent);
 	}
-	
+
 	/**
 	 * 
 	 * @param infile
 	 * @return
 	 */
 	public static Map<String, String> readFile2Map(String infile) {
-		
+
 		List<String[]> keyValueList = readFile2ListSplitLines(infile);
 		Map<String, String> keyValueMap= new HashMap<String,String>();
-		
+
 		for (String[] pair: keyValueList) {
-			
+
 			if (pair.length >= 2) {
 				keyValueMap.put(pair[0], pair[1]);
-			
+
 			} else {
 				System.out.println("Error. File does not contain tab-separated key value pairs.");
 				System.exit(1);
@@ -460,30 +469,39 @@ public class BasicTools {
 		}
 		return (keyValueMap);
 	}
-	
+
 	/**
 	 * 
 	 * @param infile
 	 * @return
 	 */
 	public static String readFile2String(String infile) {
-		
+
 		String lines = "";
 		String line;
-		
+
+		BufferedReader br = null;
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(infile));
-			
+			br = new BufferedReader(new FileReader(infile));
+
 			while ((line = br.readLine()) != null) {
-				 lines += (line + "\n");
+				lines += (line + "\n");
 			}
 		}
 		catch (IOException ioe) {
 			ioe.printStackTrace();
-		}	
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		return lines;
 	}
-	
+
 	/**
 	 * 
 	 * @param infile
@@ -492,7 +510,7 @@ public class BasicTools {
 	public static List<String[]> readFile2ListSplitLines(String infile) {
 		return readFile2ListSplitLines(infile, false);
 	}
-	
+
 	/**
 	 * 
 	 * @param infile
@@ -500,42 +518,44 @@ public class BasicTools {
 	 * @return
 	 */
 	public static List<String[]> readFile2ListSplitLines(String infile, boolean useTokenizer) {
-		
+
 		List<String[]> splittedLines = new ArrayList<String[]>();
 		String line = null;
-		
+
 		try {
-			 BufferedReader br = new BufferedReader(new FileReader(infile));
-			 
-			 while ((line = br.readLine()) != null) {
-				 
-				 // skip blank lines
-				 if (line.trim().equals("")) continue;
-				 
-				 // add splitted line
-				 if (useTokenizer) {
-					 StringTokenizer strtok = new StringTokenizer(line);
-					 int numValues = strtok.countTokens();
-					 String[] currEntries = new String[numValues];
-					 for (int t=0; t < numValues; t++) {
-						 currEntries[t] = strtok.nextToken();
-					 }
-					 splittedLines.add(currEntries);
-					 
-				 } else {
-					 splittedLines.add(line.split("\t"));
-				 }
-			}		 
-			 br.close();
+			BufferedReader br = new BufferedReader(new FileReader(infile));
+
+			while ((line = br.readLine()) != null) {
+
+				// skip blank lines
+				if (line.trim().equals("")) {
+					continue;
+				}
+
+				// add splitted line
+				if (useTokenizer) {
+					StringTokenizer strtok = new StringTokenizer(line);
+					int numValues = strtok.countTokens();
+					String[] currEntries = new String[numValues];
+					for (int t=0; t < numValues; t++) {
+						currEntries[t] = strtok.nextToken();
+					}
+					splittedLines.add(currEntries);
+
+				} else {
+					splittedLines.add(line.split("\t"));
+				}
+			}
+			br.close();
 		}
-		
+
 		catch(IOException ioe) {
 			System.out.println(ioe.getMessage());
 		}
-		
+
 		return splittedLines;
-	}	
-	
+	}
+
 	/**
 	 * 
 	 * @param list1
@@ -543,7 +563,7 @@ public class BasicTools {
 	 * @return
 	 */
 	public static List<String> union(List<String> list1, List<String> list2) {
-		
+
 		HashSet<String> unionSet = new HashSet<String>();
 		for (String element: list1) {
 			unionSet.add(element);
@@ -553,10 +573,10 @@ public class BasicTools {
 		}
 		List<String> union = new ArrayList<String>();
 		union.addAll(unionSet);
-		
+
 		return(union);
 	}
-	
+
 	/**
 	 * 
 	 * @param list1
@@ -566,7 +586,7 @@ public class BasicTools {
 	public static List<String> union(String[] list1, String[] list2) {
 		return(union(new ArrayList<String>(Arrays.asList(list1)), new ArrayList<String>(Arrays.asList(list2))));
 	}
-	
+
 	/**
 	 * 
 	 * @param list1
@@ -574,7 +594,7 @@ public class BasicTools {
 	 * @return
 	 */
 	public static List<String> intersect(List<String> list1, List<String> list2) {
-		
+
 		HashSet<String> intersectionSet = new HashSet<String>();
 		for (String element: list1) {
 			if (list2.contains(element)) {
@@ -583,10 +603,10 @@ public class BasicTools {
 		}
 		List<String> intersection = new ArrayList<String>();
 		intersection.addAll(intersectionSet);
-		
+
 		return(intersection);
 	}
-	
+
 	/**
 	 * 
 	 * @param list1
@@ -596,7 +616,7 @@ public class BasicTools {
 	public static List<String> setDiff(String[] list1, String[] list2) {
 		return(setDiff(new ArrayList<String>(Arrays.asList(list1)), new ArrayList<String>(Arrays.asList(list2))));
 	}
-	
+
 	/**
 	 * 
 	 * @param list1
@@ -612,10 +632,10 @@ public class BasicTools {
 		}
 		List<String> diff = new ArrayList<String>();
 		diff.addAll(diffSet);
-		
+
 		return(diff);
 	}
-	
+
 	/**
 	 * 
 	 * @param ids
@@ -623,26 +643,26 @@ public class BasicTools {
 	 * @return
 	 */
 	public static List<String[]> combineLists(List<String> ids, List<Double> values) {
-		
+
 		if (ids.size() != values.size()) {
 			System.out.println("Error. Lists have unequal sizes.");
 			System.out.println(1);
 		}
-		
+
 		List<String[]> mergedList = new ArrayList<String[]>();
 		for (int i=0; i<ids.size(); i++) {
 			mergedList.add(new String[] {ids.get(i), values.get(i).toString()});
 		}
 		return(mergedList);
 	}
-	
+
 	/**
 	 * 
 	 * @param matrix
 	 * @return
 	 */
 	public static double[] getColMeans(double[][] matrix) {
-		
+
 		double[] colMeans = new double[matrix[0].length];
 		for (int i=0; i<matrix[0].length; i++) {
 			double colSum = 0;
@@ -653,7 +673,7 @@ public class BasicTools {
 		}
 		return(colMeans);
 	}
-	
+
 	/**
 	 * 
 	 * @param s
@@ -661,7 +681,7 @@ public class BasicTools {
 	 * @return
 	 */
 	public static String padRight(String s, int n) {
-	     return String.format("%1$-" + n + "s", s);  
+		return String.format("%1$-" + n + "s", s);
 	}
 
 	/**
@@ -671,22 +691,9 @@ public class BasicTools {
 	 * @return
 	 */
 	public static String padLeft(String s, int n) {
-	    return String.format("%1$#" + n + "s", s);  
+		return String.format("%1$#" + n + "s", s);
 	}
-	
-	/**
-	 * 
-	 * @param args path to a FASTA file.
-	 */
-	public static void main(String args[]) {		
-		Map<String, String> sequences = readFASTA(args[0]); // /rahome/eichner/web_home/test_seq.fasta
-		
-		for (String header: sequences.keySet()) {
-			System.out.println("> " + header);
-			System.out.println(sequences.get(header));
-		}
-	}
-	
+
 	/**
 	 * 
 	 * @param cmd
@@ -695,7 +702,7 @@ public class BasicTools {
 	public static String[] runCommand(String cmd) {
 		return runCommand(cmd, true);
 	}
-	
+
 	/**
 	 * 
 	 * @param cmd
@@ -703,43 +710,43 @@ public class BasicTools {
 	 * @return
 	 */
 	public static String[] runCommand(String cmd, boolean parseOutput) {
-		
+
 		String[] consoleOutput = null;
-		
+
 		try {
 			Process proc = Runtime.getRuntime().exec(cmd);
 			proc.waitFor();
-			
+
 			if (parseOutput) {
 				List<String> stdout = new ArrayList<String>();
 				String line;
 				BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			
+
 				while ((line = br.readLine()) != null) {
 					stdout.add(line.trim());
 				}
 				consoleOutput = stdout.toArray(new String[]{});
 			}
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
+
 		return consoleOutput;
 	}
-	
+
 	/**
 	 * 
 	 * @param stringArray
 	 * @return
 	 */
 	public static String collapseStringArray(String[] stringArray) {
-		
+
 		return collapseStringArray(stringArray, "\t");
 	}
-	
+
 	/**
 	 * 
 	 * @param stringArray
@@ -747,7 +754,7 @@ public class BasicTools {
 	 * @return
 	 */
 	public static String collapseStringArray(String[] stringArray, String separator) {
-		
+
 		StringBuffer stringBuffer = new StringBuffer(stringArray[0]);
 		for (int i=1; i<stringArray.length; i++) {
 			stringBuffer.append(separator + stringArray[i]);
@@ -762,7 +769,7 @@ public class BasicTools {
 	 * @return
 	 */
 	public static int[] getAllIndicesOf(String string, String substring) {
-		
+
 		List<Integer> indices = new ArrayList<Integer>();
 		int index = string.indexOf(substring);
 		while(index >= 0) {
@@ -771,20 +778,20 @@ public class BasicTools {
 		}
 		return Integer2int(indices.toArray(new Integer[]{}));
 	}
-	
+
 	/**
 	 * 
 	 * @param file
 	 */
 	public static void createDir4File(String file) {
-		
+
 		String directory = new File(file).getParent();
 		if (!new File(directory).exists() && !new File(directory).mkdirs()) {
 			System.out.println("Error. Directory for file \"" + file + "\" could not be created.");
 			System.exit(0);
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param array1
@@ -792,9 +799,9 @@ public class BasicTools {
 	 * @return
 	 */
 	public static double[] concatenateArrays(double[] array1, double[] array2) {
-		
+
 		int arraySize = array1.length + array2.length;
-		double[] resArray = (double[]) new double[arraySize];
+		double[] resArray = new double[arraySize];
 		for (int i=0; i<array1.length; i++) {
 			resArray[i] = array1[i];
 		}
@@ -803,7 +810,7 @@ public class BasicTools {
 		}
 		return resArray;
 	}
-	
+
 	/**
 	 * 
 	 * @param array1
@@ -812,7 +819,7 @@ public class BasicTools {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T[] concatenateArrays(T[] array1, T[] array2) {
-		
+
 		int arraySize = array1.length + array2.length;
 		T[] resArray = (T[]) new Object[arraySize];
 		for (int i=0; i<array1.length; i++) {
@@ -823,27 +830,27 @@ public class BasicTools {
 		}
 		return resArray;
 	}
-	
+
 	/**
 	 * 
 	 * @param array
 	 * @return
 	 */
 	public static double[] transform2zScores(double[] array) {
-		
+
 		Mean mean = new Mean();
 		StandardDeviation sd = new StandardDeviation(false);
-		
+
 		double mu = mean.evaluate(array);
 		double sigma = sd.evaluate(array);
-		
+
 		double[] zScores = new double[array.length];
 		for (int i=0; i<array.length; i++) {
 			zScores[i] = (array[i] - mu) / sigma;
 		}
 		return(zScores);
 	}
-	
+
 	/**
 	 * 
 	 * @param array
@@ -851,29 +858,29 @@ public class BasicTools {
 	 * @return
 	 */
 	public static double computePercentile(double[] array, double perc) {
-		
+
 		double res = 0;
 		if (perc == 0) {
 			Min minCalculator = new Min();
 			res = minCalculator.evaluate(array);
-			
+
 		} else if (perc <= 100) {
 			Percentile percCalculator = new Percentile();
 			res = percCalculator.evaluate(array, perc);
-			
+
 		} else {
 			System.out.println("Error. Percentile has to be between 0 and 100.");
 			System.exit(0);
 		}
 		return(res);
 	}
-	
+
 	public static void copy(String infile, String outfile) {
 		copy(infile, outfile, false);
 	}
-			
+
 	public static void copy(String infile, String outfile, boolean isResource) {
-		
+
 		try {
 			BufferedReader br = null;
 			if (isResource) {
@@ -882,8 +889,8 @@ public class BasicTools {
 				br = new BufferedReader(new FileReader(new File(infile)));
 			}
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
-			
-			
+
+
 			String line;
 			while ((line = br.readLine()) != null) {
 				bw.write(line + "\n");
@@ -891,23 +898,23 @@ public class BasicTools {
 			br.close();
 			bw.flush();
 			bw.close();
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public static String doubleArrayToLibSVM(double[] doubleArray) {
-		
+
 		StringBuffer doubleString = new StringBuffer();
 		for (int i=0; i<doubleArray.length; i++) {
 			doubleString.append((i+1) + ":" + doubleArray[i] + " ");
 		}
 		return doubleString.toString().trim();
 	}
-	
+
 	public static int getHammingDistance(String string1, String string2) {
-		
+
 		int hammingDist = 0;
 		for (int i=0; i<string1.length(); i++) {
 			if (string1.charAt(i) != string2.charAt(i)) {
@@ -916,9 +923,9 @@ public class BasicTools {
 		}
 		return hammingDist;
 	}
-	
+
 	public static int[] getMinPositions(int[] array) {
-	
+
 		int minDist = Integer.MAX_VALUE;
 		ArrayList<Integer> minPos = null;
 
@@ -935,6 +942,6 @@ public class BasicTools {
 		}
 		return Integer2int(minPos.toArray(new Integer[]{}));
 	}
-} 
+}
 
 
