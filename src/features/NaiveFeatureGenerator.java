@@ -1,9 +1,9 @@
-/*  
+/*
  * $Id: NaiveFeatureGenerator.java 99 2014-01-09 21:57:51Z draeger $
  * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/features/NaiveFeatureGenerator.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
- *  
+ * 
  * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
@@ -23,6 +23,7 @@
 package features;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -32,6 +33,8 @@ import java.util.Map;
  */
 public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
 
+	private static final transient Logger logger = Logger.getLogger(NaiveFeatureGenerator.class.getName());
+	
 	/**
 	 * 
 	 * @param fastaFile
@@ -40,16 +43,20 @@ public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
 	 */
 	public NaiveFeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
 		super(fastaFile, featureFile, superPred);
-		this.pssmFeat = false;
-		this.naiveFeat = true;
+		pssmFeat = false;
+		naiveFeat = true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see features.BLASTfeatureGenerator#computeFeaturesFromBlastResult()
 	 */
+	@Override
 	protected void computeFeaturesFromBlastResult() {
 		
 		Map<String, Integer> shortSeqID2label = getSeq2LabelMapWithShortenedIDs();
+		
+		int numErrors = 0;
+		int numWarnings = 0;
 		
 		for (String seqID: hits.keySet()) {
 			
@@ -70,11 +77,20 @@ public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
 				features.put(seqID, new double[] {predClass});
 				
 			} else if (bestHit.isEmpty()) {
-				System.out.println("Warning. No BLAST hits found for sequence: " + seqID);
+				logger.warning("No BLAST hits found for sequence: " + seqID);
+				numWarnings++;
 				
 			} else {
-				System.out.println("Error. No label found for sequence: " + bestHit);
+				logger.severe("No label found for sequence: " + bestHit);
+				numErrors++;
 			}
+		}
+		
+		if (numErrors > 0) {
+			logger.info("Number of errors: " + numErrors);
+		}
+		if (numWarnings > 0) {
+			logger.info("Number of warnings: " + numWarnings);
 		}
 	}
 }
