@@ -48,7 +48,6 @@ public class NaiveBayesExternalPredictionTest {
 	/**
 	 * @param args
 	 * @throws IOException
-	 * @throws Exception
 	 */
 	public static void main(String[] args) throws IOException {
 

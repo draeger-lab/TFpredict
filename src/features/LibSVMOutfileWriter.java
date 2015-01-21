@@ -1,9 +1,9 @@
-/*  
+/*
  * $Id: LibSVMOutfileWriter.java 99 2014-01-09 21:57:51Z draeger $
  * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/features/LibSVMOutfileWriter.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
- *  
+ * 
  * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import modes.Predict;
 
@@ -47,9 +48,14 @@ import modes.Predict;
  */
 public class LibSVMOutfileWriter {
 
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(LibSVMOutfileWriter.class.getName());
+
 	// clean version
 	public int[] write(List<String> domainIDs, Map<String, IprEntry> seq2domain, String outfile) {
-		
+
 		List<String> libsvmFeatureTable = new ArrayList<String>();
 		List<String> excludedSequences = new ArrayList<String>();
 		Map<Integer, List<String>> feat2seq = new HashMap<Integer, List<String>>();
@@ -60,51 +66,51 @@ public class LibSVMOutfileWriter {
 		if (seq2domain.get(firstKey).superclass != null) {
 			superclassFeatures = true;
 		}
-		
+
 		int[] numFeatureVectors = null;
 		if (superclassFeatures) {
 			numFeatureVectors = new int[] {0,0,0,0,0};
 		} else {
 			numFeatureVectors = new int[] {0,0};
 		}
-		
+
 		String label;
-		
+
 		try {
 			BufferedWriter bw_libsvmfile = new BufferedWriter(new FileWriter(new File(outfile)));
 
 			for (String currSeq : seq2domain.keySet()) {
-				
+
 				IprEntry curr_entry = seq2domain.get(currSeq);
 				if (curr_entry.isTF) {
-					
+
 					// Superclass prediction
 					if (superclassFeatures) {
 						label = Integer.toString(curr_entry.superclass);
 
-					// TF prediction (TF)
+						// TF prediction (TF)
 					} else {
 						label = "+1";
 					}
-					
-				// TF prediction (non-TF)
+
+					// TF prediction (non-TF)
 				} else {
 					label = "-1";
 				}
-				
+
 				String fvector = Predict.createIPRvector(curr_entry.domain_ids, domainIDs, Predict.featureOffset);
 				String line = label + " " + fvector + "\n";
-				
+
 				// save names of sequences for which no feature vector could be generated as no InterPro domains were found
 				if (fvector.isEmpty()) {
 					excludedSequences.add(currSeq);
 					continue;
 				}
-				
+
 				if (currSeq.equals("GL2_P46607_MatBase")) {
-					System.out.println("Superclass: " + curr_entry.superclass);
+					logger.info("Superclass: " + curr_entry.superclass);
 				}
-				
+
 				// save mapping from feature vectors to (multiple) sequence IDs
 				int featVecIdx = libsvmFeatureTable.indexOf(line);
 				if (featVecIdx != -1) {
@@ -112,11 +118,11 @@ public class LibSVMOutfileWriter {
 					currSeqIDs.add(currSeq);
 					feat2seq.put(featVecIdx, currSeqIDs);
 					continue;
-				
+
 				} else {
 					libsvmFeatureTable.add(line);
 					bw_libsvmfile.write(line);
-					
+
 					List<String> currSeqIDs = new ArrayList<String>();
 					currSeqIDs.add(currSeq);
 					feat2seq.put(feat2seq.size(), currSeqIDs);
@@ -136,10 +142,10 @@ public class LibSVMOutfileWriter {
 			bw_libsvmfile.close();
 		}
 		catch(IOException ioe) {
-			System.out.println(ioe.getMessage());
-			System.out.println("IOException occurred while writing output file");
+			logger.warning(ioe.getMessage());
+			logger.warning("IOException occurred while writing output file");
 		}
-		
+
 		// write Sequence IDs for each feature vector to file
 		String namesFile = outfile.replace(".txt", "_names.txt");
 		List<String[]> namesList = new ArrayList<String[]>();
@@ -147,11 +153,11 @@ public class LibSVMOutfileWriter {
 			namesList.add(feat2seq.get(i).toArray(new String[]{}));
 		}
 		BasicTools.writeSplittedList2File(namesList, namesFile);
-		
+
 		// write names of proteins for which no feature vectors were generated to file
 		String excludedNamesFile = outfile.replace(".txt", "_excluded.txt");
 		if (!excludedSequences.isEmpty()) {
-			System.out.println("Excluded " + excludedSequences.size() + " protein sequences with empty feature vectors.");
+			logger.warning("Excluded " + excludedSequences.size() + " protein sequences with empty feature vectors.");
 			BasicTools.writeList2File(excludedSequences, excludedNamesFile);
 		}
 		return numFeatureVectors;

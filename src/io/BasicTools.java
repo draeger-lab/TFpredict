@@ -316,6 +316,7 @@ public class BasicTools {
 
 			// If FASTA file contains duplicated headers --> mark HashTable
 			if (sequences.containsKey(header)) {
+				System.out.println(header);
 				sequences.put(duplicatedHeaderKey, "");
 			}
 			String seq = curr_seq.toString();

@@ -1,9 +1,9 @@
-/*  
+/*
  * $Id: WekaLauncher.java 99 2014-01-09 21:57:51Z draeger $
  * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/liblinear/WekaLauncher.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
- *  
+ * 
  * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
@@ -45,7 +45,7 @@ import liblinear.WekaClassifier.ClassificationMethod;
  * @since 1.0
  */
 public class WekaLauncher {
-	
+
 	/**
 	 * 
 	 * @param featureFile
@@ -59,7 +59,7 @@ public class WekaLauncher {
 			classProbFileDir = resultsDir;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param featureFile
@@ -70,7 +70,7 @@ public class WekaLauncher {
 		this(featureFile, resultsDir);
 		this.modelFileDir = modelFileDir;
 	}
-	
+
 	/**
 	 * 
 	 * @param featureFile
@@ -80,7 +80,7 @@ public class WekaLauncher {
 		this(featureFile);
 		this.resultsDir = resultsDir;
 	}
-	
+
 	/**
 	 * 
 	 * @param featureFile
@@ -90,23 +90,23 @@ public class WekaLauncher {
 	}
 
 	private static final String mergedResultsFileName = "evaluationResults.txt";
-	
+
 	static boolean silent = true;
 	static PrintStream defaultOutstream = System.out;
-	
-	private String libsvmFeatureFile;
-    private String resultsDir = null;
-    private String modelFileDir = null;
-    private String classProbFileDir = null;
-    private String cvSplitFile = null;
 
-    private boolean nestedCV = true;
+	private String libsvmFeatureFile;
+	private String resultsDir = null;
+	private String modelFileDir = null;
+	private String classProbFileDir = null;
+	private String cvSplitFile = null;
+
+	private boolean nestedCV = true;
 	private int multiruns = 1;
-    private int folds = 4;
-	
+	private int folds = 4;
+
 
 	public void setNestedCV(boolean performNestedCV) {
-		this.nestedCV = performNestedCV;
+		nestedCV = performNestedCV;
 	}
 
 	public void setMultiruns(int multiruns) {
@@ -117,16 +117,17 @@ public class WekaLauncher {
 		this.folds = folds;
 	}
 
-	
-	/**
-	 * @param args
-	 */
 
-	
+	/**
+	 * 
+	 * @param classifierName
+	 * @param multithreading
+	 * @return
+	 */
 	private String[] getClassifierArguments(String classifierName, boolean multithreading) {
-		
+
 		ArrayList<String> argsClassifier = new ArrayList<String>();
-		
+
 		argsClassifier.add("-c");
 		argsClassifier.add(classifierName);
 		argsClassifier.add("-f");
@@ -158,23 +159,23 @@ public class WekaLauncher {
 			argsClassifier.add("-t");
 			argsClassifier.add("true");
 		}
-		
+
 		return argsClassifier.toArray(new String[]{});
 	}
-	
-	
+
+
 	private int[][][] getCVSplit() {
 		return getCVSplit(libsvmFeatureFile, folds, multiruns);
 	}
-	
+
 	public static int[][][] getCVSplit(String libsvmFeatureFile, int folds, int multiruns) {
-		
+
 		// get unscaled libsvm feature vectors for each run and split
 		String[][][] splittedDatasets = new String[multiruns][][];
 		for (int run = 0; run < multiruns; run++) {
 			splittedDatasets[run] = WekaClassifier.getSplittedDataset(libsvmFeatureFile, folds, run);
 		}
-		
+
 		// read original feature file
 		List<String> featureVectors = BasicTools.readFile2List(libsvmFeatureFile, false);
 		for (int i=0; i<featureVectors.size(); i++) {
@@ -185,7 +186,7 @@ public class WekaLauncher {
 				featureVectors.set(i, currFeatVec.replaceFirst("\\+1", "1"));
 			}
 		}
-		
+
 		// reconstruct random splits and permutations performed by Weka during cross-validation
 		int [][][] cvSplit = new int[multiruns][folds][];
 		for (int run = 0; run < multiruns; run++) {
@@ -193,28 +194,28 @@ public class WekaLauncher {
 				int foldSize = splittedDatasets[run][fold].length;
 				int[] foldPerm = new int[foldSize];
 				for (int instIdx = 0; instIdx < foldSize; instIdx++) {
-					 String featVec = splittedDatasets[run][fold][instIdx].replaceAll("([0-9])\\.0\\s", "$1 ").replaceFirst("\\.0$", "");
-					 int idx = featureVectors.indexOf(featVec);
-					 if (idx != -1) {
-						 foldPerm[instIdx] = idx;
-					 
-					 // instance was not found in CV-split --> Error.
-					 } else {
-						 System.out.println("Error. Feature vector was not found.");
-						 System.out.println(featVec);
-						 System.exit(0);
-					 }
+					String featVec = splittedDatasets[run][fold][instIdx].replaceAll("([0-9])\\.0\\s", "$1 ").replaceFirst("\\.0$", "");
+					int idx = featureVectors.indexOf(featVec);
+					if (idx != -1) {
+						foldPerm[instIdx] = idx;
+
+						// instance was not found in CV-split --> Error.
+					} else {
+						System.out.println("Error. Feature vector was not found.");
+						System.out.println(featVec);
+						System.exit(0);
+					}
 				}
 				cvSplit[run][fold] = foldPerm;
 			}
 		}
 		return(cvSplit);
 	}
-	
+
 	private void saveWekaCVsplit() {
-		
+
 		int[][][] cvSplit = getCVSplit();
-		
+
 		// write cross-validation split to file
 		ArrayList<String> cvSplitList = new ArrayList<String>();
 		for (int run = 0; run < multiruns; run++) {
@@ -228,23 +229,23 @@ public class WekaLauncher {
 		}
 		BasicTools.writeList2File(cvSplitList, cvSplitFile);
 	}
-	
+
 	public double[][] runWekaClassifier(boolean multithreading) {
-		
+
 		//save cross-validation split used by Weka
 		if (resultsDir != null) {
 			cvSplitFile = resultsDir + "cvSplit.txt";
 			saveWekaCVsplit();
 		}
-		
+
 		// run classifiers in separate threads
 		if (multithreading) {
 			Collection<Job> queue = new ArrayList<Job>();
-			
+
 			for (ClassificationMethod classMethod: ClassificationMethod.values()) {
 				queue.add(new Job(classMethod.name()));
 			}
-			
+
 			ExecutorService exec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 			try {
 				exec.invokeAll(queue);
@@ -252,10 +253,12 @@ public class WekaLauncher {
 				e.printStackTrace();
 			}
 			exec.shutdown();
-			while (!exec.isTerminated());
-			
-		
-		// run classifiers in single thread
+			while (!exec.isTerminated()) {
+				;
+			}
+
+
+			// run classifiers in single thread
 		} else {
 			// TODO: For test exchange next line and for loop
 			//ClassificationMethod classMethod = ClassificationMethod.SVM_ecoc;
@@ -263,24 +266,24 @@ public class WekaLauncher {
 				String[] argsClassifier = getClassifierArguments(classMethod.name(), multithreading);
 				try {
 					WekaClassifier.main(argsClassifier);
-					
+
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		
+
 		// return results from evaluation of classifiers
 		double[][] classResults = null;
 		if (resultsDir != null) {
 			mergeResultsFiles();
 			classResults = parseResultsFile();
-		} 
-		
+		}
+
 		return(classResults);
 	}
-	
-	
+
+
 	private void mergeResultsFiles() {
 		String mergedClassResults = "";
 		// TODO: For test exchange next line and for loop
@@ -291,9 +294,9 @@ public class WekaLauncher {
 		}
 		BasicTools.writeString2File(mergedClassResults, resultsDir + mergedResultsFileName);
 	}
-	
+
 	private double[][] parseResultsFile() {
-		
+
 		int numScores = folds * multiruns;
 		// TODO: For test exchange next line and for loop
 		// int numMethods = 1;
@@ -320,23 +323,23 @@ public class WekaLauncher {
 		}
 		return tempFile;
 	}
-	
+
 	public static void redirectSystemOut(String outfile) {
-        try {
-            System.setOut(new PrintStream(new FileOutputStream(outfile)));
-            
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-            return;
-        }
-    }
-	
+		try {
+			System.setOut(new PrintStream(new FileOutputStream(outfile)));
+
+		} catch (FileNotFoundException ex) {
+			ex.printStackTrace();
+			return;
+		}
+	}
+
 	class Job implements Callable<String>{
-		
+
 		String classifierType;
-		
+
 		public Job(String argsClassifier) {
-			this.classifierType = argsClassifier;
+			classifierType = argsClassifier;
 
 		}
 
@@ -354,19 +357,19 @@ public class WekaLauncher {
 			return "Done.";
 		}
 	}
-	
-	
+
+
 	public static void main(String[] args) {
-		
+
 		String feature_file = "test/libsvm_featurefile_small.txt";
 		String results_dir = "test/class_dir/";
 		String model_dir = "test/model_dir/";
-		
+
 		WekaLauncher launcher = new WekaLauncher(feature_file, results_dir, model_dir, true);
 		launcher.printConfiguration();
 		launcher.runWekaClassifier(false);
 	}
-	
+
 	private void printConfiguration() {
 		System.out.println("Input File:                " + libsvmFeatureFile);
 		if (resultsDir != null) {
@@ -382,7 +385,7 @@ public class WekaLauncher {
 		System.out.println("Folds:            	   " + folds);
 		System.out.println(nestedCV ? "Nested CV:                 yes" : "Nested CV:                 no");
 	}
-	
+
 }
 
 

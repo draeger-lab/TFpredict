@@ -63,6 +63,12 @@ public class Cleaner {
 		System.out.println("not found:\t" + (total - found));
 	}
 
+	/**
+	 * 
+	 * @param uniProtId
+	 * @return
+	 * @throws Exception
+	 */
 	private static ProteinSequence getSequenceForId(String uniProtId) throws Exception {
 		URL uniprotFasta = new URL(String.format("http://www.uniprot.org/uniprot/%s.fasta", uniProtId));
 		ProteinSequence seq = FastaReaderHelper.readFastaProteinSequence(uniprotFasta.openStream()).get(uniProtId);
