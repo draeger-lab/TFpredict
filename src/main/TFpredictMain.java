@@ -66,7 +66,7 @@ public class TFpredictMain {
 	 */
 	public static void main(String[] args) throws FileNotFoundException {
 
-		System.setOut(new PrintStream(new File("/home/jtyurkovich/git/TFPredict/resultsFileDir/output.txt")));
+		System.setOut(new PrintStream(new File(System.getProperty("user.dir") + "/output.txt")));
 
 		final long time = System.currentTimeMillis();
 
