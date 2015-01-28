@@ -55,7 +55,7 @@
 	</path>
 	
     <path id="classpath">
-      <pathelement location="bin"/>
+      <pathelement location="${build.dest}"/>
       <pathelement location="lib/blas-0.8.jar"/>
       <pathelement location="lib/commons-cli-1.2.jar"/>
       <pathelement location="lib/commons-math-2.1.jar"/>
@@ -77,8 +77,8 @@
         <format property="YEAR" pattern="yyyy"/>
       </tstamp>
 
-      <mkdir dir="bin"/>
-      <copy includeemptydirs="false" todir="bin">
+      <mkdir dir="${build.dest}"/>
+      <!--copy includeemptydirs="false" todir="bin">
         <fileset dir="src">
           <exclude name="**/*.java"/>
         </fileset>
@@ -87,7 +87,7 @@
         <fileset dir="resources">
           <exclude name="**/*.java"/>
         </fileset>
-      </copy>
+      </copy-->
     </target>
 
 	<!-- =================================================================== -->
@@ -105,7 +105,7 @@
         debug="${debug}"
         deprecation="${deprecation}"
         debuglevel="${debuglevel}"
-        destdir="bin"
+        destdir="${build.dest}"
         fork="true"
         includeantruntime="false"
         listfiles="yes"
@@ -204,7 +204,7 @@
       description="Cleans everything"
     >
       <delete includeEmptyDirs="true" quiet="yes">
-        <fileset dir="bin" includes="**/*"/>
+        <fileset dir="${build.dest}" includes="**/*"/>
       </delete>
     </target>
 
