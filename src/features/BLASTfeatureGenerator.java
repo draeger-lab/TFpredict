@@ -61,7 +61,6 @@ public abstract class BLASTfeatureGenerator {
 	protected Map<String, Integer> seq2label = new HashMap<String, Integer>();
 	protected Map<String, String> sequences = new HashMap<String, String>();
 
-	protected Map<String, Map<String, Double>> hits = new HashMap<String, Map<String, Double>>();
 	protected Map<String, int[][]> pssms = new HashMap<String, int[][]>();
 	protected Map<String, double[]> features = new HashMap<String, double[]>();
 
@@ -112,7 +111,6 @@ public abstract class BLASTfeatureGenerator {
 	public void generateFeatures() {
 		preparePsiBlast();
 		runPsiBlast();
-		computeFeaturesFromBlastResult();
 		writeFeatureFile();
 	}
 
@@ -156,6 +154,8 @@ public abstract class BLASTfeatureGenerator {
 		if (pssmFeat) {
 			numIter = 2;
 		}
+
+		int numWarnings = 0;
 
 		int seqCnt = 1;
 		for (String seqID: sequences.keySet()) {
@@ -203,16 +203,24 @@ public abstract class BLASTfeatureGenerator {
 					hitsFileExists = true;
 				}
 				try {
-					Map<String, Double> currHits = getPsiBlastHits(infileFasta, database, outfileHits, numIter, hitsFileExists);
-					hits.put(seqID, currHits);
+					Map<String, Double> currHits = getPsiBlastHits(infileFasta, database, new File(outfileHits), numIter, hitsFileExists);
+
+					BlastResultFeature feature = computeFeaturesFromBlastResult(seqID, currHits);
+					numWarnings += feature.getWarningCount();
+					features.put(seqID, feature.getFeatures());
+
 				} catch (NumberFormatException | IOException exc) {
 					logger.severe(exc.getMessage());
 					exc.printStackTrace();
 				}
 			}
 		}
-	}
 
+		if (numWarnings > 0) {
+			logger.warning("Number of warnings: " + numWarnings);
+		}
+
+	}
 
 	/**
 	 * 
@@ -222,14 +230,14 @@ public abstract class BLASTfeatureGenerator {
 	 * @param numIter
 	 * @param useExistingHitsFile
 	 * @return
+	 * @throws NumberFormatException
+	 * @throws IOException
 	 */
-	private Map<String, Double> getPsiBlastHits(String fastaFile, String database, String hitsOutfile, int numIter, boolean useExistingHitsFile) throws NumberFormatException, IOException {
-
-		if (! useExistingHitsFile) {
+	private Map<String, Double> getPsiBlastHits(String fastaFile, String database, File hitsOutfile, int numIter, boolean useExistingHitsFile) throws NumberFormatException, IOException {
+		if (!useExistingHitsFile) {
 			String cmd = path2BLAST + "bin/psiblast -query " + fastaFile + " -num_iterations " + numIter + " -db " + database + " -out " + hitsOutfile;
 			BasicTools.runCommand(cmd, false);
 		}
-
 		return BasicTools.parseBLASTHits(hitsOutfile);
 	}
 
@@ -283,9 +291,17 @@ public abstract class BLASTfeatureGenerator {
 
 	/**
 	 * 
+	 * @param hits
 	 */
-	protected abstract void computeFeaturesFromBlastResult();
+	protected abstract void computeFeaturesFromBlastResult(Map<String, Map<String, Double>> hits);
 
+	/**
+	 * 
+	 * @param seqID
+	 * @param currHits
+	 * @return
+	 */
+	protected abstract <T extends Number> BlastResultFeature computeFeaturesFromBlastResult(String seqID, Map<String, T> currHits);
 
 	/**
 	 * 
@@ -299,16 +315,15 @@ public abstract class BLASTfeatureGenerator {
 			double[] featureVector = features.get(seqID);
 			int label = seq2label.get(seqID);
 			StringBuffer featureString = new StringBuffer("" + label);
-			for (int i=0; i<featureVector.length; i++) {
-				if (!naiveFeat && featureVector[i] == 0)
-				{
+			for (int i = 0; i < featureVector.length; i++) {
+				if (!naiveFeat && featureVector[i] == 0) {
 					continue;     // skip features with value zero
 				}
-				featureString.append( " " + (i+1) + ":" + (featureVector[i] + "").replaceFirst("\\.0$", ""));
+				featureString.append(" " + (i+1) + ":" + (featureVector[i] + "").replaceFirst("\\.0$", ""));
 			}
 
 			int featVecIdx = libSVMfeatures.indexOf(featureString.toString());
-			if (naiveFeat || featVecIdx == -1) {
+			if (naiveFeat || (featVecIdx == -1)) {
 				libSVMfeatures.add(featureString.toString());
 				sequenceNames.add(seqID);
 			} else {

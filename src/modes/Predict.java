@@ -49,7 +49,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
@@ -561,8 +560,8 @@ public class Predict {
 			BasicTools.runCommand(runBLAST_cmdTF, false);
 			BasicTools.runCommand(runBLAST_cmdSuper, false);
 			try {
-				seq2blastHitsTF.put(seqID, getBlastHits(currHitsFileTF));
-				seq2blastHitsSuper.put(seqID, getBlastHits(currHitsFileSuper));
+				seq2blastHitsTF.put(seqID, getBlastHits(new File(currHitsFileTF)));
+				seq2blastHitsSuper.put(seqID, getBlastHits(new File(currHitsFileSuper)));
 			} catch (NumberFormatException | IOException exc) {
 				logger.severe(exc.getMessage());
 				exc.printStackTrace();
@@ -573,7 +572,7 @@ public class Predict {
 	/**
 	 * Read PSI-BLAST output from temporary files
 	 */
-	private Map<String, Double> getBlastHits(String blastHitsFile) throws NumberFormatException, IOException {
+	private Map<String, Double> getBlastHits(File blastHitsFile) throws NumberFormatException, IOException {
 		return BasicTools.parseBLASTHits(blastHitsFile);
 	}
 
@@ -1055,8 +1054,8 @@ public class Predict {
 	 */
 	private static Map<String, Instance> createPercentileFeatureVectors(Map<String, Map<String, Double>> seq2blastHits, Map<String, Integer> seq2label, boolean superPred) {
 
-		PercentileFeatureGenerator percFeatGen = new PercentileFeatureGenerator(seq2blastHits, seq2label, superPred);
-		percFeatGen.computeFeaturesFromBlastResult();
+		PercentileFeatureGenerator percFeatGen = new PercentileFeatureGenerator(seq2label, superPred);
+		percFeatGen.computeFeaturesFromBlastResult(seq2blastHits);
 		Map<String, double[]> seq2feat = percFeatGen.getFeatures();
 
 		Map<String, Instance> seq2fvector = new HashMap<String, Instance>();
@@ -1067,6 +1066,11 @@ public class Predict {
 		return seq2fvector;
 	}
 
+	/**
+	 * 
+	 * @param fvector
+	 * @return
+	 */
 	private static Instance getInst(String fvector) {
 
 		Instance inst = null;

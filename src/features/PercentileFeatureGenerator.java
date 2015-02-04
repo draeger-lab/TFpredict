@@ -25,9 +25,14 @@ package features;
 import io.BasicTools;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import de.zbit.util.logging.LogUtil;
 import modes.Predict;
+
 
 /**
  *
@@ -43,6 +48,11 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 	private static final int[] percentiles = new int[] {0,25,50,75,100};
 
 	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(PercentileFeatureGenerator.class.getName());
+
+	/**
 	 * 
 	 * @param fastaFile
 	 * @param featureFile
@@ -56,13 +66,11 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 
 	/**
 	 * 
-	 * @param hits
 	 * @param seq2label
 	 * @param superPred
 	 */
-	public PercentileFeatureGenerator(Map<String, Map<String,Double>> hits, Map<String, Integer> seq2label, boolean superPred) {
+	public PercentileFeatureGenerator(Map<String, Integer> seq2label, boolean superPred) {
 		super();
-		this.hits = hits;
 		this.seq2label = seq2label;
 		this.superPred = superPred;
 	}
@@ -71,132 +79,144 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 	 * @see features.BLASTfeatureGenerator#computeFeaturesFromBlastResult()
 	 */
 	@Override
-	public void computeFeaturesFromBlastResult() {
+	public void computeFeaturesFromBlastResult(Map<String, Map<String, Double>> hits) {
 
 		int numWarnings = 0;
 
 		for (final String seqID: hits.keySet()) {
-
-			final Map<String, Double> currHits = hits.get(seqID);
-			double[] percFeatVec = null;
-
-			if (superPred) {
-				final ArrayList<Double> scoresBasicDomain = new ArrayList<Double>();
-				final ArrayList<Double> scoresZincFinger = new ArrayList<Double>();
-				final ArrayList<Double> scoresHelixTurnHelix = new ArrayList<Double>();
-				final ArrayList<Double> scoresBetaScaffold = new ArrayList<Double>();
-				final ArrayList<Double> scoresOther = new ArrayList<Double>();
-				for (final String hit: currHits.keySet()) {
-					if (hit.equals(seqID)) {
-						continue;
-					}
-					if (seq2label.get(hit) == Predict.Basic_domain) {
-						scoresBasicDomain.add(currHits.get(hit));
-
-					} else if (seq2label.get(hit) == Predict.Zinc_finger) {
-						scoresZincFinger.add(currHits.get(hit));
-
-					} else if (seq2label.get(hit) == Predict.Helix_turn_helix) {
-						scoresHelixTurnHelix.add(currHits.get(hit));
-
-					} else if (seq2label.get(hit) == Predict.Beta_scaffold) {
-						scoresBetaScaffold.add(currHits.get(hit));
-
-					} else if (seq2label.get(hit) == Predict.Other) {
-						scoresOther.add(currHits.get(hit));
-
-					} else {
-						System.out.println("Error. Invalid label associated with BLAST hit \"" + hit + "\": " + seq2label.get(hit));
-						System.exit(0);
-					}
-				}
-
-
-				double[] bitScoresBasicDomain = BasicTools.Double2double(scoresBasicDomain.toArray(new Double[]{}));
-				double[] bitScoresZincFinger = BasicTools.Double2double(scoresZincFinger.toArray(new Double[]{}));
-				double[] bitScoresHelixTurnHelix = BasicTools.Double2double(scoresHelixTurnHelix.toArray(new Double[]{}));
-				double[] bitScoresBetaScaffold = BasicTools.Double2double(scoresBetaScaffold.toArray(new Double[]{}));
-				double[] bitScoresOther = BasicTools.Double2double(scoresOther.toArray(new Double[]{}));
-				if (bitScoresBasicDomain.length == 0) {
-					bitScoresBasicDomain = new double[] {0};
-				}
-				if (bitScoresZincFinger.length == 0) {
-					bitScoresZincFinger = new double[] {0};
-				}
-				if (bitScoresHelixTurnHelix.length == 0) {
-					bitScoresHelixTurnHelix = new double[] {0};
-				}
-				if (bitScoresBetaScaffold.length == 0) {
-					bitScoresBetaScaffold = new double[] {0};
-				}
-				if (bitScoresOther.length == 0) {
-					bitScoresOther = new double[] {0};
-				}
-
-				final Double[] percVector = new Double[percentiles.length*5];
-
-				for (int p=0; p<percentiles.length; p++) {
-					percVector[p] = BasicTools.computePercentile(bitScoresBasicDomain, percentiles[p]);
-					percVector[p+5] = BasicTools.computePercentile(bitScoresZincFinger, percentiles[p]);
-					percVector[p+10] = BasicTools.computePercentile(bitScoresHelixTurnHelix, percentiles[p]);
-					percVector[p+15] = BasicTools.computePercentile(bitScoresBetaScaffold, percentiles[p]);
-					percVector[p+20] = BasicTools.computePercentile(bitScoresOther, percentiles[p]);
-				}
-				percFeatVec = BasicTools.Double2double(percVector);
-
-			} else {
-
-				final ArrayList<Double> scoresTF = new ArrayList<Double>();
-				final ArrayList<Double> scoresNonTF = new ArrayList<Double>();
-				for (final String hit: currHits.keySet()) {
-					if (hit.equals(seqID)) {
-						continue;
-					}
-					final Integer result = seq2label.get(hit);
-					if (result != null) {
-						if (result == Predict.TF) {
-							scoresTF.add(currHits.get(hit));
-						} else if (seq2label.get(hit) == Predict.Non_TF) {
-							scoresNonTF.add(currHits.get(hit));
-						} else {
-							System.out
-							.println("Error. Invalid label associated with BLAST hit \""
-									+ hit + "\": " + seq2label.get(hit));
-							System.exit(0);
-						}
-					}
-				}
-
-				if (scoresTF.isEmpty() && scoresNonTF.isEmpty()) {
-					System.out.println("Warning. No BLAST hits found for sequence: " + seqID);
-					numWarnings++;
-					continue;
-				}
-
-				double[] bitScoresTF = BasicTools.Double2double(scoresTF.toArray(new Double[]{}));
-				double[] bitScoresNonTF = BasicTools.Double2double(scoresNonTF.toArray(new Double[]{}));
-				if (bitScoresTF.length == 0) {
-					bitScoresTF = new double[] {0};
-				}
-				if (bitScoresNonTF.length == 0) {
-					bitScoresNonTF = new double[] {0};
-				}
-
-
-				final double[] percentilesTF = new double[percentiles.length];
-				final double[] percentilesNonTF = new double[percentiles.length];
-				for (int p=0; p<percentiles.length; p++) {
-					percentilesTF[p] = BasicTools.computePercentile(bitScoresTF, percentiles[p]);
-					percentilesNonTF[p] = BasicTools.computePercentile(bitScoresNonTF, percentiles[p]);
-				}
-				percFeatVec = BasicTools.concatenateArrays(percentilesTF, percentilesNonTF);
-			}
-			features.put(seqID, percFeatVec);
+			BlastResultFeature feature = computeFeaturesFromBlastResult(seqID, hits.get(seqID));
+			numWarnings += feature.getWarningCount();
+			features.put(seqID, feature.getFeatures());
 		}
 
 		if (numWarnings > 0) {
-			System.out.println("Number of warnings: " + numWarnings);
+			logger.warning("Number of warnings: " + numWarnings);
 		}
+	}
+
+	/**
+	 * 
+	 * @param seqID
+	 * @param currHits
+	 * @return
+	 */
+	@Override
+	protected <T extends Number> BlastResultFeature computeFeaturesFromBlastResult(String seqID, Map<String, T> currHits) {
+		int numWarnings = 0;
+		double[] percFeatVec = null;
+
+		if (superPred) {
+			List<Double> scoresBasicDomain = new ArrayList<Double>();
+			List<Double> scoresZincFinger = new ArrayList<Double>();
+			List<Double> scoresHelixTurnHelix = new ArrayList<Double>();
+			List<Double> scoresBetaScaffold = new ArrayList<Double>();
+			List<Double> scoresOther = new ArrayList<Double>();
+			for (String hit: currHits.keySet()) {
+				if (hit.equals(seqID)) {
+					continue;
+				}
+				if (seq2label.get(hit) == Predict.Basic_domain) {
+					scoresBasicDomain.add(currHits.get(hit).doubleValue());
+
+				} else if (seq2label.get(hit) == Predict.Zinc_finger) {
+					scoresZincFinger.add(currHits.get(hit).doubleValue());
+
+				} else if (seq2label.get(hit) == Predict.Helix_turn_helix) {
+					scoresHelixTurnHelix.add(currHits.get(hit).doubleValue());
+
+				} else if (seq2label.get(hit) == Predict.Beta_scaffold) {
+					scoresBetaScaffold.add(currHits.get(hit).doubleValue());
+
+				} else if (seq2label.get(hit) == Predict.Other) {
+					scoresOther.add(currHits.get(hit).doubleValue());
+
+				} else {
+					logger.severe("Error. Invalid label associated with BLAST hit \"" + hit + "\": " + seq2label.get(hit));
+					System.exit(0);
+				}
+			}
+
+
+			double[] bitScoresBasicDomain = BasicTools.Double2double(scoresBasicDomain.toArray(new Double[]{}));
+			double[] bitScoresZincFinger = BasicTools.Double2double(scoresZincFinger.toArray(new Double[]{}));
+			double[] bitScoresHelixTurnHelix = BasicTools.Double2double(scoresHelixTurnHelix.toArray(new Double[]{}));
+			double[] bitScoresBetaScaffold = BasicTools.Double2double(scoresBetaScaffold.toArray(new Double[]{}));
+			double[] bitScoresOther = BasicTools.Double2double(scoresOther.toArray(new Double[]{}));
+			if (bitScoresBasicDomain.length == 0) {
+				bitScoresBasicDomain = new double[] {0};
+			}
+			if (bitScoresZincFinger.length == 0) {
+				bitScoresZincFinger = new double[] {0};
+			}
+			if (bitScoresHelixTurnHelix.length == 0) {
+				bitScoresHelixTurnHelix = new double[] {0};
+			}
+			if (bitScoresBetaScaffold.length == 0) {
+				bitScoresBetaScaffold = new double[] {0};
+			}
+			if (bitScoresOther.length == 0) {
+				bitScoresOther = new double[] {0};
+			}
+
+			Double[] percVector = new Double[percentiles.length*5];
+
+			for (int p=0; p<percentiles.length; p++) {
+				percVector[p] = BasicTools.computePercentile(bitScoresBasicDomain, percentiles[p]);
+				percVector[p+5] = BasicTools.computePercentile(bitScoresZincFinger, percentiles[p]);
+				percVector[p+10] = BasicTools.computePercentile(bitScoresHelixTurnHelix, percentiles[p]);
+				percVector[p+15] = BasicTools.computePercentile(bitScoresBetaScaffold, percentiles[p]);
+				percVector[p+20] = BasicTools.computePercentile(bitScoresOther, percentiles[p]);
+			}
+			percFeatVec = BasicTools.Double2double(percVector);
+
+		} else {
+
+			List<Double> scoresTF = new ArrayList<Double>();
+			List<Double> scoresNonTF = new ArrayList<Double>();
+			for (String hit: currHits.keySet()) {
+				if (hit.equals(seqID)) {
+					continue;
+				}
+				Integer result = seq2label.get(hit);
+				if (result != null) {
+					if (result == Predict.TF) {
+						scoresTF.add(currHits.get(hit).doubleValue());
+					} else if (seq2label.get(hit) == Predict.Non_TF) {
+						scoresNonTF.add(currHits.get(hit).doubleValue());
+					} else {
+						logger.severe("Error. Invalid label associated with BLAST hit \""
+								+ hit + "\": " + seq2label.get(hit));
+						System.exit(0);
+					}
+				}
+			}
+
+			if (scoresTF.isEmpty() && scoresNonTF.isEmpty()) {
+				logger.warning("Warning. No BLAST hits found for sequence: " + seqID);
+				numWarnings++;
+				return new BlastResultFeature(seqID, percFeatVec, 0, numWarnings);
+			}
+
+			double[] bitScoresTF = BasicTools.Double2double(scoresTF.toArray(new Double[]{}));
+			double[] bitScoresNonTF = BasicTools.Double2double(scoresNonTF.toArray(new Double[]{}));
+			if (bitScoresTF.length == 0) {
+				bitScoresTF = new double[] {0};
+			}
+			if (bitScoresNonTF.length == 0) {
+				bitScoresNonTF = new double[] {0};
+			}
+
+
+			double[] percentilesTF = new double[percentiles.length];
+			double[] percentilesNonTF = new double[percentiles.length];
+			for (int p = 0; p < percentiles.length; p++) {
+				percentilesTF[p] = BasicTools.computePercentile(bitScoresTF, percentiles[p]);
+				percentilesNonTF[p] = BasicTools.computePercentile(bitScoresNonTF, percentiles[p]);
+			}
+			percFeatVec = BasicTools.concatenateArrays(percentilesTF, percentilesNonTF);
+		}
+
+		return new BlastResultFeature(seqID, percFeatVec, 0, numWarnings);
 	}
 
 	/**
@@ -212,15 +232,17 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 	 *            (TXT format)
 	 */
 	public static void main(String[] args) {
+		LogUtil.initializeLogging(Level.INFO, "data", "features", "io", "ipr", "liblinear", "main", "modes", "resources", "edu");
+
 		// generate feature file for TF prediction
-		final String tfFastaFile = args[0]; //"/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/latest/TFandNonTF.fasta";
-		final String tfFeatureFile = args[1]; //"/rahome/eichner/projects/tfpredict/data/tf_pred/feature_files/latest/percentile_featurefile.txt";
+		String tfFastaFile = args[0]; //"/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/latest/TFandNonTF.fasta";
+		String tfFeatureFile = args[1]; //"/rahome/eichner/projects/tfpredict/data/tf_pred/feature_files/latest/percentile_featurefile.txt";
 
-		final long time = System.currentTimeMillis();
+		long time = System.currentTimeMillis();
 
-		final PercentileFeatureGenerator tfFeatureGenerator = new PercentileFeatureGenerator(tfFastaFile, tfFeatureFile, false);
+		PercentileFeatureGenerator tfFeatureGenerator = new PercentileFeatureGenerator(tfFastaFile, tfFeatureFile, false);
 		tfFeatureGenerator.generateFeatures();
 
-		System.out.println("Time elapsed: " + ((System.currentTimeMillis() - time)/3600) + " minutes");
+		logger.info("Time elapsed: " + ((System.currentTimeMillis() - time)/3600) + " minutes");
 	}
 }
