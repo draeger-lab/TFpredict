@@ -1,9 +1,9 @@
-/*  
+/*
  * $Id: PSSMFeatureGenerator.java 99 2014-01-09 21:57:51Z draeger $
  * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/features/PSSMFeatureGenerator.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
- *  
+ * 
  * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
@@ -22,6 +22,8 @@
  */
 package features;
 
+import java.util.Map;
+
 import io.BasicTools;
 
 /**
@@ -31,7 +33,7 @@ import io.BasicTools;
  * @since 1.0
  */
 public class PSSMFeatureGenerator extends BLASTfeatureGenerator {
-	
+
 	/**
 	 * 
 	 * @param fastaFile
@@ -40,38 +42,55 @@ public class PSSMFeatureGenerator extends BLASTfeatureGenerator {
 	 */
 	public PSSMFeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
 		super(fastaFile, featureFile, superPred);
-		this.pssmFeat = true;
-		this.naiveFeat = false;
+		pssmFeat = true;
+		naiveFeat = false;
 	}
-	
-	protected void computeFeaturesFromBlastResult() {
 
+	/* (non-Javadoc)
+	 * @see features.BLASTfeatureGenerator#computeFeaturesFromBlastResult(java.util.Map)
+	 */
+	@Override
+	protected void computeFeaturesFromBlastResult(Map<String, Map<String, Double>> hits) {
 		for (String seqID: pssms.keySet()) {
-			
-			String seq = sequences.get(seqID);
-			int[][] currPSSM = pssms.get(seqID);
-			double[] pssmFeatVec = new double[400];
-			
-			for (int i=0; i<aminoAcids.length; i++) {
-				int[] indices = BasicTools.getAllIndicesOf(seq, aminoAcids[i]);
-				for (int j=0; j<aminoAcids.length; j++) {
-					int sum = 0;
-					for (int k=0; k<indices.length; k++) {
-						sum += currPSSM[k][j];
-					}
-					int featIdx = i * 20 + j;
-					pssmFeatVec[featIdx] = scalePSSMscore(sum);
-				}
+			BlastResultFeature feature = computeFeaturesFromBlastResult(seqID, null);
+			if (feature.isSetFeatures()) {
+				features.put(seqID, feature.getFeatures());
 			}
-			features.put(seqID, pssmFeatVec);
 		}
 	}
-	
-	
+
+	/**
+	 * 
+	 * @param pssmScore
+	 * @return
+	 */
 	private static double scalePSSMscore(int pssmScore) {
-		
-		double scaledScore = 1 / (1 + Math.exp(-pssmScore));
-		
-		return scaledScore;
+		return 1d / (1d + Math.exp(-pssmScore));
+	}
+
+	/* (non-Javadoc)
+	 * @see features.BLASTfeatureGenerator#computeFeaturesFromBlastResult(java.lang.String, java.util.Map)
+	 */
+	@Override
+	protected <T extends Number> BlastResultFeature computeFeaturesFromBlastResult(String seqID,
+			Map<String, T> currHits) {
+		double[] pssmFeatVec = new double[400];
+
+		String seq = sequences.get(seqID);
+		int[][] currPSSM = pssms.get(seqID);
+
+		for (int i = 0; i<aminoAcids.length; i++) {
+			int[] indices = BasicTools.getAllIndicesOf(seq, aminoAcids[i]);
+			for (int j = 0; j < aminoAcids.length; j++) {
+				int sum = 0;
+				for (int k=0; k<indices.length; k++) {
+					sum += currPSSM[k][j];
+				}
+				int featIdx = i * 20 + j;
+				pssmFeatVec[featIdx] = scalePSSMscore(sum);
+			}
+		}
+
+		return new BlastResultFeature(seqID, pssmFeatVec);
 	}
 }

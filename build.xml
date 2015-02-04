@@ -64,6 +64,7 @@
       <pathelement location="lib/jaxrpc.jar"/>
       <pathelement location="lib/libsvm.jar"/>
       <pathelement location="lib/weka-3.7.1.jar"/>
+      <pathelement location="lib/SysBio.jar"/>
     </path>
 	
 	<!-- =================================================================== -->
@@ -193,6 +194,7 @@
       	<zipfileset excludes="${excludes}" src="lib/jaxrpc.jar"/>
       	<zipfileset excludes="${excludes}" src="lib/libsvm.jar"/>
       	<zipfileset excludes="${excludes}" src="lib/weka-3.7.1.jar"/>
+      	<zipfileset excludes="${excludes}" src="lib/SysBio.jar"/>
       </jar>
     </target>
 
@@ -207,6 +209,5 @@
         <fileset dir="${build.dest}" includes="**/*"/>
       </delete>
     </target>
-
 
 </project>
