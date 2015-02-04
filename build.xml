@@ -152,7 +152,7 @@
     <target
       name="jar_incl-libs"
       depends="build"
-      description=""
+      description="Builds an executable JAR file that includes all required third-party libraries."
     >
     	
       <property name="excludes" value="META-INF/**, COPYING.txt, licenses/**, package.html, package-info.class, overview.html, AUTHORS.txt"/>

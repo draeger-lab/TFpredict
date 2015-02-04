@@ -1,9 +1,9 @@
-/*  
+/*
  * $Id: Predict.java 99 2014-01-09 21:57:51Z draeger $
  * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/modes/Predict.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
- *  
+ * 
  * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
@@ -74,24 +74,24 @@ import weka.core.converters.LibSVMLoader;
  * @since 1.0
  */
 public class Predict {
-	
+
 	public static final int featureOffset = 10;
-	
+
 	private static final String interproPrefix = "http://www.ebi.ac.uk/interpro/ISearch?query=";
 	private static final String transfacPublicURL = "http://www.gene-regulation.com/pub/databases.html";
 	private static final String transfacClassURL = "http://www.gene-regulation.com/pub/databases/transfac/clSM.html";
 	private static final int maxNumSequencesBatchMode = 10;
-	
+
 	private static final byte DuplicatedHeaderError = 1;
 	private static final byte InvalidUniProtError = 2;
 	private static final byte TooManySequencesError = 3;
-	
+
 	static Logger logger = Logger.getLogger(Predict.class.getName());
 	static {
 		logger.setLevel(Level.SEVERE);
 	}
 
-	
+
 	// use webservice version by default (local version is used if argument "iprscanPath" is provided)
 	static boolean useWeb = true;
 	static boolean standAloneMode = false;
@@ -117,7 +117,7 @@ public class Predict {
 	public static String superPredBlastFasta = "blast_db/TF.fasta";
 	public static String tfPredBlastDB = "blast_db/TFnonTF.db";
 	public static String superPredBlastDB = "blast_db/TF.db";
-	
+
 	// arguments passed from Galaxy to TFpredict
 	static String basedir = "";
 	static String input_file = "";
@@ -128,7 +128,7 @@ public class Predict {
 	static String tfName = "Sequence_1";
 	static String uniprot_id;
 	static String fasta_file;
-	
+
 	private String tfnontfDBfastaFile;
 	private String tfDBfastaFile;
 	private Classifier tfClassifier;
@@ -139,14 +139,14 @@ public class Predict {
 	private Map<String,String> tfName2class;
 	private Map<String, Integer> domain2tf;
 	private Map<String, Integer> domain2superclass;
-	
+
 	private Map<String, IprEntry> seq2domain;
 	private Map<String, IprRaw> IPRdomains;
 	private Map<String, IprProcessed> seq2bindingDomain;
-	
+
 	// gfx related mapping of seqid to jobid
 	private Map<String, String> seq2job;
-	
+
 	private String[] sequence_ids;
 	private Map<String, String> sequences = new HashMap<String, String>();
 	private Map<String, Double[]> probDist_TFclass  = new HashMap<String, Double[]>();
@@ -154,7 +154,7 @@ public class Predict {
 	private Map<String, Integer> predictedSuperclass  = new HashMap<String, Integer>();
 	private Map<String, String> annotatedClass  = new HashMap<String, String>();
 	private Map<String, String[]> bindingDomains  = new HashMap<String, String[]>();
-	
+
 	private Map<String, Boolean> predictionPossible = new HashMap<String, Boolean>();
 	private Map<String, Boolean> predictionTrivial = new HashMap<String, Boolean>();
 	private Map<String, Boolean> seqIsTF = new HashMap<String, Boolean>();
@@ -162,7 +162,7 @@ public class Predict {
 	private Map<String, Boolean> domainsPredicted = new HashMap<String, Boolean>();
 	Map<String, Map<String, Double>> seq2blastHitsTF = new HashMap<String, Map<String, Double>>();
 	Map<String, Map<String, Double>> seq2blastHitsSuper = new HashMap<String, Map<String, Double>>();
-	
+
 	public static final int Non_TF = 0;
 	public static final int TF = 1;
 	public static final int Basic_domain = 1;
@@ -172,7 +172,7 @@ public class Predict {
 	public static final int Other = 0;
 	private static final String[] superclassNames = new String[] {"Other", "Basic domain", "Zinc finger", "Helix-turn-helix", "Beta scaffold"};
 
-	
+
 	static DecimalFormat df = new DecimalFormat("0.00");
 	static {
 		DecimalFormatSymbols symb = new DecimalFormatSymbols();
@@ -181,69 +181,69 @@ public class Predict {
 	}
 
 	public static void main(CommandLine cmd) throws Exception {
-		
+
 		Predict TFpredictor = new Predict();
-		
+
 		TFpredictor.parseArguments(cmd);
 		TFpredictor.prepareInput();
 		TFpredictor.prepareClassifiers();
 		TFpredictor.runInterproScan();
 		TFpredictor.runPsiBlast();
-	    TFpredictor.performClassification();
+		TFpredictor.performClassification();
 
-	    if (standAloneMode) {
-	    	TFpredictor.writeConsoleOutput();
-	    } else {
+		if (standAloneMode) {
+			TFpredictor.writeConsoleOutput();
+		} else {
 
-	    	TFpredictor.writeHTMLoutput();
-	    }
-	    if (sabine_outfile != null) {
-	    	TFpredictor.writeSABINEoutput();
-	    }
+			TFpredictor.writeHTMLoutput();
+		}
+		if (sabine_outfile != null) {
+			TFpredictor.writeSABINEoutput();
+		}
 	}
-	
+
 	/*
 	public static void main(String[] args){
 		testModelFiles();
 	}
-	*/
-	
+	 */
+
 	public static void testModelFiles() {
-		
+
 		// read relevant domains for TF/non-TF classification
 		List<String> relDomains = BasicTools.readResource2List("domainsTFpred.txt");
 		//List<String> relDomains = BasicTools.readResource2List("domainsSuperPred.txt");
-		
+
 		String[] domains = new String[] {"IPR001646", "IPR004065", "IPR015310", "IPR000510", "IPR020956"};
 		//String[] domains = new String[] {"IPR003604", "IPR008288", "IPR017970", "IPR010588", "IPR002546"};
 		List<String> currDomains = new ArrayList<String>();
 		currDomains.addAll(Arrays.asList(domains));
-		
+
 		String fvector = createIPRvector(currDomains, relDomains, featureOffset);
 		int lastFeatureIdx = relDomains.size() + featureOffset;
 		if (!fvector.endsWith(lastFeatureIdx + ":1")) {
 			fvector += " " + lastFeatureIdx + ":0";
 		}
 		System.out.println("Feature vector: " + fvector);
-	    Instance currInstance = getInst("0 " + fvector);
-	    
+		Instance currInstance = getInst("0 " + fvector);
+
 		List<String> tfPredModelFiles = new ArrayList<String>();
 		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
 			tfPredModelFiles.add("models/tfPred/" + classMethod.modelFileName);
 			//tfPredModelFiles.add("models/superPred/" + classMethod.modelFileName);
 		}
-		
+
 		for (int i=3; i<tfPredModelFiles.size(); i++) {
 			try {
 				Classifier tfPredictor = (Classifier) weka.core.SerializationHelper.read(Resource.class.getResourceAsStream(tfPredModelFiles.get(i)));
 				double[] tfProb = tfPredictor.distributionForInstance(currInstance);
-				
+
 				System.out.print(tfPredModelFiles.get(i).replaceAll(".*/", "").replace(".model", "") + ": \t(" + tfProb[0]);
 				for (int p=1; p<tfProb.length; p++) {
 					System.out.print(",  " + df.format(tfProb[p]));
 				}
 				System.out.println(")");
-	
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -251,83 +251,87 @@ public class Predict {
 	}
 
 	private void parseArguments(CommandLine cmd) {
-		
+
 		if(cmd.hasOption("sequence")) {
 			sequence = cmd.getOptionValue("sequence").replaceAll("\\s", "");
 		}
-		
+
 		if(cmd.hasOption("species")) {
 			species = cmd.getOptionValue("species");
 		}
-		
+
 		if(cmd.hasOption("uniprotID")) {
 			uniprot_id = cmd.getOptionValue("uniprotID");
 		}
-		
+
 		if(cmd.hasOption("fasta")) {
 			fasta_file = cmd.getOptionValue("fasta");
 			batchMode = true;
 		}
-		
+
 		if(cmd.hasOption("htmlOutfile")) {
 			html_outfile = cmd.getOptionValue("htmlOutfile");
 		}
-		
+
 		if(cmd.hasOption("sabineOutfile")) {
 			sabine_outfile = cmd.getOptionValue("sabineOutfile");
 		}
-		
-        if(cmd.hasOption("basedir")) {
-            basedir = cmd.getOptionValue("basedir");
-            if (!basedir.endsWith("/")) basedir += "/" ;
-            input_file = basedir + "query.fasta";
-        }
-        
-        if (cmd.hasOption("tfClassifier")) {
-        	String tfClassifier = cmd.getOptionValue("tfClassifier");
-        	String modelFileName = WekaClassifier.ClassificationMethod.valueOf(tfClassifier).modelFileName;
-        	tfClassifier_file = "models/tfPred/" + modelFileName;
-        }
-        
-        if (cmd.hasOption("superClassifier")) {
-        	String superClassifier = cmd.getOptionValue("superClassifier");
-        	String modelFileName = WekaClassifier.ClassificationMethod.valueOf(superClassifier).modelFileName;
-        	superClassifier_file = "models/superPred/" + modelFileName;
-        }
-		
+
+		if(cmd.hasOption("basedir")) {
+			basedir = cmd.getOptionValue("basedir");
+			if (!basedir.endsWith("/")) {
+				basedir += "/" ;
+			}
+			input_file = basedir + "query.fasta";
+		}
+
+		if (cmd.hasOption("tfClassifier")) {
+			String tfClassifier = cmd.getOptionValue("tfClassifier");
+			String modelFileName = WekaClassifier.ClassificationMethod.valueOf(tfClassifier).modelFileName;
+			tfClassifier_file = "models/tfPred/" + modelFileName;
+		}
+
+		if (cmd.hasOption("superClassifier")) {
+			String superClassifier = cmd.getOptionValue("superClassifier");
+			String modelFileName = WekaClassifier.ClassificationMethod.valueOf(superClassifier).modelFileName;
+			superClassifier_file = "models/superPred/" + modelFileName;
+		}
+
 		if(cmd.hasOption("iprscanPath")) {
 			iprpath = cmd.getOptionValue("iprscanPath");
 			useWeb = false;
 		}
-		
+
 		if (cmd.hasOption("ignoreCharacteristicDomains")) {
 			useCharacteristicDomains = false;
 		}
-		
+
 		// set BLAST path from argument (if given)
 		if(cmd.hasOption("blastPath")) {
 			blastpath = cmd.getOptionValue("blastPath");
-				
-		// set BLAST path from environment variable (if given)
+
+			// set BLAST path from environment variable (if given)
 		} else if (System.getenv("BLAST_DIR") != null && System.getenv("BLAST_DIR").length() > 0) {
 			blastpath = System.getenv("BLAST_DIR");
-		
+
 		} else {
 			System.out.println("TFpredict requires BLAST which is available from the NCBI FTP site\n" +
-							   "(ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/).\n" +
-							   "After downloading a path to the local BLAST installation has to be passed to TFpredict.\n" +
-							   "Please define the environment variable BLAST_DIR to point to the BLAST directory on\n" +
-							   "your OS and run this program again.\n" +
-							   "Alternatively you can use the command line argument -blastPath <pathToBlast>.\n");
+					"(ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/).\n" +
+					"After downloading a path to the local BLAST installation has to be passed to TFpredict.\n" +
+					"Please define the environment variable BLAST_DIR to point to the BLAST directory on\n" +
+					"your OS and run this program again.\n" +
+					"Alternatively you can use the command line argument -blastPath <pathToBlast>.\n");
 			System.exit(0);
 		}
-		if (!blastpath.endsWith("/")) blastpath += "/";
-		
+		if (!blastpath.endsWith("/")) {
+			blastpath += "/";
+		}
+
 		if(cmd.hasOption("standAloneMode")) {
 			standAloneMode = true;
 			silent = true;
 		} else {
-	    	FileHandler logFileHandler;
+			FileHandler logFileHandler;
 			try {
 				logFileHandler = new FileHandler(sabine_outfile);
 				logFileHandler.setFormatter(new Formatter() {
@@ -342,45 +346,45 @@ public class Predict {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void prepareInput() {
-		
+
 		relDomains_TFclass = BasicTools.readResource2List(relDomainsTF_file);
 		relDomains_Superclass = BasicTools.readResource2List(relDomainsSuper_file);
 		tfName2class = (Map<String, String>) ObjectRW.readFromResource(tfName2class_file);
-		
+
 		relGOterms = BasicTools.readResource2List(relGOterms_file);
-		
+
 		// if UniProt ID was given --> retrieve sequence and species from UniProt
 		if (uniprot_id != null) {
 			UniProtClient uniprot_client = new UniProtClient();
 			String fasta_seq = uniprot_client.getUniProtSequence(uniprot_id.toUpperCase(), true);
-			
+
 			// Stop, if given UniProt ID is invalid
 			if (fasta_seq == null) {
 				logger.log(Level.SEVERE, "Error. Invalid UniProt ID or Entry name: " + uniprot_id + ".");
 				writeHTMLerrorOutput(InvalidUniProtError);
 				System.exit(0);
 			}
-			
+
 			String[] splitted_header = fasta_seq.substring(0, fasta_seq.indexOf(" ")).trim().split("\\|");
-			
+
 			tfName = splitted_header[2];
 			uniprot_id = splitted_header[1];
 			species = fasta_seq.substring(fasta_seq.indexOf("OS=")+3, fasta_seq.indexOf("GN=")-1);
 			sequence = fasta_seq.replaceFirst(">.*\\n", "").replaceAll("\\n", "");
-		} 
-		
+		}
+
 		// read characteristic domains (if desired)
 		if (useCharacteristicDomains) {
-			
+
 			domain2tf = new HashMap<String, Integer>();
 			List<String> tfDomains = BasicTools.readResource2List(characteristicTFdomains_file);
 			for (String domainID: tfDomains) {
 				domain2tf.put(domainID, TF);
 			}
-			
+
 			domain2superclass = new HashMap<String, Integer>();
 			for (int i=0; i<characteristicDomains_files.length; i++) {
 				List<String> currDomains = BasicTools.readResource2List(characteristicDomains_files[i]);
@@ -389,11 +393,11 @@ public class Predict {
 				}
 			}
 		}
-		
+
 		if (batchMode) {
 			// BatchMode --> parse sequences from given FASTA file (and shorten long headers)
 			sequences = BasicTools.readFASTA(fasta_file);
-			
+
 			// Stop, if FASTA file contains duplicated headers
 			if (sequences.containsKey(BasicTools.duplicatedHeaderKey)) {
 				logger.log(Level.SEVERE, "Error. FASTA file contains duplicated headers.");
@@ -402,15 +406,15 @@ public class Predict {
 			}
 			// Stop, if maximum number of sequences allowed for Batch mode was exceeded
 			if ((sequences.size() > maxNumSequencesBatchMode) && !standAloneMode) {
-				logger.log(Level.SEVERE, "Error. Maximum number of sequences allowed in Batch Mode: " + maxNumSequencesBatchMode + 
-						   		   ". FASTA file contains " + sequences.size() + " sequences.");
+				logger.log(Level.SEVERE, "Error. Maximum number of sequences allowed in Batch Mode: " + maxNumSequencesBatchMode +
+						". FASTA file contains " + sequences.size() + " sequences.");
 				writeHTMLerrorOutput(TooManySequencesError);
 				System.exit(0);
 			}
-			
+
 			sequence_ids = sequences.keySet().toArray(new String[] {});
 			BasicTools.writeFASTA(sequences, input_file);
-			
+
 		} else {
 			// SingleQueryMode --> add default header and write protein sequence to file
 			String[] inputSeq = BasicTools.wrapString(sequence);
@@ -423,25 +427,25 @@ public class Predict {
 			BasicTools.writeArray2File(fastaSeq, input_file);
 		}
 	}
-	
+
 	private void prepareClassifiers() {
 
 		// load TF/Non-TF and superclass classifier
 		try {
-			tfClassifier = (Classifier) weka.core.SerializationHelper.read(Resource.class.getResourceAsStream(tfClassifier_file));			 
+			tfClassifier = (Classifier) weka.core.SerializationHelper.read(Resource.class.getResourceAsStream(tfClassifier_file));
 			superClassifier = (Classifier) weka.core.SerializationHelper.read(Resource.class.getResourceAsStream(superClassifier_file));
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-    	if (!silent) {
-    		//System.out.println("  " + relDomains_TFclass.size() + " domains used for TF/Non-TF classification.");
-    		//System.out.println("  " + relDomains_Superclass.size() + " domains used for Superclass classification.\n");
-    	}
+
+		if (!silent) {
+			//System.out.println("  " + relDomains_TFclass.size() + " domains used for TF/Non-TF classification.");
+			//System.out.println("  " + relDomains_Superclass.size() + " domains used for Superclass classification.\n");
+		}
 	}
-    
-	 // execute iprscan and get results
+
+	// execute iprscan and get results
 	private void runInterproScan() {
 
 		// HACK: line can be excluded for testing purposes
@@ -449,7 +453,7 @@ public class Predict {
 		AnimatedChar an = null;
 		if (standAloneMode) {
 			System.out.print("\n  Fetching domains from InterProScan. This may take several minutes... ");
-			
+
 			an = new AnimatedChar();
 			an.setOutputStream(System.out);
 			an.showAnimatedChar();
@@ -460,17 +464,17 @@ public class Predict {
 			an.hideAnimatedChar();
 			System.out.println();
 		}
-		
+
 		// HACK: lines can be included for testing purposes
 		//basedir = "/rahome/eichner/projects/tfpredict/failed_inputs/";
 		//List<String[]> IPRoutput = BasicTools.readFile2ListSplitLines(basedir + "allTFs_iprscan_output.txt");
-		
+
 		// generates mapping from sequence IDs to InterPro domain IDs
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
-		
+
 		// generates map of from domain ID to object containing the InterPro ID, description, position, and GO classes
 		IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
-	
+
 		// process result
 		seq2bindingDomain = IPRprocess.filterIPRdomains(seq2domain, IPRdomains, relGOterms, tfName2class);
 		if (standAloneMode || !silent) {
@@ -499,10 +503,10 @@ public class Predict {
 			}
 		}
 	}
-	
-	// generates databases, runs BLAST on query sequence and extracts hits 
+
+	// generates databases, runs BLAST on query sequence and extracts hits
 	private void runPsiBlast() {
-		
+
 		// copy FASTA files from Jar to temporary directory
 		String blast_db_dir = basedir + "blast_db/";
 		if (! new File(blast_db_dir).exists() && ! new File(blast_db_dir).mkdir()) {
@@ -512,19 +516,21 @@ public class Predict {
 		tfDBfastaFile = blast_db_dir + new File(superPredBlastFasta).getName();
 		BasicTools.copy(tfPredBlastFasta, tfnontfDBfastaFile, true);
 		BasicTools.copy(superPredBlastFasta, tfDBfastaFile, true);
-		
+
 		// generate PSI-BLAST databases from FASTA files
 		String createDB_cmd = blastpath + "bin/makeblastdb";
-		if (BasicTools.isWindows()) createDB_cmd = "\"" + createDB_cmd + "\"";
+		if (BasicTools.isWindows()) {
+			createDB_cmd = "\"" + createDB_cmd + "\"";
+		}
 		String createDB_cmdTF = createDB_cmd +  " -in " + tfnontfDBfastaFile + " -out " + tfnontfDBfastaFile + ".db" + " -dbtype prot";
 		String createDB_cmdSuper = createDB_cmd + " -in " + tfDBfastaFile + " -out " + tfDBfastaFile + ".db" + " -dbtype prot";
 		BasicTools.runCommand(createDB_cmdTF , false);
 		BasicTools.runCommand(createDB_cmdSuper, false);
-		
+
 		// blast query sequences against TF and TF/non-TF database
 		String blastHitsFileTF = input_file.replace(".fasta", ".tf.hits");
 		String blastHitsFileSuper = input_file.replace(".fasta", ".super.hits");
-		
+
 		// if given FASTA file contains multiple sequences --> split into single sequences
 		Map<String, String> seq2fasta = new HashMap<String, String>();
 		int seqCnt = 1;
@@ -537,11 +543,13 @@ public class Predict {
 		} else {
 			seq2fasta.put(sequence_ids[0], input_file);
 		}
-			
+
 		seqCnt = 1;
 		for (String seqID: sequence_ids) {
 			String runBLAST_cmd = blastpath + "bin/psiblast";
-			if (BasicTools.isWindows()) runBLAST_cmd = "\"" + runBLAST_cmd + "\"";
+			if (BasicTools.isWindows()) {
+				runBLAST_cmd = "\"" + runBLAST_cmd + "\"";
+			}
 			String currHitsFileTF = blastHitsFileTF;
 			String currHitsFileSuper = blastHitsFileSuper;
 			if (batchMode) {
@@ -552,42 +560,26 @@ public class Predict {
 			String runBLAST_cmdSuper = runBLAST_cmd + " -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + currHitsFileSuper + " -db " +  tfDBfastaFile + ".db";
 			BasicTools.runCommand(runBLAST_cmdTF, false);
 			BasicTools.runCommand(runBLAST_cmdSuper, false);
-			seq2blastHitsTF.put(seqID, getBlastHits(currHitsFileTF));
-			seq2blastHitsSuper.put(seqID, getBlastHits(currHitsFileSuper));
+			try {
+				seq2blastHitsTF.put(seqID, getBlastHits(currHitsFileTF));
+				seq2blastHitsSuper.put(seqID, getBlastHits(currHitsFileSuper));
+			} catch (NumberFormatException | IOException exc) {
+				logger.severe(exc.getMessage());
+				exc.printStackTrace();
+			}
 		}
 	}
-	
-	// read PSI-BLAST output from temporary files
-	private Map<String, Double> getBlastHits(String blastHitsFile) { 
-			
-		List<String> hitsTable = BasicTools.readFile2List(blastHitsFile, false);
 
-			// skip header
-			int lineIdx = 0;
-			String line;
-			while (lineIdx < hitsTable.size() && !(line = hitsTable.get(lineIdx)).startsWith("Sequences producing significant alignments")) {
-				lineIdx++;
-			}
-			lineIdx = lineIdx + 2; 
-			
-			// read hits and corresponding bit scores
-			Map<String, Double> blastHits = new HashMap<String, Double>();
-			while (lineIdx < hitsTable.size() && !hitsTable.get(lineIdx).isEmpty() && !(line = hitsTable.get(lineIdx)).startsWith(">")) {
-
-				StringTokenizer strtok = new StringTokenizer(line);
-				String hitID = strtok.nextToken();
-				String nextToken;
-				while ((nextToken = strtok.nextToken()).startsWith("GO:"));  // skip GO terms in non-TF headers
-				double hitScore = Double.parseDouble(nextToken); 
-				blastHits.put(hitID, hitScore);
-				lineIdx++;
-			}
-			return blastHits;
+	/**
+	 * Read PSI-BLAST output from temporary files
+	 */
+	private Map<String, Double> getBlastHits(String blastHitsFile) throws NumberFormatException, IOException {
+		return BasicTools.parseBLASTHits(blastHitsFile);
 	}
-	
-	
+
+
 	private void performClassification() {
-    
+
 		// check if trivial prediction is possible based on characteristic domains detected by InterProScan
 		for (String seq: sequence_ids) {
 			predictionTrivial.put(seq, false);
@@ -610,7 +602,7 @@ public class Predict {
 				}
 			}
 		}
-		
+
 		// create Bit score percentile feature vectors
 		Map<String, String> sequencesTF = BasicTools.readFASTA(tfnontfDBfastaFile, true);
 		Map<String, String> sequencesSuper = BasicTools.readFASTA(tfDBfastaFile, true);
@@ -618,7 +610,7 @@ public class Predict {
 		Map<String, Integer> seq2labelSuper = DomainFeatureGenerator.getLabelsFromFastaHeaders(sequencesSuper.keySet(), true, false);
 		Map<String, Instance> seq2percFeatTF = createPercentileFeatureVectors(seq2blastHitsTF, seq2labelTF, false);
 		Map<String, Instance> seq2percFeatSuper = createPercentileFeatureVectors(seq2blastHitsSuper, seq2labelSuper, true);
-		
+
 		// flag all sequences for which no prediction is possible
 		// (i.e., none of the IPRdomains which are relevant for TF/Non-TF classification was found)
 		for (String seq: sequence_ids) {
@@ -633,17 +625,17 @@ public class Predict {
 				predictionPossible.put(seq, true);
 			}
 		}
-		
+
 		// perform all classification steps if feature vector could be created
 		try {
 			for (String seq: seq2percFeatTF.keySet()) {
-				if (predictionPossible.get(seq)) {				
+				if (predictionPossible.get(seq)) {
 					if (!predictionTrivial.get(seq)) {
 						seqIsTF.put(seq, false);
 					}
 					annotatedClassAvailable.put(seq, false);
 					domainsPredicted.put(seq, false);
-					
+
 					// perform TF/Non-TF classification
 					if (!predictionTrivial.get(seq)) {
 						Instance featVectorTF = seq2percFeatTF.get(seq);
@@ -654,9 +646,9 @@ public class Predict {
 						probDist_TFclass.put(seq, BasicTools.double2Double(currProbDistTF));
 						if (currProbDistTF[TF] >= currProbDistTF[Non_TF] && seq2percFeatSuper.containsKey(seq)) {
 							seqIsTF.put(seq, true);
-						} 
+						}
 					}
-					
+
 					// if not yet identified as TF, try identification via characteristic domains
 					if (!seqIsTF.get(seq) && useCharacteristicDomains) {
 						IprEntry seq2DomainEntry = seq2domain.get(seq);
@@ -671,7 +663,7 @@ public class Predict {
 							}
 						}
 					}
-		    		
+
 					// if sequence was classified as TF --> predict superclass
 					if (seqIsTF.get(seq)) {
 						if (!predictionTrivial.get(seq)) {
@@ -682,20 +674,20 @@ public class Predict {
 							int maxIndex = BasicTools.getMaxIndex(currProbDistSuper);
 							predictedSuperclass.put(seq, maxIndex);
 						}
-						
+
 						// predict DNA-binding domain
-				    	IprProcessed ipr_res = seq2bindingDomain.get(seq);
-				    	
-				    	if (ipr_res != null) {
-				    		if (!ipr_res.anno_transfac_class.isEmpty()) {
-				    			annotatedClassAvailable.put(seq, true);
-				    			annotatedClass.put(seq, ipr_res.anno_transfac_class);
-				    		} 
-				    		if (!ipr_res.binding_domains.isEmpty()) {
-				    			domainsPredicted.put(seq, true);
-				    			bindingDomains.put(seq, ipr_res.binding_domains.toArray(new String[]{}));
-				    		}
-				    	}
+						IprProcessed ipr_res = seq2bindingDomain.get(seq);
+
+						if (ipr_res != null) {
+							if (!ipr_res.anno_transfac_class.isEmpty()) {
+								annotatedClassAvailable.put(seq, true);
+								annotatedClass.put(seq, ipr_res.anno_transfac_class);
+							}
+							if (!ipr_res.binding_domains.isEmpty()) {
+								domainsPredicted.put(seq, true);
+								bindingDomains.put(seq, ipr_res.binding_domains.toArray(new String[]{}));
+							}
+						}
 					}
 				}
 			}
@@ -703,10 +695,10 @@ public class Predict {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// writes HTML header
 	private static void writeHTMLheader(BufferedWriter bw) {
-		
+
 		try {
 			bw.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\n");
 			bw.write("     \"http://www.w3.org/TR/html4/loose.dtd\">\n");
@@ -726,64 +718,64 @@ public class Predict {
 			bw.write("</style>\n");
 			bw.write("</head>\n");
 			bw.write("<body style=\"padding-left: 30px\">\n");
-			
+
 		} catch(IOException ioe) {
 			ioe.printStackTrace();
 		}
 	}
-	
+
 	private void writeHTMLerrorOutput(byte errorType) {
-		
+
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(html_outfile)));
-			
+
 			writeHTMLheader(bw);
 			bw.write("<h4> Error </h4>\n");
-			
+
 			if (errorType == InvalidUniProtError) {
 				bw.write("<h3> Invalid UniProt ID or Entry name: " + uniprot_id + ".</h3>\n");
-						
+
 			} else if (errorType == TooManySequencesError) {
 				bw.write("<h3> Maximum number of sequences allowed in Batch Mode: " + maxNumSequencesBatchMode + "<br>\n" +
-			   		   "Number of sequences in given FASTA file: " + sequences.size() + "</h3>\n");
-				
+						"Number of sequences in given FASTA file: " + sequences.size() + "</h3>\n");
+
 			} else if (errorType == DuplicatedHeaderError) {
 				bw.write("<h3>FASTA file contains duplicated headers.</h3>\n");
-			} 
-			
+			}
+
 			// close HTML file
 			bw.write("</body>\n");
 			bw.write("</html>\n");
-			
+
 			bw.flush();
 			bw.close();
-			
+
 		} catch (Exception e) {
 			System.exit(0);
 			//e.printStackTrace();
 		}
 	}
-	
+
 	private void writeHTMLoutput() {
-		
+
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(html_outfile)));
-			
+
 			writeHTMLheader(bw);
-		
+
 			for (int i=0; i<sequence_ids.length; i++) {
 				String seq = sequence_ids[i];
-				
+
 				if (i > 0) {
 					bw.write("<br><hr>\n\n");
 				}
-				
+
 				if (batchMode) {
 					bw.write("<h1><span style=\"color:#000000\">Results report: </span>" + seq + "</h1>\n");
 				}
 				bw.write("<h2>TF/Non-TF prediction:</h2>\n");
 				if (predictionPossible.get(seq)) {
-					
+
 					String[] outcomesTF = getClassificationOutcomes(BasicTools.Double2double(probDist_TFclass.get(seq)));
 					bw.write("<table>\n");
 					bw.write("  <tr><th></th><th>Probability<th></tr>\n");
@@ -791,7 +783,7 @@ public class Predict {
 					bw.write("  <tr><th> Non-TF </th><td class=\"" + outcomesTF[Non_TF] + "\"> " + df.format(probDist_TFclass.get(seq)[Non_TF]) + " </td></tr>\n");
 					bw.write("</table>\n\n");
 					bw.write("<br>\n\n");
-					    
+
 					bw.write("<h2>Superclass prediction:</h2>\n");
 					if (seqIsTF.get(seq)) {
 						String[] outcomesSuper = getClassificationOutcomes(BasicTools.Double2double(probDist_Superclass.get(seq)));
@@ -803,83 +795,83 @@ public class Predict {
 						bw.write("  <tr><th> Beta scaffold </th><td class=\"" + outcomesSuper[Beta_scaffold] + "\"> " + df.format(probDist_Superclass.get(seq)[Beta_scaffold]) + " </td></tr>\n");
 						bw.write("  <tr><th> Other </th><td class=\"" + outcomesSuper[Other] + "\"> " + df.format(probDist_Superclass.get(seq)[Other]) + " </td></tr>\n");
 						bw.write("</table>\n\n");
-						bw.write("<br>\n\n");    	
-						
+						bw.write("<br>\n\n");
+
 						bw.write("<h2>Annotated structural class:</h2>\n");
-			    		if (annotatedClassAvailable.get(seq)) {	
+						if (annotatedClassAvailable.get(seq)) {
 							bw.write("<h3>" + getAnnotatedSuperclass(annotatedClass.get(seq)) + " (<a href=\"" + transfacClassURL + "\" target=\"_blank\">" + annotatedClass.get(seq) + "</a>) </h3>\n");
 							bw.write("The annotated structual class was obtained from the <a href=\"" + transfacPublicURL + "\" target=\"_blank\">TRANSFAC Public</a> database.\n");
 							bw.write("<br><br><br>\n\n");
 						} else {
-				    		bw.write("<h3>Not available</h3>\n");
-				    		bw.write("The annotated structural class could not be obtained from the <a href=\"" + transfacPublicURL + "\" target=\"_blank\">TRANSFAC Public</a> database.");
-				    		bw.write("<br><br><br>\n\n");
-				    	}
-					    
-			    		// include result image from InterProScan into HTML report
-					    if (!seq2job.isEmpty() && seq2job.containsKey(seq)) {
-					    	String job = seq2job.get(seq);
+							bw.write("<h3>Not available</h3>\n");
+							bw.write("The annotated structural class could not be obtained from the <a href=\"" + transfacPublicURL + "\" target=\"_blank\">TRANSFAC Public</a> database.");
+							bw.write("<br><br><br>\n\n");
+						}
+
+						// include result image from InterProScan into HTML report
+						if (!seq2job.isEmpty() && seq2job.containsKey(seq)) {
+							String job = seq2job.get(seq);
 							bw.write("<table>\n");
-							bw.write("  <tr><th> <img src=\"" + job + ".visual-png.png\"/>" + "</th></tr>\n");	
+							bw.write("  <tr><th> <img src=\"" + job + ".visual-png.png\"/>" + "</th></tr>\n");
 							bw.write("  <tr><th> Illustration generated by <a href=https://www.ebi.ac.uk/Tools/services/web/toolresult.ebi?jobId="+job+"&tool=iprscan&analysis=visual target=\"_blank\"> InterProScan </a> </th></tr>\n");
 							bw.write("</table>\n\n");
 							bw.write("<br>\n\n");
-					    }
-			    		bw.write("<h2>DNA-binding domain(s):</h2>\n");
-					    if (domainsPredicted.get(seq)) {
+						}
+						bw.write("<h2>DNA-binding domain(s):</h2>\n");
+						if (domainsPredicted.get(seq)) {
 							bw.write("<table>\n");
-							bw.write("  <tr><th> Domain ID </th><th> Start </th><th> End </th></tr>\n");	
-					    	
+							bw.write("  <tr><th> Domain ID </th><th> Start </th><th> End </th></tr>\n");
+
 							for (String domain : bindingDomains.get(seq)) {
 								String[] splitted_domain = domain.replace("    ", "\t").split("\t");
 								String currLink =  "<a href=\"" + interproPrefix + splitted_domain[0] + "\" target=\"_blank\"> " + splitted_domain[0] + " </a>";
-								bw.write("  <tr><td> "+ currLink + " </td><td> "+ splitted_domain[1] +" </td><td> " + splitted_domain[2] +" </td></tr>\n"); 
+								bw.write("  <tr><td> "+ currLink + " </td><td> "+ splitted_domain[1] +" </td><td> " + splitted_domain[2] +" </td></tr>\n");
 							}
 							bw.write("</table>\n\n");
 							bw.write("<br>\n\n");
-							
-					    } else {
-				    		bw.write("<h2>No DNA-binding domain found.</h2>\n");
-				    	}
-					    
-				    // if sequence was classified as Non-TF --> display message 
+
+						} else {
+							bw.write("<h2>No DNA-binding domain found.</h2>\n");
+						}
+
+						// if sequence was classified as Non-TF --> display message
 					} else {
 						bw.write("<h3>No prediction possible.</h3>");
-				    	bw.write("The given sequence was classified as a Non-TF. As all further classification steps (e.g., superclass and DNA-binding domain prediction) require a TF sequence, these steps were not performed.");
+						bw.write("The given sequence was classified as a Non-TF. As all further classification steps (e.g., superclass and DNA-binding domain prediction) require a TF sequence, these steps were not performed.");
 					}
-			    } else {
-			    	bw.write("<h3>No prediction possible.</h3>");
-			    	bw.write("BLAST did not find any significant hits in the protein sequence database. Consequently, TFpredict could not perform the prediction task.");
-			    }
+				} else {
+					bw.write("<h3>No prediction possible.</h3>");
+					bw.write("BLAST did not find any significant hits in the protein sequence database. Consequently, TFpredict could not perform the prediction task.");
+				}
 			}
-			
+
 			// close HTML file
 			bw.write("</body>\n");
 			bw.write("</html>\n");
-			
+
 			bw.flush();
 			bw.close();
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void writeConsoleOutput() {
-		
+
 		String hline = "  -----------------------";
-		
+
 		for (int i=0; i<sequence_ids.length; i++) {
 			String seq = sequence_ids[i];
-			
+
 			if (i > 0) {
 				System.out.println("__________________________________________");
 			}
-			
+
 			System.out.println("\n==========================================");
 			System.out.println("Results report for sequence: " + seq);
 			System.out.println("==========================================\n");
-			
+
 			if (predictionPossible.get(seq)) {
 				System.out.println("  TF/Non-TF prediction:");
 				System.out.println(hline);
@@ -896,45 +888,45 @@ public class Predict {
 					System.out.println("  Helix-turn-helix    " + df.format(probDist_Superclass.get(seq)[Helix_turn_helix]));
 					System.out.println("  Beta scaffold       " + df.format(probDist_Superclass.get(seq)[Beta_scaffold]));
 					System.out.println("  Other               " + df.format(probDist_Superclass.get(seq)[Other]) + "\n");
-					
-					if (annotatedClassAvailable.get(seq)) {	
+
+					if (annotatedClassAvailable.get(seq)) {
 						System.out.println("  Annotated structural class:");
 						System.out.println(hline);
 						System.out.println("  " + getAnnotatedSuperclass(annotatedClass.get(seq)) + " (" + annotatedClass.get(seq) + ") \n");
 					}
-					
+
 					if (domainsPredicted.get(seq)) {
 						System.out.println("  DNA-binding domain(s):");
 						System.out.println(hline);
 						System.out.println("  Domain ID \t Start \t End");
 						for (String domain : bindingDomains.get(seq)) {
 							String[] splitted_domain = domain.replace("    ", "\t").split("\t");
-							System.out.println("  " + splitted_domain[0] + " \t " + splitted_domain[1] + " \t " + splitted_domain[2]); 
+							System.out.println("  " + splitted_domain[0] + " \t " + splitted_domain[1] + " \t " + splitted_domain[2]);
 						}
-					
+
 					} else {
 						System.out.println("  DNA-binding domain could not be predicted.\n");
 					}
 				}
-				
+
 			} else {
 				System.out.println("  No prediction possible.\n");
 			}
 		}
 	}
-	
+
 	private void writeSABINEoutput() {
-			
+
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(sabine_outfile)));
-			
+
 			for (int i=0; i<sequence_ids.length; i++) {
 				String seq = sequence_ids[i];
-				
+
 				if (i > 0) {
 					bw.write("//\nXX\n");
 				}
-				
+
 				if (batchMode) {
 					bw.write("NA  " + seq + "\n");
 				} else {
@@ -947,16 +939,16 @@ public class Predict {
 					bw.write("RF  " + uniprot_id + "\n");
 					bw.write("XX  \n");
 				}
-				
+
 				if (predictionPossible.get(seq) && seqIsTF.get(seq)) {
-					
+
 					if (annotatedClassAvailable.get(seq)) {
 						bw.write("CL  " + expandTransfacClass(annotatedClass.get(seq)) + "\n");
 					} else {
 						bw.write("CL  " + predictedSuperclass.get(seq) + ".0.0.0.0" + "\n");
 					}
 					bw.write("XX  \n");
-		
+
 					// write sequence
 					String[] wrapped_seq;
 					if (batchMode) {
@@ -965,10 +957,10 @@ public class Predict {
 						wrapped_seq = BasicTools.wrapString(sequence);
 					}
 					for (String line: wrapped_seq) {
-						bw.write("S1  " + line + "\n"); 
+						bw.write("S1  " + line + "\n");
 					}
 					bw.write("XX  \n");
-							
+
 					// write domains
 					if (domainsPredicted.get(seq)) {
 						for (String domain : bindingDomains.get(seq)) {
@@ -976,8 +968,8 @@ public class Predict {
 						}
 						bw.write("XX\n");
 					}
-					
-				// Protein was either not classified (no IPR domains found) or classified as Non-TF
+
+					// Protein was either not classified (no IPR domains found) or classified as Non-TF
 				} else {
 					if (predictionPossible.get(seq)) {
 						bw.write("CL  Non-TF\nXX\n");
@@ -988,21 +980,21 @@ public class Predict {
 			}
 			bw.flush();
 			bw.close();
-			
+
 		} catch(IOException ioe) {
 			System.out.println(ioe.getMessage());
 			System.out.println("IOException occurred while writing input file for SABINE.");
 		}
 	}
-	
+
 	// returns "win", "lose", or "draw" for each class depending on the given probabilities
 	private static String[] getClassificationOutcomes(double[] probDist) {
-		
+
 		String[] classOutcome = new String[probDist.length];
 		double maxProb = BasicTools.getMax(probDist);
 		List<Integer> winIdx = new ArrayList<Integer>();
 		int numWinners = 0;
-		
+
 		for (int i=0; i<probDist.length; i++) {
 			if (probDist[i] == maxProb) {
 				classOutcome[i] = "win";
@@ -1012,8 +1004,8 @@ public class Predict {
 				classOutcome[i] = "lose";
 			}
 		}
-		
-		// multiple winning classes -> set outcome for winning classes to "draw" 
+
+		// multiple winning classes -> set outcome for winning classes to "draw"
 		if (numWinners > 1) {
 			for (int i=0; i<winIdx.size(); i++) {
 				classOutcome[winIdx.get(i)] = "draw";
@@ -1021,22 +1013,22 @@ public class Predict {
 		}
 		return classOutcome;
 	}
-	
-   // convert transfac-classification to SABINE-InputFileFormat                                                                                                                                 
-    private static String expandTransfacClass(String transfac_class) {
-            String expanded_class = transfac_class + ".";
 
-            while (expanded_class.length() <= 9) {
-            	expanded_class = expanded_class.concat("0.");
-            }
+	// convert transfac-classification to SABINE-InputFileFormat
+	private static String expandTransfacClass(String transfac_class) {
+		String expanded_class = transfac_class + ".";
 
-            return expanded_class;
-    }
+		while (expanded_class.length() <= 9) {
+			expanded_class = expanded_class.concat("0.");
+		}
 
-    private static String getAnnotatedSuperclass(String transfac_class) {
-    	return(superclassNames[Integer.parseInt(transfac_class.substring(0,1))]);
-    }
-	
+		return expanded_class;
+	}
+
+	private static String getAnnotatedSuperclass(String transfac_class) {
+		return(superclassNames[Integer.parseInt(transfac_class.substring(0,1))]);
+	}
+
 	/**
 	 * 
 	 * @param predIPRdomains
@@ -1046,27 +1038,27 @@ public class Predict {
 	 */
 	public static String createIPRvector(List<String> predIPRdomains, List<String> relIPRdomains, int start) {
 		String fvector = "";
-		
+
 		for (int i = 0; i < relIPRdomains.size(); i++) {
 			String curr_ipr = relIPRdomains.get(i);
 			if (predIPRdomains.contains(curr_ipr)) {
-				
+
 				int column = i+1+start;
 				fvector = fvector.concat(column + ":" + "1 ");
 			}
 		}
 		return fvector.trim();
 	}
-	
+
 	/*
 	 * function used to create the bit score percentile feature vectors for TF/non-TF and superclass prediction
 	 */
 	private static Map<String, Instance> createPercentileFeatureVectors(Map<String, Map<String, Double>> seq2blastHits, Map<String, Integer> seq2label, boolean superPred) {
-		
+
 		PercentileFeatureGenerator percFeatGen = new PercentileFeatureGenerator(seq2blastHits, seq2label, superPred);
 		percFeatGen.computeFeaturesFromBlastResult();
 		Map<String, double[]> seq2feat = percFeatGen.getFeatures();
-		
+
 		Map<String, Instance> seq2fvector = new HashMap<String, Instance>();
 		for  (String seqID: seq2feat.keySet()) {
 			String currFeatVec = BasicTools.doubleArrayToLibSVM(seq2feat.get(seqID));
@@ -1078,9 +1070,9 @@ public class Predict {
 	private static Instance getInst(String fvector) {
 
 		Instance inst = null;
-	
+
 		LibSVMLoader lsl = new LibSVMLoader();
-		
+
 		Instances tmp = null;
 		InputStream is;
 		try {
@@ -1095,7 +1087,7 @@ public class Predict {
 			System.exit(1);
 		}
 		inst = tmp.firstInstance();
-		
+
 		return inst;
 	}
 }

@@ -475,6 +475,12 @@ public class TrainingDataGenerator {
 		BasicTools.writeFASTA(correctedNontfSeqs, outputFile);
 	}
 
+	/**
+	 * 
+	 * @param fastaFile
+	 * @param uniprotIDfile
+	 * @param fastaSubsetFile
+	 */
 	private static void generateFastaSubsetFile(String fastaFile, String uniprotIDfile, String fastaSubsetFile) {
 
 		List<String> uniprotIDs = BasicTools.readFile2List(uniprotIDfile, false);
@@ -490,6 +496,11 @@ public class TrainingDataGenerator {
 		BasicTools.writeFASTA(seqsSubset, fastaSubsetFile);
 	}
 
+	/**
+	 * 
+	 * @param sabineFlatfile
+	 * @param sabineInputfile
+	 */
 	private static void convertSabineFlatfile2Inputfile(String sabineFlatfile, String sabineInputfile) {
 
 		// read SABINE flatfile

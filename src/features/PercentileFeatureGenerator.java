@@ -37,14 +37,29 @@ import modes.Predict;
  */
 public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 
+	/**
+	 * 
+	 */
 	private static final int[] percentiles = new int[] {0,25,50,75,100};
 
+	/**
+	 * 
+	 * @param fastaFile
+	 * @param featureFile
+	 * @param superPred
+	 */
 	public PercentileFeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
 		super(fastaFile, featureFile, superPred);
 		pssmFeat = false;
 		naiveFeat = false;
 	}
 
+	/**
+	 * 
+	 * @param hits
+	 * @param seq2label
+	 * @param superPred
+	 */
 	public PercentileFeatureGenerator(Map<String, Map<String,Double>> hits, Map<String, Integer> seq2label, boolean superPred) {
 		super();
 		this.hits = hits;
@@ -52,6 +67,9 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 		this.superPred = superPred;
 	}
 
+	/* (non-Javadoc)
+	 * @see features.BLASTfeatureGenerator#computeFeaturesFromBlastResult()
+	 */
 	@Override
 	public void computeFeaturesFromBlastResult() {
 
@@ -194,8 +212,6 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 	 *            (TXT format)
 	 */
 	public static void main(String[] args) {
-
-
 		// generate feature file for TF prediction
 		final String tfFastaFile = args[0]; //"/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/latest/TFandNonTF.fasta";
 		final String tfFeatureFile = args[1]; //"/rahome/eichner/projects/tfpredict/data/tf_pred/feature_files/latest/percentile_featurefile.txt";
@@ -206,6 +222,5 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 		tfFeatureGenerator.generateFeatures();
 
 		System.out.println("Time elapsed: " + ((System.currentTimeMillis() - time)/3600) + " minutes");
-
 	}
 }
