@@ -964,23 +964,25 @@ public class BasicTools {
 	 * @throws NumberFormatException
 	 * @throws IOException
 	 */
-	public static Map<String, Double> parseBLASTHits(String hitsOutfile) throws NumberFormatException, IOException {
+	public static Map<String, Double> parseBLASTHits(File hitsOutfile) throws NumberFormatException, IOException {
 		// read PSI-BLAST output from temporary files
 
 		Map<String, Double> blastHits = new HashMap<String, Double>();
 
-		int lineIdx = 0;
+		int lineIdx = 1;
 		String line;
 
 		//List<String> hitsTable = BasicTools.readFile2List(hitsOutfile, false);
-		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(hitsOutfile))));
-		while ((line = br.readLine()) != null) {
+		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(hitsOutfile)));
+		for (boolean startReading = false; ((line = br.readLine()) != null) && !(startReading && line.startsWith(">")); lineIdx++) {
 			line = line.trim();
-			lineIdx++;
 
 			// skip header and empty or invalid lines
-			if (!line.startsWith("Sequences producing significant alignments")
-					&& !line.isEmpty() && !line.startsWith(">")) {
+			if (line.startsWith("Sequences producing significant alignments")) {
+				startReading = true;
+				continue;
+			}
+			if (startReading && !line.isEmpty() && !line.startsWith(">")) {
 
 				StringTokenizer strtok = new StringTokenizer(line);
 				String hitID = strtok.nextToken();
@@ -995,7 +997,6 @@ public class BasicTools {
 				blastHits.put(hitID, Double.parseDouble(nextToken)); // hit score
 
 			}
-
 		}
 		br.close();
 		logger.info(MessageFormat.format("Successfully read {0,number,integer} lines from hits file {1}.", lineIdx, hitsOutfile));
