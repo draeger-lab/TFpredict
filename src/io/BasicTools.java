@@ -32,6 +32,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 import org.apache.commons.math.stat.descriptive.moment.Mean;
 import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
@@ -54,6 +56,11 @@ import resources.Resource;
  * @since 1.0
  */
 public class BasicTools {
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(BasicTools.class.getName());
 
 	/**
 	 * 
@@ -337,7 +344,7 @@ public class BasicTools {
 				}
 			}
 		}
-		return(sequences);
+		return sequences;
 	}
 
 	/**
@@ -444,7 +451,7 @@ public class BasicTools {
 			ioe.printStackTrace();
 		}
 
-		return(fileContent);
+		return fileContent;
 	}
 
 	/**
@@ -726,6 +733,8 @@ public class BasicTools {
 					stdout.add(line.trim());
 				}
 				consoleOutput = stdout.toArray(new String[]{});
+
+				br.close();
 			}
 
 		} catch (IOException e) {
@@ -924,6 +933,11 @@ public class BasicTools {
 		return hammingDist;
 	}
 
+	/**
+	 * 
+	 * @param array
+	 * @return
+	 */
 	public static int[] getMinPositions(int[] array) {
 
 		int minDist = Integer.MAX_VALUE;
@@ -941,6 +955,52 @@ public class BasicTools {
 			}
 		}
 		return Integer2int(minPos.toArray(new Integer[]{}));
+	}
+
+	/**
+	 * 
+	 * @param hitsOutfile
+	 * @return
+	 * @throws NumberFormatException
+	 * @throws IOException
+	 */
+	public static Map<String, Double> parseBLASTHits(String hitsOutfile) throws NumberFormatException, IOException {
+		// read PSI-BLAST output from temporary files
+
+		Map<String, Double> blastHits = new HashMap<String, Double>();
+
+		int lineIdx = 0;
+		String line;
+
+		//List<String> hitsTable = BasicTools.readFile2List(hitsOutfile, false);
+		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(hitsOutfile))));
+		while ((line = br.readLine()) != null) {
+			line = line.trim();
+			lineIdx++;
+
+			// skip header and empty or invalid lines
+			if (!line.startsWith("Sequences producing significant alignments")
+					&& !line.isEmpty() && !line.startsWith(">")) {
+
+				StringTokenizer strtok = new StringTokenizer(line);
+				String hitID = strtok.nextToken();
+				// correct wrong UniProt ID for T03281 in factor.dat
+				if (hitID.contains("|41817|TF|")) {
+					hitID = hitID.replace("|41817|TF|", "|P41817|TF|");
+				}
+				String nextToken = null;
+				while (strtok.hasMoreTokens() && (nextToken = strtok.nextToken()).startsWith("GO:")) {
+					// skip GO terms in non-TF headers
+				}
+				blastHits.put(hitID, Double.parseDouble(nextToken)); // hit score
+
+			}
+
+		}
+		br.close();
+		logger.info(MessageFormat.format("Successfully read {0,number,integer} lines from hits file {1}.", lineIdx, hitsOutfile));
+
+		return blastHits;
 	}
 }
 

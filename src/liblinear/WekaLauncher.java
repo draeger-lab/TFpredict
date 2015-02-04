@@ -163,11 +163,21 @@ public class WekaLauncher {
 		return argsClassifier.toArray(new String[]{});
 	}
 
-
+	/**
+	 * 
+	 * @return
+	 */
 	private int[][][] getCVSplit() {
 		return getCVSplit(libsvmFeatureFile, folds, multiruns);
 	}
 
+	/**
+	 * 
+	 * @param libsvmFeatureFile
+	 * @param folds
+	 * @param multiruns
+	 * @return
+	 */
 	public static int[][][] getCVSplit(String libsvmFeatureFile, int folds, int multiruns) {
 
 		// get unscaled libsvm feature vectors for each run and split
@@ -178,7 +188,7 @@ public class WekaLauncher {
 
 		// read original feature file
 		List<String> featureVectors = BasicTools.readFile2List(libsvmFeatureFile, false);
-		for (int i=0; i<featureVectors.size(); i++) {
+		for (int i = 0; i < featureVectors.size(); i++) {
 			String currFeatVec = featureVectors.get(i);
 			if (currFeatVec.startsWith("-1")) {
 				featureVectors.set(i, currFeatVec.replaceFirst("-1", "0"));
