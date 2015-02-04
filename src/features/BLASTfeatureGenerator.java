@@ -24,17 +24,12 @@ package features;
 
 import io.BasicTools;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
 import data.TrainingDataGenerator;
@@ -152,6 +147,9 @@ public abstract class BLASTfeatureGenerator {
 	}
 
 
+	/**
+	 * 
+	 */
 	protected void runPsiBlast() {
 
 		int numIter = 1;
@@ -283,6 +281,9 @@ public abstract class BLASTfeatureGenerator {
 		return pssm;
 	}
 
+	/**
+	 * 
+	 */
 	protected abstract void computeFeaturesFromBlastResult();
 
 
