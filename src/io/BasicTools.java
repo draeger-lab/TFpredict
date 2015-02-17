@@ -95,15 +95,15 @@ public class BasicTools {
 		List<String> lines = new ArrayList<String>();
 
 		int numFullLines = string.length() / max_line_length;
-		for (int i=0; i < numFullLines; i++) {
-			lines.add(string.toUpperCase().substring(i * max_line_length, (i+1) * max_line_length));
+		for (int i = 0; i < numFullLines; i++) {
+			lines.add(string.toUpperCase().substring(i * max_line_length, (i + 1) * max_line_length));
 		}
 
 		int writtenStringLength = (string.length() / max_line_length) * max_line_length;
-		if (string.length() - writtenStringLength > 0) {
+		if ((string.length() - writtenStringLength) > 0) {
 			lines.add(string.toUpperCase().substring(writtenStringLength, string.length()));
 		}
-		return(lines.toArray(new String[]{}));
+		return lines.toArray(new String[] {});
 	}
 
 	/**
@@ -148,8 +148,18 @@ public class BasicTools {
 	 * @param outfile
 	 */
 	public static void writeList2File(List<String> list, String outfile) {
-		String[] array = list.toArray(new String[] {});
-		writeArray2File(array, outfile);
+		//String[] array = list.toArray(new String[] {});
+		//writeArray2File(array, outfile);
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
+			for (String line : list) {
+				bw.append(line);
+				bw.newLine();
+			}
+			bw.close();
+		} catch (IOException exc) {
+			exc.printStackTrace();
+		}
 	}
 
 	/**
@@ -158,7 +168,14 @@ public class BasicTools {
 	 * @param outfile
 	 */
 	public static void writeString2File(String lines, String outfile) {
-		writeArray2File(lines.split("\\n"), outfile);
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
+			bw.write(lines);
+			bw.close();
+			//writeArray2File(lines.split("\\n"), outfile);
+		} catch (IOException exc) {
+			exc.printStackTrace();
+		}
 	}
 
 	/**
@@ -167,18 +184,15 @@ public class BasicTools {
 	 * @param outfile
 	 */
 	public static void writeArray2File(String[] array, String outfile) {
-
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
-
-			for (String line: array) {
-				bw.write(line + "\n");
+			for (String line : array) {
+				bw.append(line);
+				bw.newLine();
 			}
-			bw.flush();
 			bw.close();
-
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IOException exc) {
+			exc.printStackTrace();
 		}
 	}
 
@@ -328,7 +342,7 @@ public class BasicTools {
 			}
 			String seq = curr_seq.toString();
 			if (!seq.matches("^[A-IK-NP-Za-ik-np-z\\s]*$")) {
-				System.out.println("\nWarning. Given protein sequence \"" + header + "\" contains invalid symbols.");
+				logger.warning("Warning. Given protein sequence \"" + header + "\" contains invalid symbols.");
 			}
 
 			sequences.put(header, seq);
@@ -354,7 +368,6 @@ public class BasicTools {
 	 * @param output_file
 	 */
 	public static void writeFASTA(String header, String sequence, String output_file) {
-
 		Map<String, String> sequenceMap = new HashMap<String, String>();
 		sequenceMap.put(header, sequence);
 		writeFASTA(sequenceMap, output_file);
@@ -366,19 +379,19 @@ public class BasicTools {
 	 * @param output_file
 	 */
 	public static void writeFASTA(Map<String, String> sequences, String output_file) {
-
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(output_file)));
-
 			for (String header: sequences.keySet()) {
-				bw.write(">" + header + "\n");
+				bw.append('>');
+				bw.append(header);
+				bw.newLine();
 				String[] curr_seq = BasicTools.wrapString(sequences.get(header));
-				for (String line: curr_seq) {
-					bw.write(line + "\n");
+				for (String line : curr_seq) {
+					bw.append(line);
+					bw.newLine();
 				}
-				bw.write("\n");
+				bw.newLine();
 			}
-			bw.flush();
 			bw.close();
 
 		} catch (IOException ioe) {
@@ -888,6 +901,12 @@ public class BasicTools {
 		copy(infile, outfile, false);
 	}
 
+	/**
+	 * 
+	 * @param infile
+	 * @param outfile
+	 * @param isResource
+	 */
 	public static void copy(String infile, String outfile, boolean isResource) {
 
 		try {
@@ -902,10 +921,10 @@ public class BasicTools {
 
 			String line;
 			while ((line = br.readLine()) != null) {
-				bw.write(line + "\n");
+				bw.append(line);
+				bw.newLine();
 			}
 			br.close();
-			bw.flush();
 			bw.close();
 
 		} catch (IOException e) {

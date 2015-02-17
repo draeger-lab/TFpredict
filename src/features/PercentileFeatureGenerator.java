@@ -232,7 +232,7 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 	 *            (TXT format)
 	 */
 	public static void main(String[] args) {
-		LogUtil.initializeLogging(Level.INFO, "data", "features", "io", "ipr", "liblinear", "main", "modes", "resources", "edu");
+		LogUtil.initializeLogging(Level.INFO, "data", "de", "edu", "features", "io", "ipr", "liblinear", "main", "modes", "resources");
 
 		// generate feature file for TF prediction
 		String tfFastaFile = args[0]; //"/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/latest/TFandNonTF.fasta";

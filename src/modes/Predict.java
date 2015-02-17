@@ -417,13 +417,26 @@ public class Predict {
 		} else {
 			// SingleQueryMode --> add default header and write protein sequence to file
 			String[] inputSeq = BasicTools.wrapString(sequence);
-			String[] fastaSeq = new String[inputSeq.length+1];
-			fastaSeq[0] = ">" + tfName;
-			sequence_ids = new String[] {tfName};
-			for (int i=0; i<inputSeq.length; i++) {
-				fastaSeq[i+1] = inputSeq[i];
+
+			//			String[] fastaSeq = new String[inputSeq.length+1];
+			//			fastaSeq[0] = ">" + tfName;
+			try {
+				BufferedWriter bw = new BufferedWriter(new FileWriter(new File(input_file)));
+				bw.append('>');
+				bw.append(tfName);
+				bw.append('\n');
+
+				sequence_ids = new String[] {tfName};
+				for (int i = 0; i < inputSeq.length; i++) {
+					//					fastaSeq[i+1] = inputSeq[i];
+					bw.append(inputSeq[i]);
+					bw.append('\n');
+				}
+				//BasicTools.writeArray2File(fastaSeq, input_file);
+				bw.close();
+			} catch (IOException exc) {
+				exc.printStackTrace();
 			}
-			BasicTools.writeArray2File(fastaSeq, input_file);
 		}
 	}
 
