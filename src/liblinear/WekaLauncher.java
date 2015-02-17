@@ -294,17 +294,24 @@ public class WekaLauncher {
 	}
 
 
+	/**
+	 * 
+	 */
 	private void mergeResultsFiles() {
-		String mergedClassResults = "";
+		StringBuilder mergedClassResults = new StringBuilder();
 		// TODO: For test exchange next line and for loop
 		// ClassificationMethod classMethod = ClassificationMethod.SVM_ecoc;
 		for (ClassificationMethod classMethod: ClassificationMethod.values()) {
 			String classResultFile = resultsDir + classMethod.modelFileName.replace(".model", ".eval");
-			mergedClassResults = mergedClassResults.concat(BasicTools.readFile2String(classResultFile));
+			mergedClassResults.append(BasicTools.readFile2String(classResultFile));
 		}
-		BasicTools.writeString2File(mergedClassResults, resultsDir + mergedResultsFileName);
+		BasicTools.writeString2File(mergedClassResults.toString(), resultsDir + mergedResultsFileName);
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	private double[][] parseResultsFile() {
 
 		int numScores = folds * multiruns;

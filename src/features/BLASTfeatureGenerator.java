@@ -30,9 +30,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import data.TrainingDataGenerator;
+import de.zbit.util.ThreadManager;
 
 /**
  * 
@@ -58,11 +60,11 @@ public abstract class BLASTfeatureGenerator {
 	protected String featureFile;
 	protected String database;
 
-	protected Map<String, Integer> seq2label = new HashMap<String, Integer>();
-	protected Map<String, String> sequences = new HashMap<String, String>();
+	protected Map<String, Integer> seq2label = new ConcurrentHashMap<String, Integer>();
+	protected Map<String, String> sequences = new ConcurrentHashMap<String, String>();
 
-	protected Map<String, int[][]> pssms = new HashMap<String, int[][]>();
-	protected Map<String, double[]> features = new HashMap<String, double[]>();
+	protected Map<String, int[][]> pssms = new ConcurrentHashMap<String, int[][]>();
+	protected Map<String, double[]> features = new ConcurrentHashMap<String, double[]>();
 
 	private static final Logger logger = Logger.getLogger(BLASTfeatureGenerator.class.getName());
 
@@ -106,6 +108,13 @@ public abstract class BLASTfeatureGenerator {
 	}
 
 	/**
+	 * @return the pathForTmpDir
+	 */
+	protected String getPathForTmpDir() {
+		return pathForTmpDir;
+	}
+
+	/**
 	 * 
 	 */
 	public void generateFeatures() {
@@ -135,9 +144,8 @@ public abstract class BLASTfeatureGenerator {
 	 * 
 	 * @return
 	 */
-	protected HashMap<String, Integer> getSeq2LabelMapWithShortenedIDs() {
-
-		HashMap<String, Integer> shortSeq2Label = new HashMap<String, Integer>();
+	protected Map<String, Integer> getSeq2LabelMapWithShortenedIDs() {
+		Map<String, Integer> shortSeq2Label = new HashMap<String, Integer>();
 		for (String seqID: seq2label.keySet()) {
 			shortSeq2Label.put(seqID.split(" ")[0], seq2label.get(seqID));
 		}
@@ -150,76 +158,80 @@ public abstract class BLASTfeatureGenerator {
 	 */
 	protected void runPsiBlast() {
 
-		int numIter = 1;
-		if (pssmFeat) {
-			numIter = 2;
-		}
+		final int numIter = (pssmFeat) ? 2 : 1;
 
-		int numWarnings = 0;
+		ThreadManager threadManager = new ThreadManager();
+		int threads = 0;
 
 		int seqCnt = 1;
 		for (String seqID: sequences.keySet()) {
-
-			// prepare temporary files for PSI-BLAST output
-			String tempFilePrefix = "";
-			File localTempDir = new File(pathForTmpDir);
-
-			try {
-				if (localTempDir.exists()) {
-					tempFilePrefix = File.createTempFile("psiblast_", "", localTempDir).getAbsolutePath();
-
-					// use system default directory for temporary files
-				} else {
-					tempFilePrefix = File.createTempFile("psiblast_", "").getAbsolutePath();
-				}
-
-			} catch (IOException e) {
-				e.printStackTrace();
+			if (threads == threadManager.getNumberOfSlots() - 1) {
+				threadManager.awaitTermination();
+				threadManager = new ThreadManager();
+				threads = 0;
 			}
-			String infileFasta = tempFilePrefix + "_fasta.txt";
-			String outfileHits = tempFilePrefix + "_hits.txt";
-			String outfilePSSM = tempFilePrefix + "_pssm.txt";
-
-			BasicTools.writeFASTA(seqID, sequences.get(seqID), infileFasta);
 
 			// run PSI-BLAST current sequence
-			logger.info("Processing sequence: " + seqID + "\t(" + seqCnt++ + "/" + sequences.size() + ")");
+			logger.info("Processing sequence: " + seqID + "\t(" + seqCnt + "/" + sequences.size() + ")");
+			String sequence = sequences.get(seqID);
 
-			String uniprotID = seqID.split("\\|")[TrainingDataGenerator.UniProtIDField];
-			if (pssmFeat) {
-				String pssmFile = localTempDir + "/psiblast_" + uniprotID + "_pssm.txt";
-				boolean pssmFileExists = false;
-				if (new File(pssmFile).exists()) {
-					outfilePSSM = pssmFile;
-					pssmFileExists = true;
-				}
-				pssms.put(seqID, getPsiBlastPSSM(infileFasta, database, outfileHits, outfilePSSM, numIter, pssmFileExists).toArray(new int[][]{}));
+			threadManager.addToPool(() -> {
+				// prepare temporary files for PSI-BLAST output
+				String tempFilePrefix = "";
+				File localTempDir = new File(getPathForTmpDir());
 
-			} else {
-				String hitsFile = localTempDir + "/psiblast_" + uniprotID + "_hits.txt";
-				boolean hitsFileExists = false;
-				if (new File(hitsFile).exists()) {
-					outfileHits = hitsFile;
-					hitsFileExists = true;
-				}
 				try {
-					Map<String, Double> currHits = getPsiBlastHits(infileFasta, database, new File(outfileHits), numIter, hitsFileExists);
+					if (localTempDir.exists()) {
+						tempFilePrefix = File.createTempFile("psiblast_", "", localTempDir).getAbsolutePath();
 
-					BlastResultFeature feature = computeFeaturesFromBlastResult(seqID, currHits);
-					numWarnings += feature.getWarningCount();
-					features.put(seqID, feature.getFeatures());
+						// use system default directory for temporary files
+					} else {
+						tempFilePrefix = File.createTempFile("psiblast_", "").getAbsolutePath();
+					}
 
-				} catch (NumberFormatException | IOException exc) {
-					logger.severe(exc.getMessage());
-					exc.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			}
-		}
+				String infileFasta = tempFilePrefix + "_fasta.txt";
+				String outfileHits = tempFilePrefix + "_hits.txt";
+				String outfilePSSM = tempFilePrefix + "_pssm.txt";
 
-		if (numWarnings > 0) {
-			logger.warning("Number of warnings: " + numWarnings);
-		}
+				BasicTools.writeFASTA(seqID, sequence, infileFasta);
 
+				String uniprotID = seqID.split("\\|")[TrainingDataGenerator.UniProtIDField];
+				if (pssmFeat) {
+					String pssmFile = localTempDir + "/psiblast_" + uniprotID + "_pssm.txt";
+					boolean pssmFileExists = false;
+					if (new File(pssmFile).exists()) {
+						outfilePSSM = pssmFile;
+						pssmFileExists = true;
+					}
+					pssms.put(seqID, getPsiBlastPSSM(infileFasta, database, outfileHits, outfilePSSM, numIter, pssmFileExists).toArray(new int[][]{}));
+
+				} else {
+					String hitsFile = localTempDir + "/psiblast_" + uniprotID + "_hits.txt";
+					boolean hitsFileExists = false;
+					if (new File(hitsFile).exists()) {
+						outfileHits = hitsFile;
+						hitsFileExists = true;
+					}
+					try {
+						Map<String, Double> currHits = getPsiBlastHits(infileFasta, database, new File(outfileHits), numIter, hitsFileExists);
+
+						BlastResultFeature feature = computeFeaturesFromBlastResult(seqID, currHits);
+						logger.warning("Warnings: " + feature.getWarningCount());
+						features.put(seqID, feature.getFeatures());
+
+					} catch (NumberFormatException | IOException exc) {
+						logger.severe(exc.getMessage());
+						exc.printStackTrace();
+					}
+				}
+			});
+
+			seqCnt++;
+			threads++;
+		}
 	}
 
 	/**
@@ -233,7 +245,7 @@ public abstract class BLASTfeatureGenerator {
 	 * @throws NumberFormatException
 	 * @throws IOException
 	 */
-	private Map<String, Double> getPsiBlastHits(String fastaFile, String database, File hitsOutfile, int numIter, boolean useExistingHitsFile) throws NumberFormatException, IOException {
+	protected Map<String, Double> getPsiBlastHits(String fastaFile, String database, File hitsOutfile, int numIter, boolean useExistingHitsFile) throws NumberFormatException, IOException {
 		if (!useExistingHitsFile) {
 			String cmd = path2BLAST + "bin/psiblast -query " + fastaFile + " -num_iterations " + numIter + " -db " + database + " -out " + hitsOutfile;
 			BasicTools.runCommand(cmd, false);
@@ -251,7 +263,7 @@ public abstract class BLASTfeatureGenerator {
 	 * @param useExistingPssmFile
 	 * @return
 	 */
-	private List<int[]> getPsiBlastPSSM(String fastaFile, String database, String hitsOutfile, String pssmOutfile, int numIter, boolean useExistingPssmFile) {
+	protected List<int[]> getPsiBlastPSSM(String fastaFile, String database, String hitsOutfile, String pssmOutfile, int numIter, boolean useExistingPssmFile) {
 
 		if (! useExistingPssmFile) {
 			String cmd = path2BLAST + "bin/psiblast -query " + fastaFile + " -num_iterations " + numIter + " -db " + database + " -out " + hitsOutfile + " -out_ascii_pssm " + pssmOutfile;
@@ -311,26 +323,49 @@ public abstract class BLASTfeatureGenerator {
 		List<String> sequenceNames = new ArrayList<String>();
 
 		for (String seqID: features.keySet()) {
-
 			double[] featureVector = features.get(seqID);
-			int label = seq2label.get(seqID);
-			StringBuffer featureString = new StringBuffer("" + label);
-			for (int i = 0; i < featureVector.length; i++) {
-				if (!naiveFeat && featureVector[i] == 0) {
-					continue;     // skip features with value zero
+			// avoid null pointer exceptions
+			if ((featureVector != null) && (seq2label.containsKey(seqID))) {
+				int label = seq2label.get(seqID).intValue();
+				StringBuilder featureString = new StringBuilder();
+				featureString.append(label);
+				for (int i = 0; i < featureVector.length; i++) {
+					if (!naiveFeat && (featureVector[i] == 0)) {
+						continue;     // skip features with value zero
+					}
+					featureString.append(' ');
+					featureString.append(i + 1);
+					featureString.append(':');
+					featureString.append(Double.toString(featureVector[i]).replaceFirst("\\.0$", ""));
 				}
-				featureString.append(" " + (i+1) + ":" + (featureVector[i] + "").replaceFirst("\\.0$", ""));
-			}
 
-			int featVecIdx = libSVMfeatures.indexOf(featureString.toString());
-			if (naiveFeat || (featVecIdx == -1)) {
-				libSVMfeatures.add(featureString.toString());
-				sequenceNames.add(seqID);
-			} else {
-				sequenceNames.set(featVecIdx, sequenceNames.get(featVecIdx) + "\t" + seqID);
+				int featVecIdx = libSVMfeatures.indexOf(featureString.toString());
+				if (naiveFeat || (featVecIdx == -1)) {
+					libSVMfeatures.add(featureString.toString());
+					sequenceNames.add(seqID);
+				} else {
+					sequenceNames.set(featVecIdx, sequenceNames.get(featVecIdx) + "\t" + seqID);
+				}
 			}
 		}
 		BasicTools.writeList2File(libSVMfeatures, featureFile);
 		BasicTools.writeList2File(sequenceNames, featureFile.replace(".txt", "_names.txt"));
 	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	protected String getDatabase() {
+		return database;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	protected Map<String, int[][]> getPSSMs() {
+		return pssms;
+	}
+
 }
