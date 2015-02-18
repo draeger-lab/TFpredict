@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 
 import data.TrainingDataGenerator;
 import de.zbit.util.ThreadManager;
+import de.zbit.util.progressbar.ProgressBar;
 
 /**
  * 
@@ -166,11 +167,16 @@ public abstract class BLASTfeatureGenerator {
 		ThreadManager threadManager = new ThreadManager();
 		int threads = 0;
 
+
+		ProgressBar progress = new ProgressBar(sequences.size());
+		progress.DisplayBar("Number of completed sequences");
+
 		int seqCnt = 1;
 		for (String sequenceID: sequences.keySet()) {
 			if (threads == threadManager.getNumberOfSlots() - 1) {
 				threadManager.awaitTermination();
-				logger.info("Completed " + seqCnt + " of " + sequences.size());
+				//logger.info("Completed " + seqCnt + " of " + sequences.size());
+				progress.setCallNr(seqCnt);
 				threadManager = new ThreadManager();
 				threads = 0;
 			}
@@ -186,20 +192,20 @@ public abstract class BLASTfeatureGenerator {
 				 */
 				@Override
 				public void run() {
-				  double feature[] = runPsiBlast(numIter, seqID, sequence);
-				  if (feature != null) {
-				    features.put(seqID, feature);
-				  } else {
-				    logger.fine("No features found for " + seqID);
-				    seqWithoutFeatures.add(seqID);
-				  }
+					double feature[] = runPsiBlast(numIter, seqID, sequence);
+					if (feature != null) {
+						features.put(seqID, feature);
+					} else {
+						logger.fine("No features found for " + seqID);
+						seqWithoutFeatures.add(seqID);
+					}
 				}
 			});
 
 			seqCnt++;
 			threads++;
 		}
-		
+
 		if ((threadManager != null) && !threadManager.isAllDone()) {
 			threadManager.awaitTermination();
 		}
@@ -211,7 +217,7 @@ public abstract class BLASTfeatureGenerator {
 	 * @param numIter
 	 * @param seqID
 	 * @param sequence
-	 * @return 
+	 * @return
 	 */
 	private double[] runPsiBlast(final int numIter, final String seqID, final String sequence) {
 		// prepare temporary files for PSI-BLAST output
