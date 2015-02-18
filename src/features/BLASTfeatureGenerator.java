@@ -28,8 +28,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -159,79 +161,111 @@ public abstract class BLASTfeatureGenerator {
 	protected void runPsiBlast() {
 
 		final int numIter = (pssmFeat) ? 2 : 1;
+		final Set<String> seqWithoutFeatures = new HashSet<String>();
 
 		ThreadManager threadManager = new ThreadManager();
 		int threads = 0;
 
 		int seqCnt = 1;
-		for (String seqID: sequences.keySet()) {
+		for (String sequenceID: sequences.keySet()) {
 			if (threads == threadManager.getNumberOfSlots() - 1) {
 				threadManager.awaitTermination();
+				logger.info("Completed " + seqCnt + " of " + sequences.size());
 				threadManager = new ThreadManager();
 				threads = 0;
 			}
 
+			final String seqID = sequenceID;
 			// run PSI-BLAST current sequence
-			logger.info("Processing sequence: " + seqID + "\t(" + seqCnt + "/" + sequences.size() + ")");
-			String sequence = sequences.get(seqID);
+			logger.fine("Scheduling job for sequence: " + seqID + "\t(" + seqCnt + "/" + sequences.size() + ")");
+			final String sequence = sequences.get(seqID);
 
-			threadManager.addToPool(() -> {
-				// prepare temporary files for PSI-BLAST output
-				String tempFilePrefix = "";
-				File localTempDir = new File(getPathForTmpDir());
-
-				try {
-					if (localTempDir.exists()) {
-						tempFilePrefix = File.createTempFile("psiblast_", "", localTempDir).getAbsolutePath();
-
-						// use system default directory for temporary files
-					} else {
-						tempFilePrefix = File.createTempFile("psiblast_", "").getAbsolutePath();
-					}
-
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				String infileFasta = tempFilePrefix + "_fasta.txt";
-				String outfileHits = tempFilePrefix + "_hits.txt";
-				String outfilePSSM = tempFilePrefix + "_pssm.txt";
-
-				BasicTools.writeFASTA(seqID, sequence, infileFasta);
-
-				String uniprotID = seqID.split("\\|")[TrainingDataGenerator.UniProtIDField];
-				if (pssmFeat) {
-					String pssmFile = localTempDir + "/psiblast_" + uniprotID + "_pssm.txt";
-					boolean pssmFileExists = false;
-					if (new File(pssmFile).exists()) {
-						outfilePSSM = pssmFile;
-						pssmFileExists = true;
-					}
-					pssms.put(seqID, getPsiBlastPSSM(infileFasta, database, outfileHits, outfilePSSM, numIter, pssmFileExists).toArray(new int[][]{}));
-
-				} else {
-					String hitsFile = localTempDir + "/psiblast_" + uniprotID + "_hits.txt";
-					boolean hitsFileExists = false;
-					if (new File(hitsFile).exists()) {
-						outfileHits = hitsFile;
-						hitsFileExists = true;
-					}
-					try {
-						Map<String, Double> currHits = getPsiBlastHits(infileFasta, database, new File(outfileHits), numIter, hitsFileExists);
-
-						BlastResultFeature feature = computeFeaturesFromBlastResult(seqID, currHits);
-						logger.warning("Warnings: " + feature.getWarningCount());
-						features.put(seqID, feature.getFeatures());
-
-					} catch (NumberFormatException | IOException exc) {
-						logger.severe(exc.getMessage());
-						exc.printStackTrace();
-					}
+			threadManager.addToPool(new Runnable() {
+				/* (non-Javadoc)
+				 * @see java.lang.Runnable#run()
+				 */
+				@Override
+				public void run() {
+				  double feature[] = runPsiBlast(numIter, seqID, sequence);
+				  if (feature != null) {
+				    features.put(seqID, feature);
+				  } else {
+				    logger.fine("No features found for " + seqID);
+				    seqWithoutFeatures.add(seqID);
+				  }
 				}
 			});
 
 			seqCnt++;
 			threads++;
 		}
+		
+		if ((threadManager != null) && !threadManager.isAllDone()) {
+			threadManager.awaitTermination();
+		}
+		logger.warning("Did not find features for " + seqWithoutFeatures.size() + " of " + sequences.size() + " sequences.");
+	}
+
+	/**
+	 * 
+	 * @param numIter
+	 * @param seqID
+	 * @param sequence
+	 * @return 
+	 */
+	private double[] runPsiBlast(final int numIter, final String seqID, final String sequence) {
+		// prepare temporary files for PSI-BLAST output
+		String tempFilePrefix = "";
+		File localTempDir = new File(getPathForTmpDir());
+
+		try {
+			if (localTempDir.exists()) {
+				tempFilePrefix = File.createTempFile("psiblast_", "", localTempDir).getAbsolutePath();
+
+				// use system default directory for temporary files
+			} else {
+				tempFilePrefix = File.createTempFile("psiblast_", "").getAbsolutePath();
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String infileFasta = tempFilePrefix + "_fasta.txt";
+		String outfileHits = tempFilePrefix + "_hits.txt";
+		String outfilePSSM = tempFilePrefix + "_pssm.txt";
+
+		BasicTools.writeFASTA(seqID, sequence, infileFasta);
+
+		String uniprotID = seqID.split("\\|")[TrainingDataGenerator.UniProtIDField];
+		if (pssmFeat) {
+			String pssmFile = localTempDir + "/psiblast_" + uniprotID + "_pssm.txt";
+			boolean pssmFileExists = false;
+			if (new File(pssmFile).exists()) {
+				outfilePSSM = pssmFile;
+				pssmFileExists = true;
+			}
+			pssms.put(seqID, getPsiBlastPSSM(infileFasta, database, outfileHits, outfilePSSM, numIter, pssmFileExists).toArray(new int[][]{}));
+
+		} else {
+			String hitsFile = localTempDir + "/psiblast_" + uniprotID + "_hits.txt";
+			boolean hitsFileExists = false;
+			if (new File(hitsFile).exists()) {
+				outfileHits = hitsFile;
+				hitsFileExists = true;
+			}
+			try {
+				Map<String, Double> currHits = getPsiBlastHits(infileFasta, database, new File(outfileHits), numIter, hitsFileExists);
+
+				BlastResultFeature feature = computeFeaturesFromBlastResult(seqID, currHits);
+				logger.fine("Warnings: " + feature.getWarningCount());
+				return feature.getFeatures();
+
+			} catch (Throwable exc) {
+				logger.severe(exc.getMessage());
+				exc.printStackTrace();
+			}
+		}
+		return null;
 	}
 
 	/**

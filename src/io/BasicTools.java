@@ -1018,7 +1018,7 @@ public class BasicTools {
 			}
 		}
 		br.close();
-		logger.info(MessageFormat.format("Successfully read {0,number,integer} lines from hits file {1}.", lineIdx, hitsOutfile));
+		logger.fine(MessageFormat.format("Successfully read {0,number,integer} lines from hits file {1}.", lineIdx, hitsOutfile));
 
 		return blastHits;
 	}

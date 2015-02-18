@@ -90,7 +90,7 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 		}
 
 		if (numWarnings > 0) {
-			logger.warning("Number of warnings: " + numWarnings);
+			logger.fine("Number of warnings: " + numWarnings);
 		}
 	}
 
@@ -192,7 +192,7 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 			}
 
 			if (scoresTF.isEmpty() && scoresNonTF.isEmpty()) {
-				logger.warning("Warning. No BLAST hits found for sequence: " + seqID);
+				logger.fine("Warning. No BLAST hits found for sequence: " + seqID);
 				numWarnings++;
 				return new BlastResultFeature(seqID, percFeatVec, 0, numWarnings);
 			}
@@ -243,6 +243,6 @@ public class PercentileFeatureGenerator extends BLASTfeatureGenerator {
 		PercentileFeatureGenerator tfFeatureGenerator = new PercentileFeatureGenerator(tfFastaFile, tfFeatureFile, false);
 		tfFeatureGenerator.generateFeatures();
 
-		logger.info("Time elapsed: " + ((System.currentTimeMillis() - time)/3600) + " minutes");
+		logger.fine("Time elapsed: " + ((System.currentTimeMillis() - time)/3600) + " minutes");
 	}
 }

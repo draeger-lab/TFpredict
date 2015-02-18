@@ -70,10 +70,10 @@ public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
 		}
 
 		if (numErrors > 0) {
-			logger.info("Number of errors: " + numErrors);
+			logger.fine("Number of errors: " + numErrors);
 		}
 		if (numWarnings > 0) {
-			logger.info("Number of warnings: " + numWarnings);
+			logger.fine("Number of warnings: " + numWarnings);
 		}
 	}
 
@@ -107,7 +107,7 @@ public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
 			feature = new double[] {predClass};
 
 		} else if (bestHit.isEmpty()) {
-			logger.warning("No BLAST hits found for sequence: " + seqID);
+			logger.fine("No BLAST hits found for sequence: " + seqID);
 			numWarnings++;
 
 		} else {
