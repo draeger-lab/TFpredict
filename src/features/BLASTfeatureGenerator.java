@@ -169,14 +169,18 @@ public abstract class BLASTfeatureGenerator {
 
 
 		ProgressBar progress = new ProgressBar(sequences.size());
-		progress.DisplayBar("Number of completed sequences");
+		progress.setPrintInOneLine(true);
+		progress.DisplayBar("Completed 0 of " + sequences.size());
 
 		int seqCnt = 1;
 		for (String sequenceID: sequences.keySet()) {
 			if (threads == threadManager.getNumberOfSlots() - 1) {
 				threadManager.awaitTermination();
 				//logger.info("Completed " + seqCnt + " of " + sequences.size());
+				
 				progress.setCallNr(seqCnt);
+				progress.DisplayBar("Completed " + seqCnt + " of " + sequences.size());
+				
 				threadManager = new ThreadManager();
 				threads = 0;
 			}
@@ -209,6 +213,10 @@ public abstract class BLASTfeatureGenerator {
 		if ((threadManager != null) && !threadManager.isAllDone()) {
 			threadManager.awaitTermination();
 		}
+		
+		progress.DisplayBar("Completed all " + sequences.size());
+		progress.finished();
+		
 		logger.warning("Did not find features for " + seqWithoutFeatures.size() + " of " + sequences.size() + " sequences.");
 	}
 
