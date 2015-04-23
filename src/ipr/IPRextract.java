@@ -51,19 +51,19 @@ public class IPRextract {
 		Map<String, IprEntry> seq2domain = new HashMap<String, IprEntry>();
 		
 		for (int i=0; i < IPRoutput.size(); i++) {
-
 			String[] domain_entry = IPRoutput.get(i);
+			if (domain_entry.length < 12) continue;
 			String sequence_id = domain_entry[0].trim();
 			String domain_id = domain_entry[11].trim();
 			int domain_start = Integer.parseInt(domain_entry[6]);
 			int domain_end = Integer.parseInt(domain_entry[7]);
 			int curr_domain_length = domain_end - domain_start + 1;
-			
 			String domain_interval = domain_id + "    " + domain_start + "\t" + domain_end;
 			
 			// skip domains for which no InterPro-ID is given
 			if (domain_id.equals("NULL")) {
-				continue;
+				System.out.println("WARNING: Skipped domain " + domain_id + " with missing InterPro-ID");
+			  continue;
 			}
 			
 			IprEntry curr_entry;
@@ -146,11 +146,11 @@ public class IPRextract {
 			
 			String[] domain_entry = IPRoutput.get(i);
 					
+			if (domain_entry.length < 13) {
+			  continue;
+			}
 			String domain_id = domain_entry[11].trim();
 			// skip domains for which no InterPro-ID is given
-			if (domain_id.equals("NULL")) {
-				continue;
-			}
 			// skip domain IDs which were already added
 			if (ipr_domains.containsKey(domain_id)) {
 				continue;
@@ -174,15 +174,8 @@ public class IPRextract {
 				
 				// parse GO terms for current InterPro domain entry			
 				domain_GOterms = new ArrayList<String>(); 
-				for (String go_entry : domain_go.split(",")) {
-
-					if (go_entry.contains("GO:")) {
-						int start_pos = go_entry.indexOf("(GO:")+1;
-						int end_pos = go_entry.indexOf(")", start_pos);
-						
-						go_entry = go_entry.substring(start_pos, end_pos);
-						domain_GOterms.add(go_entry);
-					}
+				for (String go_entry : domain_go.split("\\|")) {
+				  domain_GOterms.add(go_entry);
 				}
 			}
 			IprRaw ipr_domain = new IprRaw(domain_id, domain_names, domain_GOterms);
