@@ -53,7 +53,7 @@ public class TFpredictMain {
 	private static boolean trainMode = false;
 	
 	private static final String[] validClassifiers = new String[] {"SVM_linear", "KNN", "NaiveBayes"}; 
-	private static final String version = "1.2";
+	private static final String version = "1.3";
 	
 	public static final String sabineSpeciesList = "organism_list.txt";
 	public static final String classMappingFile = "class_mapping.txt"; 

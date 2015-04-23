@@ -44,7 +44,7 @@ import java.util.Map;
 
 import javax.xml.rpc.ServiceException;
 
-import uk.ac.ebi.webservices.jaxws.IPRScanClient;
+import uk.ac.ebi.webservices.axis1.stubs.iprscan5.WsResultType;
 
 /**
  * 
@@ -54,7 +54,7 @@ import uk.ac.ebi.webservices.jaxws.IPRScanClient;
  */
 public class IPRrun {
 	
-	public static boolean addSpacerLine = true;
+	public static boolean addSpacerLine = false;
  	
 	// fixes bug in current version of InterProScan which removes first line of sequence if header is given
 	private static void addSpacerLine(String seqfile) {
@@ -134,7 +134,7 @@ public class IPRrun {
 						
 			// submit job
 			try {
-				IPRScanClient.main(param);
+				IPRScan5Client.main(param);
 			} catch (Exception e) {	}
 			
 			// restore System.exit
@@ -146,14 +146,15 @@ public class IPRrun {
 			// restore System.out
 			System.setOut(orig_stdout);
 			
-			IPRScanClient webIPR = new IPRScanClient();
+			IPRScan5Client webIPR = new IPRScan5Client();
 
 			if (!silent) System.out.println("Waiting for " + jobs.size() + " job(s) to finish ...");
 			for (String jobid : jobs) {
 				if (!silent) System.out.println("Polling job \"" + jobid + "\" ...");
 					try {
-						webIPR.getResults(jobid, basedir + jobid, "out");
-						webIPR.getResults(jobid, basedir + jobid, "visual-png");
+					  new File(basedir).mkdirs();
+						webIPR.getResults(jobid, basedir + jobid, "tsv");
+						webIPR.getResults(jobid, basedir + jobid, "svg");
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (ServiceException e) {
@@ -166,6 +167,7 @@ public class IPRrun {
 			if (silent) {
 				System.setErr(orig_stderr);
 			}
+			
 			IPRoutput = readIPROutput(basedir, jobs);
 
 		} else { // local
@@ -199,7 +201,7 @@ public class IPRrun {
 		
 		for (String job : jobs) {
 			try {
-				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".out.txt"));
+				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".tsv.txt"));
 				 while ((line = br.readLine()) != null) {
 					 String[] tabpos = line.split("\t");
 					 String seqID = tabpos[0].trim();
