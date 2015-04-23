@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="jar" name="Create Runnable Jar for Project TFPredict">
+	<target name="help">
+		<echo>
+	      This is an ANT build script to build a stand-alone JAR for
+	      TFpredict.
+	      
+	      To make this script work, you only need to set the paths in
+	      the init method.
+	    </echo>
+	</target>
+
+	<!-- define some properties that are used throughout the tasks -->
+	<target name="init">
+		<property name="base" location=".." />
+
+		<!-- the main class -->
+		<property name="main" value="main.TFpredictMain" />
+
+		<!-- the path to the sources -->
+		<property name="src" location="${base}/src" />
+
+		<!-- the path to the binaries -->
+		<property name="classes" location="build/classes" />
+
+		<!-- the application jar file -->
+		<property name="appJar" value="TFpredict.jar" />
+	</target>
+
+	<target name="clean" depends="init">
+		<delete dir="build" />
+		<delete file="${appJar}" />
+	</target>
+
+	<target name="compile" depends="clean">
+		<mkdir dir="${classes}"/>
+		<path id="class.path">
+			<fileset dir="${base}/lib">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+		<javac debug="on" srcdir="${src}" destdir="${classes}">
+			<classpath refid="class.path" />
+		</javac>
+	</target>
+
+	<!-- puts the application specific classes into application.jar. -->
+	<target name="jar" depends="compile">
+		<jar jarfile="${appJar}">
+			<manifest>
+				<attribute name="Main-Class" value="${main}" />
+				<attribute name="Built-By" value="Center for Bioinformatics Tuebingen (ZBIT)" />
+			</manifest>
+			<!-- INCLUDE/ EXCLUDE DEMO-->
+			<!--<fileset dir="${src}">-->
+			<!--  <include name="demo/view/**/*.properties"/>-->
+			<!--  <exclude name="demo/view/**/resource/**"/>-->
+			<!--</fileset>-->
+			<fileset dir="${classes}">
+			</fileset>
+
+			<zipfileset dir="${src}/resources" excludes="**/*.java" prefix="resources/"/>
+			<fileset file="${base}/readme.txt" />
+			<fileset file="${base}/license.txt" />
+			<zipgroupfileset dir="${base}/lib" includes="**/*.jar"/>
+		</jar>
+	</target>
+
+</project>
