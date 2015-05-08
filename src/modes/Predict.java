@@ -96,7 +96,7 @@ public class Predict {
 	static boolean useWeb = true;
 	static boolean standAloneMode = false;
 	static boolean batchMode = false;
-	static boolean silent = false;
+	static boolean silent = true;
 	static boolean useCharacteristicDomains = true;
 
 	// static arguments required by TFpredict

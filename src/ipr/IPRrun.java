@@ -54,7 +54,7 @@ import uk.ac.ebi.webservices.axis1.stubs.iprscan5.WsResultType;
  */
 public class IPRrun {
 	
-	public static boolean addSpacerLine = false;
+	public static boolean addSpacerLine = true;
  	
 	// fixes bug in current version of InterProScan which removes first line of sequence if header is given
 	private static void addSpacerLine(String seqfile) {
@@ -75,7 +75,7 @@ public class IPRrun {
 	
 	public IPRrun() {}
 	
-	private boolean silent = false;
+	private boolean silent = true;
 
 	// gfx related map
 	private static Map<String, String> seq2job = new HashMap<String,String>();
