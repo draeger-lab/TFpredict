@@ -309,7 +309,7 @@ public class BasicTools {
 					curr_seq = new StringBuffer();
 					first = false;
 				} else {
-					curr_seq.append(line);
+					curr_seq.append(line.replaceAll("\\s+",""));
 				}
 			}
 			
