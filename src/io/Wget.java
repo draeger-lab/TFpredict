@@ -1,6 +1,6 @@
 /*  
- * $Id$
- * $URL$
+ * $Id: Wget.java 99 2014-01-09 21:57:51Z draeger $
+ * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/io/Wget.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
  *  
@@ -29,7 +29,7 @@ import java.net.URL;
 /**
  * 
  * @author Florian Topf
- * @version $Rev$
+ * @version $Rev: 99 $
  * @since 1.0
  */
 public class Wget {

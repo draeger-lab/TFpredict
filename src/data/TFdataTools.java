@@ -1,9 +1,9 @@
-/*  
- * $Id$
- * $URL$
+/*
+ * $Id: TFdataTools.java 99 2014-01-09 21:57:51Z draeger $
+ * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/data/TFdataTools.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
- *  
+ * 
  * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
@@ -29,75 +29,79 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 import resources.Resource;
-
-
 import main.TFpredictMain;
 
 /**
  * 
  * @author Johannes Eichner
- * @version $Rev$
+ * @version $Rev: 99 $
  * @since 1.0
  */
 public class TFdataTools {
-	
-	
+
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(TFdataTools.class.getName());
+
 	public static String getTransfacClass(String class_id) {
-		
+
 		String CLASS_FORMAT =    "[0-4]\\p{Punct}[0-9][0-2]?\\p{Punct}";
 		String CLASS_ID_FORMAT = "C00\\d\\d\\p{Punct}";
-		
-	    // Method 1: check whether last token is of the form X.Y.Z. ...
+
+		// Method 1: check whether last token is of the form X.Y.Z. ...
 		StringTokenizer strtok_class = new StringTokenizer(class_id);
 		String class_token = null;
 		while (strtok_class.hasMoreTokens()) {
-			class_token = strtok_class.nextToken();	
+			class_token = strtok_class.nextToken();
 		}
-		
+
 		if((class_token.length() > 3 && class_token.substring(0,4).matches(CLASS_FORMAT))
-		   || (class_token.length() > 4 && class_token.substring(0,5).matches(CLASS_FORMAT))) {
-			
+				|| (class_token.length() > 4 && class_token.substring(0,5).matches(CLASS_FORMAT))) {
+
 			return class_token;
 		}
-		
-	    // Method 2: check whether class is obtainable by its class_id ...	
+
+		// Method 2: check whether class is obtainable by its class_id ...
 		if(class_id.length() >= 6 && class_id.substring(0,6).matches(CLASS_ID_FORMAT)) {
-			class_id = class_id.substring(0,5);	
+			class_id = class_id.substring(0,5);
 		}
-		
+
 		String line = null;
 		String res = null;
 		boolean found = false;
-		
+
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(Resource.class.getResourceAsStream(TFpredictMain.classMappingFile)));
-			
-			while((line = br.readLine()) != null) {	
+
+			while((line = br.readLine()) != null) {
 				StringTokenizer strtok = new StringTokenizer(line);
 				res = strtok.nextToken();
 				if(class_id.equals(strtok.nextToken())) {
 					found = true;
 					break;
-				}	
+				}
 			}
 			br.close();
-		
-		} catch (IOException e) {		
-			System.out.println("IOException caught while fetching class."); 
+
+		} catch (IOException e) {
+			logger.severe("IOException caught while fetching class.");
 		}
-		
+
 		if(!found) {
-			System.out.println("No classification found for \"" + class_id + "\". Aborting.");
+			logger.severe("No classification found for \"" + class_id + "\". Aborting.");
 			System.exit(0);
 		}
 		return res;
 	}
-	
-	
+
+
 	public static String[] convertPFMformat(ArrayList<String> stamp_pfm) {
-		
+
 		StringTokenizer strtok = new StringTokenizer(stamp_pfm.get(0));;
 
 		DecimalFormat fmt = new DecimalFormat();

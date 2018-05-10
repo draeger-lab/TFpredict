@@ -1,0 +1,315 @@
+#import.function("read.class.prob.files.R")  OLD VERSION - JTY
+source("/home/jtyurkovich/git/TFPredict/R/read.class.prob.files.R")
+#import.function("plot.scoring.curve.R")
+source("/home/jtyurkovich/git/TFPredict/R/plot.scoring.curve.R")
+#import.function("read.inst.names.file.R")
+source("/home/jtyurkovich/git/TFPredict/R/read.inst.names.file.R")
+#import.function("calc.tpr.R")
+source("/home/jtyurkovich/git/TFPredict/R/calc.tpr.R")
+#import.function("calc.fpr.R")
+source("/home/jtyurkovich/git/TFPredict/R/calc.fpr.R")
+
+# folder containing prob files --> point to this folder - JTY
+class.file.dir <- "/home/jtyurkovich/git/TFPredict/resultsFileDir"
+# class.file.dir <- "/rahome/eichner/projects/tfpredict/data/super_pred/class_files/latest/"
+
+# read classification outcomes for each feature type and classifier
+# this for multiple directories, one for each classifier (put all .prob files in dir) - JTY
+# folder for each feature type; keep name allClassifiers
+subdirs <- list.dirs(class.file.dir)[-1]
+
+# may not need - JTY
+#kstar.idx <- grep("kStar", subdirs)
+#if (length(kstar.idx) > 0) {
+#  subdirs <- subdirs[-kstar.idx]
+#}
+
+class.results <- lapply(subdirs, read.class.prob.files)
+feat.names <- sub("_features", "", sub(".*/", "", subdirs))
+names(class.results) <- feat.names
+
+
+method.names  <- names(class.results[[1]])
+class.names <- paste("class_", 1:ncol(class.results[[1]][[1]]$class.probs), sep="")
+num.classes <- length(class.names)
+feat2seq <- read.inst.names.file(subdirs, tf.pred=TRUE)
+#feat2seq <- read.inst.names.file(subdirs, tf.pred=FALSE)
+names(feat2seq) <- feat.names
+seq.names <- names(feat2seq[[1]])
+
+# prepare prediction scores
+# TODO: what is contained in pred.scores? there is a data structure for each classifier, but each
+#    data structure contains the same header (column names) for each classifier - JTY
+if (num.classes == 2) {
+  pred.scores <- array(NA, dim=c(length(seq.names), length(method.names), length(feat.names)),
+                      dimnames=list(sequence=seq.names, method=method.names, feature=feat.names))
+  for (i in 1:length(feat.names)) {
+    pred.scores[,,i] <- sapply(class.results[[i]], function (x) x$class.probs[,1])[feat2seq[[i]],]
+  } 
+  
+} else {
+  pred.scores <- rep(list(array(NA, dim=c(length(seq.names), length(method.names), length(feat.names)),
+                                dimnames=list(sequence=seq.names, method=method.names, feature=feat.names))), num.classes)
+  for (i in 1:length(feat.names)) {
+    for (j in 1:length(class.names)) {
+      pred.scores[[j]][,,i] <- sapply(class.results[[i]], function (x) x$class.probs[,j])[feat2seq[[i]],]
+    }
+  }
+}
+
+# prepare labels
+#global.labels <- class.results$pssm[[1]]$class.labels[feat2seq$pssm]
+global.labels <- class.results$allClassifiers[[1]]$class.labels[feat2seq$allClassifiers]
+
+if (num.classes == 2) {
+  labels <- global.labels
+  labels[labels == 2] <- -1
+  pred.task <- "TF/non-TF"
+
+} else {
+  labels <- list()
+  for (i in 1:num.classes) {
+    curr.labels <- global.labels
+    curr.labels[curr.labels != i] <- -1
+    curr.labels[curr.labels == i] <- 1 
+    labels[[i]] <-  curr.labels
+    pred.task <- "superclass"
+  }
+}
+
+# remove sequences for which no prediction was possible due to missing domains
+if (num.classes == 2) {
+  no.pred.seq <- union(which(is.na(pred.scores[,1,1])), which(is.na(pred.scores[,1,3]))) 
+  if (length(no.pred.seq) > 0) {
+    pred.scores <- pred.scores[-no.pred.seq,,]
+    labels <- labels[-no.pred.seq]
+  }
+  
+} else {
+  no.pred.seq <- which(is.na((pred.scores[[1]][,1,1])))
+  if (length(no.pred.seq) > 0) {
+    pred.scores <- lapply(pred.scores, function (x) x[-no.pred.seq,,])
+    labels <- lapply(labels, function (x) x[-no.pred.seq])
+  }
+}
+
+# compute TPR and FPR of naive method
+# TODO: need to compare our results to BLAST to generate these naive_features.txt files!!! - JTY
+
+# naive.pred.file <- "/rahome/eichner/projects/tfpredict/data/super_pred/feature_files/latest/naive_features.txt"
+naive.pred.file <- "/home/jtyurkovich/git/TFPredict/resultsFileDir"
+#naive.pred.file <- "/rahome/eichner/projects/tfpredict/data/tf_pred/feature_files/latest/naive_features.txt"
+naive.pred <- as.matrix(read.table(naive.pred.file, sep="\n"))
+naive.pred <- as.numeric(sub(".*:", "", naive.pred))
+# naive.names.file <- "/rahome/eichner/projects/tfpredict/data/super_pred/feature_files/latest/naive_features_names.txt"
+naive.names.file <- "/rahome/eichner/projects/tfpredict/data/tf_pred/feature_files/latest/naive_features_names.txt"
+naive.names <- as.matrix(read.table(naive.names.file, sep="\n"))
+
+if (num.classes == 2) {
+  naive.names <- sub("\\|.*", "", sub(".*?\\|", "", naive.names))
+} else {
+  naive.names <- gsub("(NonTF|TF)\\|.*?\\|", "", naive.names)
+}
+naive.perm <- match(seq.names, naive.names)
+naive.pred <- naive.pred[naive.perm]
+naive.pred <- naive.pred[-no.pred.seq]
+if (num.classes == 2) {
+  mean.tpr <- calc.tpr(naive.pred, abs(labels-1))
+  mean.fpr <- calc.fpr(naive.pred, abs(labels-1))
+  
+} else {
+  naive.pred <- lapply(0:4, function (i) {
+    naive.bin.pred <- naive.pred
+    naive.bin.pred[naive.pred != i] = -1
+    naive.bin.pred[naive.pred == i] = 1
+    return(naive.bin.pred)
+  })
+
+  tpr.values <- rep(NA, 5)
+  fpr.values <- rep(NA, 5)
+  for (i in 1:5) {
+    tpr.values[i] <- calc.tpr(naive.pred[[i]], labels[[i]])
+    fpr.values[i] <- calc.fpr(naive.pred[[i]], labels[[i]])
+  }
+  mean.tpr <- mean(tpr.values)
+  mean.fpr <- mean(fpr.values)
+}
+  
+# ROC curves and bar plots for comparison of classifiers (single feature type)
+roc.outfile <- paste(class.file.dir, "ROC_curves.pdf", sep="")
+roc.scores <- list()
+pdf(roc.outfile, width=12, height=8)
+for (feat.type in feat.names) {
+  if (num.classes == 2) {
+    curr.pred <- t(pred.scores[,,feat.type])
+    curr.lab <- labels+2
+  } else {
+    curr.pred <- lapply(pred.scores, function (x) t(x[,,feat.type]))
+  }
+  roc.scores[[feat.type]] <- plot.scoring.curve(curr.pred, labels, outfile=NULL, auc.barplot=TRUE, use.layout=TRUE, #add.roc.point=c(mean.fpr, mean.tpr),
+                                                title=sprintf("ROC curve for %s predictors using %s features", pred.task, feat.type))
+}
+dev.off()
+
+# consensus classifier: con.pred.scores <- apply(pred.scores[,,1], 1, mean)
+# pred.scores <- cbind(pred.scores[,,1], con.pred.scores)
+# dim(pred.scores) <- c(dim(pred.scores), 1)
+# pred.scores <- pred.scores[,c(1,8),,drop=F]
+# dimnames(pred.scores)[3]
+
+# Precision-recall curves and bar plots for comparison of classifiers (single feature type)
+prc.outfile <- paste(class.file.dir, "PRC_curves.pdf", sep="")
+prc.scores <- list()
+pdf(prc.outfile)
+for (feat.type in feat.names) {
+  if (num.classes == 2) {
+    curr.pred <- t(pred.scores[,,feat.type])
+  } else {
+    curr.pred <- lapply(pred.scores, function (x) t(x[,,feat.type]))
+  }
+  prc.scores[[feat.type]] <- plot.scoring.curve(curr.pred, labels, curve.type="prc", outfile=NULL, auc.barplot=TRUE, use.layout=TRUE,
+                                                title=sprintf("Precision-recall curve for %s predictors using %s features", pred.task, feat.type))
+}
+dev.off()
+
+
+# Boxplots showing ROC score distributions for features/classifiers
+source("/home/jtyurkovich/git/TFPredict/R/plot.boxes.R")
+#import.function("plot.boxes.R")
+roc.matrix <- do.call(cbind, lapply(roc.scores, rowMeans))
+colnames(roc.matrix) <- names(roc.scores)
+box.outfile <- paste(class.file.dir, "ROC_box_plots.pdf", sep="")
+pdf(box.outfile, width=12, height=8)
+layout(matrix(1:3, nrow=1))
+plot.boxes(roc.matrix, ylab="Area under the ROC curve", ylim=c(0.5,1))
+abline(h=0.5, lty=3)
+plot.boxes(t(roc.matrix), ylab="Area under the ROC curve", ylim=c(0.5,1))
+abline(h=0.5, lty=3)
+dev.off()
+
+# Boxplots showing ROC score distributions for superclasses
+roc.super <- do.call(rbind, roc.scores)
+colnames(roc.super) <- c("Other", "Basic domain", "Zinc finger", "Helix-turn-helix", "Beta scaffold")
+box.outfile <- paste(class.file.dir, "ROC_boxes_superclass.pdf", sep="")
+pdf(box.outfile)
+plot.boxes(roc.super, ylab="Area under the ROC curve", ylim=c(0.5,1))
+abline(h=0.5, lty=3)
+dev.off()
+
+
+# generate FASTA file for supplement
+load("/rahome/eichner/projects/tfpredict/data/tf_pred/class_files/latest/workspace.Rdata")
+input.fasta.file <- "/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/latest/TFnonTF.fasta"
+output.fasta.file <- "/rahome/eichner/manuscripts/tfpredict_tswj/TFnonTF.fasta"
+
+import.function("read.fasta2list.R")
+import.function("write.list2fasta.R")
+
+fasta.list <- read.fasta2list(fasta.file)
+uniprot.ids.ext <- as.vector(sapply(names(fasta.list), function (x) unlist(strsplit(x, "\\|"))[2]))
+uniprot.ids <- rownames(pred.scores)
+
+rel.idx <- match(uniprot.ids, uniprot.ids.ext)
+fasta.list <- fasta.list[rel.idx]
+names(fasta.list) <- sub(" GO.*", "", names(fasta.list))
+non.tf.idx <- grep("NonTF", names(fasta.list))
+names(fasta.list)[non.tf.idx] <- paste(names(fasta.list)[non.tf.idx], "UniProt", sep="|")
+names(fasta.list) <- as.vector(sapply(names(fasta.list), function (x) paste(unlist(strsplit(x, "\\|"))[c(2,3,5)], collapse="|")))
+
+write.list2fasta(fasta.list, fasta.file=output.fasta.file)
+
+
+# --------- TFpredict Revisions
+# don't need any of this - JTY
+
+# read IDs of mislabeled Non-TFs
+# serialized version of R objects - JTY
+load("/rahome/eichner/projects/tfpredict/data/tf_pred/class_files/20.03.2013/workspace.Rdata")
+class.file.dir <- "/rahome/eichner/projects/tfpredict/data/tf_pred/class_files/21.08.2013/"
+mislabeled.file <- "/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/21.08.2013/mislabeled_nonTFs.txt"
+mislabeled.nontf.ids <- as.vector(as.matrix(read.table(mislabeled.file)))
+
+mislab.idx <- as.vector(na.omit(match(mislabeled.nontf.ids, rownames(pred.scores))))
+pred.scores <- pred.scores[-mislab.idx,,]
+naive.pred <- naive.pred[-mislab.idx]
+labels <- labels[-mislab.idx]
+mean.tpr <- calc.tpr(naive.pred, abs(labels-1))
+mean.fpr <- calc.fpr(naive.pred, abs(labels-1))
+
+# generate curated TFnonTF.fasta file and predict problematic TFs
+input.fasta.file <- "/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/20.03.2013/TFnonTF.fasta"
+filtered.fasta.file <- "/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/21.08.2013/TFnonTF.fasta"
+output.fasta.file <- "/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/21.08.2013/TFnonTF_supplement.fasta"
+
+import.function("read.fasta2list.R")
+import.function("write.list2fasta.R")
+
+fasta.list <- read.fasta2list(input.fasta.file)
+uniprot.ids.ext <- as.vector(sapply(names(fasta.list), function (x) unlist(strsplit(x, "\\|"))[2]))
+uniprot.ids <- rownames(pred.scores)
+
+rel.idx <- match(uniprot.ids, uniprot.ids.ext)
+fasta.list <- fasta.list[rel.idx]
+names(fasta.list) <- sub(" GO.*", "", names(fasta.list))
+write.list2fasta(fasta.list, fasta.file=filtered.fasta.file)
+
+non.tf.idx <- grep("NonTF", names(fasta.list))
+names(fasta.list)[non.tf.idx] <- paste(names(fasta.list)[non.tf.idx], "UniProt", sep="|")
+names(fasta.list) <- as.vector(sapply(names(fasta.list), function (x) paste(unlist(strsplit(x, "\\|"))[c(2,3,5)], collapse="|")))
+
+write.list2fasta(fasta.list, fasta.file=output.fasta.file)
+
+# generate ROC curves for comparison against TF/non-TF classifiers by Zheng and Kumar
+roc.outfile <- paste(class.file.dir, "ROC_zheng_kumar.pdf", sep="")
+roc.scores <- list()
+pdf(roc.outfile, width=12, height=8)
+curr.pred <- t(pred.scores[,"svmLinear", c("percentile", "domain", "pssm")])
+curr.lab <- labels+2
+roc.scores[[feat.type]] <- plot.scoring.curve(curr.pred, labels, outfile=NULL, auc.barplot=TRUE, use.layout=TRUE, add.roc.point=c(mean.fpr, mean.tpr),
+                                              title=sprintf("ROC curve for %s predictors using %s features", pred.task, feat.type))
+dev.off()
+
+# generate ROC curves for comparison against superclass predictors by Zheng and Kumar
+load("/rahome/eichner/projects/tfpredict/data/super_pred/class_files/latest/workspace.Rdata")
+class.file.dir <- "/rahome/eichner/projects/tfpredict/data/super_pred/class_files/21.08.2013/"
+ecoc.class.dir <- "/rahome/eichner/projects/tfpredict/data/super_pred/class_files/latest/ecoc_features/"
+ecoc.class.results <- read.class.prob.files(ecoc.class.dir)[[1]]
+pred.scores.ecoc <- sapply(1:5, function (j) ecoc.class.results$class.probs[feat2seq[["domain"]],j])
+pred.scores.ecoc <- pred.scores.ecoc[-no.pred.seq,]
+
+# ROC curves and bar plots for comparison of classifiers (single feature type)
+roc.outfile <- paste(class.file.dir, "ROC_zheng_kumar.pdf", sep="")
+roc.scores <- list()
+curr.pred <- list()
+for (i in 1:5) {
+  curr.pred[[i]] <- rbind(pred.scores[[i]][,"svmLinear", "percentile"], pred.scores.ecoc[,i], pred.scores[[i]][,"svmLinear", "pssm"])
+}
+pdf(roc.outfile, width=12, height=8)
+roc.scores[[feat.type]] <- plot.scoring.curve(curr.pred, labels, outfile=NULL, auc.barplot=TRUE, use.layout=TRUE, add.roc.point=c(mean.fpr, mean.tpr),
+                                              title=sprintf("ROC curve for %s predictors using %s features", pred.task, feat.type))
+dev.off()
+
+# compare performance on C2H2-type zinc fingers
+import.function("read.fasta2list.R")
+
+fasta.file <- "/rahome/eichner/projects/tfpredict/data/tf_pred/fasta_files/latest/TF.fasta"
+fasta.list <- read.fasta2list(fasta.file)
+uniprot2class <- as.vector(sapply(names(fasta.list), function (x) unlist(strsplit(x, "\\|"))[4]))
+names(uniprot2class) <- as.vector(sapply(names(fasta.list), function (x) unlist(strsplit(x, "\\|"))[2]))
+
+uniprot.ids <- sub("\\|.*", "", sub(".*?\\|", "", rownames(pred.scores[[1]])))
+c2h2.idx <- which(sapply(uniprot2class[uniprot.ids], function (x) substr(x,1,min(nchar(x),4))) == "2.3.")
+
+pred.scores.eichner <- cbind(pred.scores[[1]][c2h2.idx, "svmLinear", "percentile"],
+                             pred.scores[[2]][c2h2.idx, "svmLinear", "percentile"],
+                             pred.scores[[3]][c2h2.idx, "svmLinear", "percentile"],
+                             pred.scores[[4]][c2h2.idx, "svmLinear", "percentile"],
+                             pred.scores[[5]][c2h2.idx, "svmLinear", "percentile"])
+
+pred.scores.kumar <- cbind(pred.scores[[1]][c2h2.idx, "svmLinear", "pssm"],
+                           pred.scores[[2]][c2h2.idx, "svmLinear", "pssm"],
+                           pred.scores[[3]][c2h2.idx, "svmLinear", "pssm"],
+                           pred.scores[[4]][c2h2.idx, "svmLinear", "pssm"],
+                           pred.scores[[5]][c2h2.idx, "svmLinear", "pssm"])
+
+pred.scores.zheng <- pred.scores.ecoc[c2h2.idx]

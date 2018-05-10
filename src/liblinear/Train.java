@@ -1,9 +1,9 @@
-/*  
- * $Id$
- * $URL$
+/*
+ * $Id: Train.java 99 2014-01-09 21:57:51Z draeger $
+ * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/liblinear/Train.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
- *  
+ * 
  * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
@@ -37,284 +37,300 @@ import java.util.StringTokenizer;
 /**
  * 
  * @author Johannes Eichner
- * @version $Rev$
+ * @version $Rev: 99 $
  * @since 1.0
  */
 public class Train {
 
-    public static void main(String[] args) throws IOException, InvalidInputDataException {
-        new Train().run(args);
-    }
+	public static void main(String[] args) throws IOException, InvalidInputDataException {
+		new Train().run(args);
+	}
 
-    private double    bias             = 1;
-    private boolean   cross_validation = false;
-    private String    inputFilename;
-    private String    modelFilename;
-    private int       nr_fold;
-    private Parameter param            = null;
-    private Problem   prob             = null;
+	private double    bias             = 1;
+	private boolean   cross_validation = false;
+	private String    inputFilename;
+	private String    modelFilename;
+	private int       nr_fold;
+	private Parameter param            = null;
+	private Problem   prob             = null;
 
-    private void do_cross_validation() {
-        int[] target = new int[prob.l];
+	private void do_cross_validation() {
+		int[] target = new int[prob.l];
 
-        long start, stop;
-        start = System.currentTimeMillis();
-        Linear.crossValidation(prob, param, nr_fold, target);
-        stop = System.currentTimeMillis();
-        System.out.println("time: " + (stop - start) + " ms");
+		long start, stop;
+		start = System.currentTimeMillis();
+		Linear.crossValidation(prob, param, nr_fold, target);
+		stop = System.currentTimeMillis();
+		System.out.println("time: " + (stop - start) + " ms");
 
-        int total_correct = 0;
-        for (int i = 0; i < prob.l; i++)
-            if (target[i] == prob.y[i]) ++total_correct;
+		int total_correct = 0;
+		for (int i = 0; i < prob.l; i++) {
+			if (target[i] == prob.y[i]) {
+				++total_correct;
+			}
+		}
 
-        System.out.printf("correct: %d" + NL, total_correct);
-        System.out.printf("Cross Validation Accuracy = %g%%\n", 100.0 * total_correct / prob.l);
-    }
+		System.out.printf("correct: %d" + NL, total_correct);
+		System.out.printf("Cross Validation Accuracy = %g%%\n", 100.0 * total_correct / prob.l);
+	}
 
-    private void exit_with_help() {
-        System.out.println("Usage: train [options] training_set_file [model_file]" + NL //
-            + "options:" + NL//
-            + "-s type : set type of solver (default 1)" + NL//
-            + "   0 -- L2-regularized logistic regression" + NL//
-            + "   1 -- L2-regularized L2-loss support vector classification (dual)" + NL//
-            + "   2 -- L2-regularized L2-loss support vector classification (primal)" + NL//
-            + "   3 -- L2-regularized L1-loss support vector classification (dual)" + NL//
-            + "   4 -- multi-class support vector classification by Crammer and Singer" + NL//
-            + "   5 -- L1-regularized L2-loss support vector classification" + NL//
-            + "   6 -- L1-regularized logistic regression" + NL//
-            + "-c cost : set the parameter C (default 1)" + NL//
-            + "-e epsilon : set tolerance of termination criterion" + NL//
-            + "   -s 0 and 2" + NL//
-            + "       |f'(w)|_2 <= eps*min(pos,neg)/l*|f'(w0)|_2," + NL//
-            + "       where f is the primal function and pos/neg are # of" + NL//
-            + "       positive/negative data (default 0.01)" + NL//
-            + "   -s 1, 3, and 4" + NL//
-            + "       Dual maximal violation <= eps; similar to libsvm (default 0.1)" + NL//
-            + "   -s 5 and 6" + NL//
-            + "       |f'(w)|_inf <= eps*min(pos,neg)/l*|f'(w0)|_inf," + NL//
-            + "       where f is the primal function (default 0.01)" + NL//
-            + "-B bias : if bias >= 0, instance x becomes [x; bias]; if < 0, no bias term added (default -1)" + NL//
-            + "-wi weight: weights adjust the parameter C of different classes (see README for details)" + NL//
-            + "-v n: n-fold cross validation mode" + NL//
-            + "-q : quiet mode (no outputs)" + NL//
-        );
-        System.exit(1);
-    }
+	private void exit_with_help() {
+		System.out.println("Usage: train [options] training_set_file [model_file]" + NL //
+				+ "options:" + NL//
+				+ "-s type : set type of solver (default 1)" + NL//
+				+ "   0 -- L2-regularized logistic regression" + NL//
+				+ "   1 -- L2-regularized L2-loss support vector classification (dual)" + NL//
+				+ "   2 -- L2-regularized L2-loss support vector classification (primal)" + NL//
+				+ "   3 -- L2-regularized L1-loss support vector classification (dual)" + NL//
+				+ "   4 -- multi-class support vector classification by Crammer and Singer" + NL//
+				+ "   5 -- L1-regularized L2-loss support vector classification" + NL//
+				+ "   6 -- L1-regularized logistic regression" + NL//
+				+ "-c cost : set the parameter C (default 1)" + NL//
+				+ "-e epsilon : set tolerance of termination criterion" + NL//
+				+ "   -s 0 and 2" + NL//
+				+ "       |f'(w)|_2 <= eps*min(pos,neg)/l*|f'(w0)|_2," + NL//
+				+ "       where f is the primal function and pos/neg are # of" + NL//
+				+ "       positive/negative data (default 0.01)" + NL//
+				+ "   -s 1, 3, and 4" + NL//
+				+ "       Dual maximal violation <= eps; similar to libsvm (default 0.1)" + NL//
+				+ "   -s 5 and 6" + NL//
+				+ "       |f'(w)|_inf <= eps*min(pos,neg)/l*|f'(w0)|_inf," + NL//
+				+ "       where f is the primal function (default 0.01)" + NL//
+				+ "-B bias : if bias >= 0, instance x becomes [x; bias]; if < 0, no bias term added (default -1)" + NL//
+				+ "-wi weight: weights adjust the parameter C of different classes (see README for details)" + NL//
+				+ "-v n: n-fold cross validation mode" + NL//
+				+ "-q : quiet mode (no outputs)" + NL//
+				);
+		System.exit(1);
+	}
 
 
-    Problem getProblem() {
-        return prob;
-    }
+	Problem getProblem() {
+		return prob;
+	}
 
-    double getBias() {
-        return bias;
-    }
+	double getBias() {
+		return bias;
+	}
 
-    Parameter getParameter() {
-        return param;
-    }
+	Parameter getParameter() {
+		return param;
+	}
 
-    void parse_command_line(String argv[]) {
-        int i;
+	void parse_command_line(String argv[]) {
+		int i;
 
-        // eps: see setting below
-        param = new Parameter(SolverType.L2R_L2LOSS_SVC_DUAL, 1, Double.POSITIVE_INFINITY);
-        // default values
-        bias = -1;
-        cross_validation = false;
+		// eps: see setting below
+		param = new Parameter(SolverType.L2R_L2LOSS_SVC_DUAL, 1, Double.POSITIVE_INFINITY);
+		// default values
+		bias = -1;
+		cross_validation = false;
 
-        int nr_weight = 0;
+		int nr_weight = 0;
 
-        // parse options
-        for (i = 0; i < argv.length; i++) {
-            if (argv[i].charAt(0) != '-') break;
-            if (++i >= argv.length) exit_with_help();
-            switch (argv[i - 1].charAt(1)) {
-                case 's':
-                    param.solverType = SolverType.values()[atoi(argv[i])];
-                    break;
-                case 'c':
-                    param.setC(atof(argv[i]));
-                    break;
-                case 'e':
-                    param.setEps(atof(argv[i]));
-                    break;
-                case 'B':
-                    bias = atof(argv[i]);
-                    break;
-                case 'w':
-                    ++nr_weight;
-                    {
-                        int[] old = param.weightLabel;
-                        param.weightLabel = new int[nr_weight];
-                        System.arraycopy(old, 0, param.weightLabel, 0, nr_weight - 1);
-                    }
+		// parse options
+		for (i = 0; i < argv.length; i++) {
+			if (argv[i].charAt(0) != '-') {
+				break;
+			}
+			if (++i >= argv.length) {
+				exit_with_help();
+			}
+			switch (argv[i - 1].charAt(1)) {
+			case 's':
+				param.solverType = SolverType.values()[atoi(argv[i])];
+				break;
+			case 'c':
+				param.setC(atof(argv[i]));
+				break;
+			case 'e':
+				param.setEps(atof(argv[i]));
+				break;
+			case 'B':
+				bias = atof(argv[i]);
+				break;
+			case 'w':
+				++nr_weight;
+				{
+					int[] old = param.weightLabel;
+					param.weightLabel = new int[nr_weight];
+					System.arraycopy(old, 0, param.weightLabel, 0, nr_weight - 1);
+				}
 
-                    {
-                        double[] old = param.weight;
-                        param.weight = new double[nr_weight];
-                        System.arraycopy(old, 0, param.weight, 0, nr_weight - 1);
-                    }
+				{
+					double[] old = param.weight;
+					param.weight = new double[nr_weight];
+					System.arraycopy(old, 0, param.weight, 0, nr_weight - 1);
+				}
 
-                    param.weightLabel[nr_weight - 1] = atoi(argv[i - 1].substring(2));
-                    param.weight[nr_weight - 1] = atof(argv[i]);
-                    break;
-                case 'v':
-                    cross_validation = true;
-                    nr_fold = atoi(argv[i]);
-                    if (nr_fold < 2) {
-                        System.err.print("n-fold cross validation: n must >= 2\n");
-                        exit_with_help();
-                    }
-                    break;
-                case 'q':
-                    Linear.disableDebugOutput();
-                    break;
-                default:
-                    System.err.println("unknown option");
-                    exit_with_help();
-            }
-        }
+				param.weightLabel[nr_weight - 1] = atoi(argv[i - 1].substring(2));
+				param.weight[nr_weight - 1] = atof(argv[i]);
+				break;
+			case 'v':
+				cross_validation = true;
+				nr_fold = atoi(argv[i]);
+				if (nr_fold < 2) {
+					System.err.print("n-fold cross validation: n must >= 2\n");
+					exit_with_help();
+				}
+				break;
+			case 'q':
+				Linear.disableDebugOutput();
+				break;
+			default:
+				System.err.println("unknown option");
+				exit_with_help();
+			}
+		}
 
-        // determine filenames
+		// determine filenames
 
-        if (i >= argv.length) exit_with_help();
+		if (i >= argv.length) {
+			exit_with_help();
+		}
 
-        inputFilename = argv[i];
+		inputFilename = argv[i];
 
-        if (i < argv.length - 1)
-            modelFilename = argv[i + 1];
-        else {
-            int p = argv[i].lastIndexOf('/');
-            ++p; // whew...
-            modelFilename = argv[i].substring(p) + ".model";
-        }
+		if (i < argv.length - 1) {
+			modelFilename = argv[i + 1];
+		} else {
+			int p = argv[i].lastIndexOf('/');
+			++p; // whew...
+			modelFilename = argv[i].substring(p) + ".model";
+		}
 
-        if (param.eps == Double.POSITIVE_INFINITY) {
-            if (param.solverType == SolverType.L2R_LR || param.solverType == SolverType.L2R_L2LOSS_SVC) {
-                param.setEps(0.01);
-            } else if (param.solverType == SolverType.L2R_L2LOSS_SVC_DUAL || param.solverType == SolverType.L2R_L1LOSS_SVC_DUAL
-                || param.solverType == SolverType.MCSVM_CS) {
-                param.setEps(0.1);
-            } else if (param.solverType == SolverType.L1R_L2LOSS_SVC || param.solverType == SolverType.L1R_LR) {
-                param.setEps(0.01);
-            }
-        }
-    }
+		if (param.eps == Double.POSITIVE_INFINITY) {
+			if (param.solverType == SolverType.L2R_LR || param.solverType == SolverType.L2R_L2LOSS_SVC) {
+				param.setEps(0.01);
+			} else if (param.solverType == SolverType.L2R_L2LOSS_SVC_DUAL || param.solverType == SolverType.L2R_L1LOSS_SVC_DUAL
+					|| param.solverType == SolverType.MCSVM_CS) {
+				param.setEps(0.1);
+			} else if (param.solverType == SolverType.L1R_L2LOSS_SVC || param.solverType == SolverType.L1R_LR) {
+				param.setEps(0.01);
+			}
+		}
+	}
 
-    /**
-     * reads a problem from LibSVM format
-     * @param filename the name of the svm file
-     * @throws IOException obviously in case of any I/O exception ;)
-     * @throws InvalidInputDataException if the input file is not correctly formatted
-     */
-    public static Problem readProblem(File file, double bias) throws IOException, InvalidInputDataException {
-        BufferedReader fp = new BufferedReader(new FileReader(file));
-        List<Integer> vy = new ArrayList<Integer>();
-        List<FeatureNode[]> vx = new ArrayList<FeatureNode[]>();
-        int max_index = 0;
+	/**
+	 * reads a problem from LibSVM format
+	 * @param file the svm file
+	 * @throws IOException obviously in case of any I/O exception ;)
+	 * @throws InvalidInputDataException if the input file is not correctly formatted
+	 */
+	public static Problem readProblem(File file, double bias) throws IOException, InvalidInputDataException {
+		BufferedReader fp = new BufferedReader(new FileReader(file));
+		List<Integer> vy = new ArrayList<Integer>();
+		List<FeatureNode[]> vx = new ArrayList<FeatureNode[]>();
+		int max_index = 0;
 
-        int lineNr = 0;
+		int lineNr = 0;
 
-        try {
-            while (true) {
-                String line = fp.readLine();
-                if (line == null) break;
-                lineNr++;
+		try {
+			while (true) {
+				String line = fp.readLine();
+				if (line == null) {
+					break;
+				}
+				lineNr++;
 
-                StringTokenizer st = new StringTokenizer(line, " \t\n\r\f:");
-                String token = st.nextToken();
+				StringTokenizer st = new StringTokenizer(line, " \t\n\r\f:");
+				String token = st.nextToken();
 
-                try {
-                    vy.add(atoi(token));
-                } catch (NumberFormatException e) {
-                    throw new InvalidInputDataException("invalid label: " + token, file, lineNr, e);
-                }
+				try {
+					vy.add(atoi(token));
+				} catch (NumberFormatException e) {
+					throw new InvalidInputDataException("invalid label: " + token, file, lineNr, e);
+				}
 
-                int m = st.countTokens() / 2;
-                FeatureNode[] x;
-                if (bias >= 0) {
-                    x = new FeatureNode[m + 1];
-                } else {
-                    x = new FeatureNode[m];
-                }
-                int indexBefore = 0;
-                for (int j = 0; j < m; j++) {
+				int m = st.countTokens() / 2;
+				FeatureNode[] x;
+				if (bias >= 0) {
+					x = new FeatureNode[m + 1];
+				} else {
+					x = new FeatureNode[m];
+				}
+				int indexBefore = 0;
+				for (int j = 0; j < m; j++) {
 
-                    token = st.nextToken();
-                    int index;
-                    try {
-                        index = atoi(token);
-                    } catch (NumberFormatException e) {
-                        throw new InvalidInputDataException("invalid index: " + token, file, lineNr, e);
-                    }
+					token = st.nextToken();
+					int index;
+					try {
+						index = atoi(token);
+					} catch (NumberFormatException e) {
+						throw new InvalidInputDataException("invalid index: " + token, file, lineNr, e);
+					}
 
-                    // assert that indices are valid and sorted
-                    if (index < 0) throw new InvalidInputDataException("invalid index: " + index, file, lineNr);
-                    if (index <= indexBefore) throw new InvalidInputDataException("indices must be sorted in ascending order", file, lineNr);
-                    indexBefore = index;
+					// assert that indices are valid and sorted
+					if (index < 0) {
+						throw new InvalidInputDataException("invalid index: " + index, file, lineNr);
+					}
+					if (index <= indexBefore) {
+						throw new InvalidInputDataException("indices must be sorted in ascending order", file, lineNr);
+					}
+					indexBefore = index;
 
-                    token = st.nextToken();
-                    try {
-                        double value = atof(token);
-                        x[j] = new FeatureNode(index, value);
-                    } catch (NumberFormatException e) {
-                        throw new InvalidInputDataException("invalid value: " + token, file, lineNr);
-                    }
-                }
-                if (m > 0) {
-                    max_index = Math.max(max_index, x[m - 1].index);
-                }
+					token = st.nextToken();
+					try {
+						double value = atof(token);
+						x[j] = new FeatureNode(index, value);
+					} catch (NumberFormatException e) {
+						throw new InvalidInputDataException("invalid value: " + token, file, lineNr);
+					}
+				}
+				if (m > 0) {
+					max_index = Math.max(max_index, x[m - 1].index);
+				}
 
-                vx.add(x);
-            }
+				vx.add(x);
+			}
 
-            return constructProblem(vy, vx, max_index, bias);
-        }
-        finally {
-            fp.close();
-        }
-    }
+			return constructProblem(vy, vx, max_index, bias);
+		}
+		finally {
+			fp.close();
+		}
+	}
 
-    void readProblem(String filename) throws IOException, InvalidInputDataException {
-        prob = Train.readProblem(new File(filename), bias);
-    }
+	void readProblem(String filename) throws IOException, InvalidInputDataException {
+		prob = Train.readProblem(new File(filename), bias);
+	}
 
-    private static Problem constructProblem(List<Integer> vy, List<FeatureNode[]> vx, int max_index, double bias) {
-        Problem prob = new Problem();
-        prob.bias = bias;
-        prob.l = vy.size();
-        prob.n = max_index;
-        if (bias >= 0) {
-            prob.n++;
-        }
-        prob.x = new FeatureNode[prob.l][];
-        for (int i = 0; i < prob.l; i++) {
-            prob.x[i] = vx.get(i);
+	private static Problem constructProblem(List<Integer> vy, List<FeatureNode[]> vx, int max_index, double bias) {
+		Problem prob = new Problem();
+		prob.bias = bias;
+		prob.l = vy.size();
+		prob.n = max_index;
+		if (bias >= 0) {
+			prob.n++;
+		}
+		prob.x = new FeatureNode[prob.l][];
+		for (int i = 0; i < prob.l; i++) {
+			prob.x[i] = vx.get(i);
 
-            if (bias >= 0) {
-                assert prob.x[i][prob.x[i].length - 1] == null;
-                prob.x[i][prob.x[i].length - 1] = new FeatureNode(max_index + 1, bias);
-            } else {
-                assert prob.x[i][prob.x[i].length - 1] != null;
-            }
-        }
+			if (bias >= 0) {
+				assert prob.x[i][prob.x[i].length - 1] == null;
+				prob.x[i][prob.x[i].length - 1] = new FeatureNode(max_index + 1, bias);
+			} else {
+				assert prob.x[i][prob.x[i].length - 1] != null;
+			}
+		}
 
-        prob.y = new int[prob.l];
-        for (int i = 0; i < prob.l; i++)
-            prob.y[i] = vy.get(i);
+		prob.y = new int[prob.l];
+		for (int i = 0; i < prob.l; i++) {
+			prob.y[i] = vy.get(i);
+		}
 
-        return prob;
-    }
+		return prob;
+	}
 
-    private void run(String[] args) throws IOException, InvalidInputDataException {
-        parse_command_line(args);
-        readProblem(inputFilename);
-        if (cross_validation)
-            do_cross_validation();
-        else {
-            Model model = Linear.train(prob, param);
-            Linear.saveModel(new File(modelFilename), model);
-        }
-    }
+	private void run(String[] args) throws IOException, InvalidInputDataException {
+		parse_command_line(args);
+		readProblem(inputFilename);
+		if (cross_validation) {
+			do_cross_validation();
+		} else {
+			Model model = Linear.train(prob, param);
+			Linear.saveModel(new File(modelFilename), model);
+		}
+	}
 }

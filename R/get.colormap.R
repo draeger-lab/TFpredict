@@ -1,0 +1,111 @@
+get.colormap <- function(num.classes, col.scheme="red.and.green", col.order="reg.states", mid.col=colors()[15]) {
+
+  library(RColorBrewer)
+  #import.package("RColorBrewer", load.silent=TRUE)
+
+  num.classes <- min(num.classes, 16)
+  colormap <- vector("character", num.classes)
+  num.col <- ceiling(max((num.classes+1)/2, 3))
+  use.mid.col <- num.classes %% 2 == 1
+
+  if (col.order == "reg.states" && col.scheme != "classes") {
+    col.idx <- ceiling(seq(3,6, length.out=num.col-1))
+  } else {
+    col.idx <- 2:num.col
+  }
+  stopifnot(!any(duplicated(col.idx)))
+  
+  if (col.scheme == "red.and.green") {
+    down.col <- brewer.pal(9, "Greens")[col.idx]
+    up.col <- brewer.pal(9, "Reds")[col.idx]
+
+  } else if (col.scheme == "orange.and.green") {
+    down.col <- brewer.pal(9, "Greens")[col.idx]
+    up.col <- brewer.pal(9, "Oranges")[col.idx]
+
+  } else if (col.scheme == "red.and.blue") {
+    down.col <- brewer.pal(9, "Blues")[col.idx]
+    up.col <- brewer.pal(9, "Reds")[col.idx]
+
+  } else if (col.scheme == "blue.and.red") {
+    down.col <- brewer.pal(9, "Reds")[col.idx]
+    up.col <- brewer.pal(9, "Blues")[col.idx]
+    
+  } else if (col.scheme == "blue.and.green") {
+    down.col <- brewer.pal(9, "Greens")[col.idx]
+    up.col <- brewer.pal(9, "Blues")[col.idx]
+
+  } else if (col.scheme == "blue") {
+    down.col <- NULL
+    up.col <- brewer.pal(9, "Blues")[2:min(num.classes, 9)]
+    use.mid.col <- TRUE
+    mid.col <- "white"
+
+  } else if (col.scheme == "green") {
+    down.col <- NULL
+    up.col <- brewer.pal(9, "Greens")[2:min(num.classes, 9)]
+    use.mid.col <- TRUE
+    mid.col <- "white"
+
+  } else if (col.scheme == "red") {
+    down.col <- NULL
+    up.col <- brewer.pal(9, "Reds")[2:min(num.classes, 9)]
+    use.mid.col <- TRUE
+    mid.col <- "white"
+
+  } else if (col.scheme == "orange") {
+    down.col <- NULL
+    up.col <- brewer.pal(9, "Oranges")[2:min(num.classes, 9)]
+    use.mid.col <- TRUE
+    mid.col <- "white"
+    
+  } else if (col.scheme == "classes") {
+    num.col <- max(num.classes, 3)
+    if (num.classes <= 9) {
+      colormap <- brewer.pal(num.col, "Set1")
+    } else if (num.classes <= 16) {
+      colormap <- c(brewer.pal(8, "Set1"), brewer.pal(8, "Set2"))
+    } else {
+      stop("Too many classes. Colors are undefined.")
+    }
+    colormap <- colormap[1:num.classes]
+    return(colormap)
+    
+  } else if (col.scheme == "pairs") {
+    num.col <- max(num.classes, 4)
+    colormap <- brewer.pal(num.col, "Paired")
+    colormap <- colormap[1:num.classes]
+    return(colormap)
+    
+  } else {
+    stop(sprintf("Unknown color scheme: %s", col.scheme))
+  }
+
+  if (num.classes <= 3) {
+    down.col <- down.col[2]
+    up.col <- up.col[2]
+  }
+  
+  # return generated colors in regular order (e.g., for fold-changes) or in appropriate order for regulation states
+  if (col.order == "regular") {
+    if (use.mid.col) {
+      colormap <- c(rev(down.col), mid.col, up.col)
+    } else {
+      colormap <- c(rev(down.col), up.col)
+    }
+    
+  } else if (col.order == "reg.states") {
+    if (use.mid.col) {
+      
+      colormap[1] <- mid.col
+      colormap[seq(2,num.classes,2)] <- down.col
+      colormap[seq(3,num.classes,2)] <- up.col
+    } else {
+      colormap[seq(1,num.classes,2)] <- down.col
+      colormap[seq(2,num.classes,2)] <- up.col
+    }
+  } else {
+    stop(sprintf("Unknown order of colors: %s", col.order))
+  }
+  return(colormap)
+}

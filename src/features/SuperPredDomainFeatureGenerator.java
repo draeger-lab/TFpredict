@@ -1,6 +1,6 @@
 /*  
- * $Id$
- * $URL$
+ * $Id: SuperPredDomainFeatureGenerator.java 99 2014-01-09 21:57:51Z draeger $
+ * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/features/SuperPredDomainFeatureGenerator.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
  *  
@@ -41,7 +41,7 @@ import org.apache.commons.cli.PosixParser;
 /**
  * 
  * @author Johannes Eichner
- * @version $Rev$
+ * @version $Rev: 99 $
  * @since 1.0
  */
 public class SuperPredDomainFeatureGenerator extends DomainFeatureGenerator {

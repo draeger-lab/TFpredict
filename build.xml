@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * $Id: build.xml 1133 2015-01-21 19:15:55Z draeger $
+ * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/SBMLsqueezer/trunk/build.xml $
+ * =================================================================== 
+ * This file is part of the program TFpredict. TFpredict performs the
+ * identification and structural characterization of transcription factors.
+ *  
+ * Copyright (C) 2010-2015 Center for Bioinformatics Tuebingen (ZBIT),
+ * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * =================================================================== 
+ *
+ * Version: $Rev: 1133 $
+-->
+<project
+	basedir="."
+	default="build"
+	name="TFPredict"
+>
+	<!-- =================================================================== -->
+	<!-- Global definitions                                                  -->
+	<!-- =================================================================== -->
+	
+	<path id="sourcepath">
+      <fileset dir="src"/>
+      <!--<fileset dir="test"/>-->
+      <fileset dir="resources"/>
+	</path>
+	
+    <path id="classpath">
+      <pathelement location="${build.dest}"/>
+      <pathelement location="lib/blas-0.8.jar"/>
+      <pathelement location="lib/commons-cli-1.2.jar"/>
+      <pathelement location="lib/commons-math-2.1.jar"/>
+      <pathelement location="lib/ftp4j-1.5.1.jar"/>
+      <pathelement location="lib/IPRScan_JAXWS.jar"/>
+      <pathelement location="lib/jaxrpc.jar"/>
+      <pathelement location="lib/libsvm.jar"/>
+      <pathelement location="lib/weka-3.7.1.jar"/>
+      <pathelement location="lib/SysBio.jar"/>
+    </path>
+	
+	<!-- =================================================================== -->
+	<!-- Initialization target                                               -->
+	<!-- =================================================================== -->
+    <target
+      name="init"
+      description="Initialization target"
+    >
+      <property environment="env"/>
+      <property name="debuglevel" value="source,lines,vars"/>
+      <property name="target" value="1.7"/>
+      <property name="source" value="1.7"/>
+      <property name="build.compiler" value="modern"/>
+      <property name="debug" value="true"/>
+      <property name="deprecation" value="false"/>
+      <property name="optimize" value="on"/>
+      <property name="verbose" value="true"/>
+      <property name="build.dest" value="bin"/>
+      <property name="vendor" value="University of California, San Diego"/>
+      <property name="UUID" value="3b2af8d2-2f25-4a84-be70-27dae122ecb3"/>
+      <property name="appJar" value="dist/${ant.project.name}.jar"/>
+    	
+      <tstamp>
+        <format property="YEAR" pattern="yyyy"/>
+      </tstamp>
+
+      <mkdir dir="${build.dest}"/>
+      <!--copy includeemptydirs="false" todir="bin">
+        <fileset dir="src">
+          <exclude name="**/*.java"/>
+        </fileset>
+      </copy>
+      <copy includeemptydirs="false" todir="bin">
+        <fileset dir="resources">
+          <exclude name="**/*.java"/>
+        </fileset>
+      </copy-->
+    </target>
+
+	<!-- =================================================================== -->
+	<!-- Build project                                                       -->
+	<!-- =================================================================== -->
+	<target
+	  name="build"
+	  depends="init"
+	  description="Compiles the project"
+	>
+      <echo message="Building project ${ant.project.name}: ${ant.file}"/>
+      <javac
+        classpathref="classpath"
+        compiler="${build.compiler}"
+        debug="${debug}"
+        deprecation="${deprecation}"
+        debuglevel="${debuglevel}"
+        destdir="${build.dest}"
+        fork="true"
+        includeantruntime="false"
+        listfiles="yes"
+        memoryMaximumSize="512M"
+        nowarn="no"
+        optimize="${optimize}"
+        source="${source}"
+        sourcepathref="sourcepath"
+        target="${target}"
+        verbose="${verbose}"
+      >
+      	<src path="src"/>
+      	<src path="resources"/>
+      </javac>
+
+      <mkdir dir="${build.dest}/META-INF"/>
+
+	  <!-- Write the manifest file (this is a very minimal definition) -->
+      <manifest file="${build.dest}/META-INF/MANIFEST.MF">
+        <attribute name="Main-Class"               value="main.TFpredictMain"/>
+        <attribute name="Built-By"                 value="${user.name}"/>
+        <attribute name="Built-Date"               value="${TODAY}"/>
+        <section name="${ant.project.name}">
+          <attribute name="Implementation-Title"   value="${ant.project.name}"/>
+          <attribute name="Implementation-Vendor"  value="${vendor}"/>
+          <attribute name="Specification-Title"    value="${ant.project.name}"/>
+          <attribute name="Specification-Vendor"   value="${vendor}"/>
+        </section>
+        <attribute name="Bundle-Name"              value="${ant.project.name}"/> 
+        <attribute name="Bundle-SymbolicName"      value="${UUID}"/>
+        <attribute name="Bundle-Vendor"            value="${vendor}"/>
+        <attribute name="Bundle-RequiredExecutionEnvironment" value="JavaSE-1.7"/>
+	  </manifest>
+
+      <copy todir="${build.dest}/META-INF/" verbose="${verbose}">
+        <fileset dir="${basedir}/licenses"/>
+      </copy>
+		
+    </target>
+	
+    <!-- =================================================================== -->
+    <!-- JAR including libs                                                  -->
+    <!-- =================================================================== -->
+    <target
+      name="jar_incl-libs"
+      depends="build"
+      description="Builds an executable JAR file that includes all required third-party libraries."
+    >
+    	
+      <property name="excludes" value="META-INF/**, COPYING.txt, licenses/**, package.html, package-info.class, overview.html, AUTHORS.txt"/>
+    	
+      <jar
+        compress="true"
+        duplicate="preserve"
+        filesetmanifest="mergewithoutmain"
+        index="true"
+        indexMetaInf="true"
+        jarfile="${appJar}"
+        level="9"
+        manifest="${build.dest}/META-INF/MANIFEST.MF"
+        manifestencoding="utf-8"
+        strict="warn"
+        update="true"
+      >
+      	<fileset
+      		dir="${build.dest}"
+      		includes="**/*.class"
+      		excludes="**/package-info.class"
+      	/>
+      	<fileset dir="${basedir}">
+      		<include name="LICENSE"/>
+      		<include name="README.md"/>
+      		<include name="AUTHORS"/>
+      	</fileset>
+      	<zipfileset dir="${build.dest}/META-INF/" prefix="META-INF/">
+      		<exclude name="MANIFEST.MF"/>
+      	</zipfileset>
+      	
+      	<!-- Include third-party libraries -->
+      	<zipfileset excludes="${excludes}" src="lib/blas-0.8.jar"/>
+      	<zipfileset excludes="${excludes}" src="lib/commons-cli-1.2.jar"/>
+      	<zipfileset excludes="${excludes}" src="lib/commons-math-2.1.jar"/>
+      	<zipfileset excludes="${excludes}" src="lib/ftp4j-1.5.1.jar"/>
+      	<zipfileset excludes="${excludes}" src="lib/IPRScan_JAXWS.jar"/>
+      	<zipfileset excludes="${excludes}" src="lib/jaxrpc.jar"/>
+      	<zipfileset excludes="${excludes}" src="lib/libsvm.jar"/>
+      	<zipfileset excludes="${excludes}" src="lib/weka-3.7.1.jar"/>
+      	<zipfileset excludes="${excludes}" src="lib/SysBio.jar"/>
+      </jar>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Cleans up the workspace                                             -->
+    <!-- =================================================================== -->
+    <target
+      name="clean"
+      depends="init"
+      description="Cleans everything"
+    >
+      <delete includeEmptyDirs="true" quiet="yes">
+        <fileset dir="${build.dest}" includes="**/*"/>
+      </delete>
+    </target>
+
+</project>

@@ -1,9 +1,9 @@
-/*  
- * $Id$
- * $URL$
+/*
+ * $Id: NaiveFeatureGenerator.java 99 2014-01-09 21:57:51Z draeger $
+ * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/features/NaiveFeatureGenerator.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
- *  
+ * 
  * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
@@ -23,14 +23,20 @@
 package features;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * 
  * @author Johannes Eichner
- * @version $Rev$
+ * @version $Rev: 99 $
  * @since 1.0
  */
 public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(NaiveFeatureGenerator.class.getName());
 
 	/**
 	 * 
@@ -40,41 +46,76 @@ public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
 	 */
 	public NaiveFeatureGenerator(String fastaFile, String featureFile, boolean superPred) {
 		super(fastaFile, featureFile, superPred);
-		this.pssmFeat = false;
-		this.naiveFeat = true;
+		pssmFeat = false;
+		naiveFeat = true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see features.BLASTfeatureGenerator#computeFeaturesFromBlastResult()
 	 */
-	protected void computeFeaturesFromBlastResult() {
-		
-		Map<String, Integer> shortSeqID2label = getSeq2LabelMapWithShortenedIDs();
-		
+	@Override
+	protected void computeFeaturesFromBlastResult(Map<String, Map<String, Double>> hits) {
+
+		int numErrors = 0;
+		int numWarnings = 0;
+
 		for (String seqID: hits.keySet()) {
-			
-			// obtain class of best hit in sequence database
-			Map<String, Double> currHits = hits.get(seqID);
-			double bestScore = 0;
-			String bestHit = "";
-			for (String hit: currHits.keySet()) {
-				if (hit.equals(seqID)) {
-					continue;
-				} 
-				if (currHits.get(hit) > bestScore) {
-					bestHit = hit;
-				}
+
+			BlastResultFeature feature = computeFeaturesFromBlastResult(seqID, hits.get(seqID));
+			if (feature.isSetFeatures()) {
+				features.put(seqID, feature.getFeatures());
 			}
-			if (shortSeqID2label.containsKey(bestHit)) {
-				int predClass = shortSeqID2label.get(bestHit);
-				features.put(seqID, new double[] {predClass});
-				
-			} else if (bestHit.isEmpty()) {
-				System.out.println("Warning. No BLAST hits found for sequence: " + seqID);
-				
-			} else {
-				System.out.println("Error. No label found for sequence: " + bestHit);
-			}
+			numErrors += feature.getErrorCount();
+			numWarnings += feature.getWarningCount();
+		}
+
+		if (numErrors > 0) {
+			logger.fine("Number of errors: " + numErrors);
+		}
+		if (numWarnings > 0) {
+			logger.fine("Number of warnings: " + numWarnings);
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see features.BLASTfeatureGenerator#computeFeaturesFromBlastResult(java.lang.String, java.util.Map)
+	 */
+	@Override
+	protected <T extends Number> BlastResultFeature computeFeaturesFromBlastResult(String seqID,
+			Map<String, T> currHits) {
+		// obtain class of best hit in sequence database
+
+		// TODO: This will never find anything because the following map will always be empty!
+		Map<String, Integer> shortSeqID2label = getSeq2LabelMapWithShortenedIDs();
+		double[] feature = null;
+
+		int numErrors = 0;
+		int numWarnings = 0;
+
+		double bestScore = 0;
+		String bestHit = "";
+		for (String hit: currHits.keySet()) {
+			if (hit.equals(seqID)) {
+				continue;
+			}
+			if (currHits.get(hit).doubleValue() > bestScore) {
+				bestHit = hit;
+			}
+		}
+		if (shortSeqID2label.containsKey(bestHit)) {
+			int predClass = shortSeqID2label.get(bestHit);
+			feature = new double[] {predClass};
+
+		} else if (bestHit.isEmpty()) {
+			logger.fine("No BLAST hits found for sequence: " + seqID);
+			numWarnings++;
+
+		} else {
+			logger.severe("No label found for sequence: " + bestHit);
+			numErrors++;
+		}
+
+		return new BlastResultFeature(seqID, feature, numErrors, numWarnings);
+	}
+
 }

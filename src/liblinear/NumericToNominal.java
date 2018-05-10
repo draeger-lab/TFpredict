@@ -1,6 +1,6 @@
 /* 
- * $Id$
- * $URL$
+ * $Id: NumericToNominal.java 80 2013-02-27 09:51:19Z draeger $
+ * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/liblinear/NumericToNominal.java $
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -59,7 +59,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Rev$
+ * @version $Rev: 80 $
  */
 public class NumericToNominal
   extends SimpleBatchFilter {
@@ -417,7 +417,7 @@ public class NumericToNominal
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 80 $");
   }
 
   /**

@@ -1,6 +1,6 @@
 /*  
- * $Id$
- * $URL$
+ * $Id: ObjectRW.java 99 2014-01-09 21:57:51Z draeger $
+ * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/io/ObjectRW.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
  *  
@@ -36,7 +36,7 @@ import resources.Resource;
  * Provides read/write support for serializable objects
  * 
  * @author Florian Topf
- * @version $Rev$
+ * @version $Rev: 99 $
  * @since 1.0
  */
 public class ObjectRW {

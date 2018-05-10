@@ -1,0 +1,1816 @@
+repetitions: 5, inner repetitions: 1, classifier: RandomForest, InFile: /home/jtyurkovich/git/TFPredict/resources/RegulonDB/featurefile.txt, folds: 5
+Normalizing data ...
+
+Classifier: Random Forest
+  Multiruns: 5  Folds: 5  Model selection: false
+
+Nested CV for Random forests ...
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.813     0.05       0.619     0.813     0.703      0.971    0
+                 0.95      0.188      0.98      0.95      0.965      0.971    1
+Weighted Avg.    0.937     0.175      0.947     0.937     0.941      0.971
+
+  time remaining: 6.6 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.75      0.029      0.72      0.75      0.735      0.933    0
+                 0.971     0.25       0.975     0.971     0.973      0.933    1
+Weighted Avg.    0.95      0.23       0.951     0.95      0.951      0.933
+
+  time remaining: 6.842 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.633     0.017      0.795     0.633     0.705      0.932    0
+                 0.983     0.367      0.963     0.983     0.973      0.932    1
+Weighted Avg.    0.95      0.335      0.947     0.95      0.948      0.932
+
+  time remaining: 5.273 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.017      0.81      0.694     0.747      0.949    0
+                 0.983     0.306      0.969     0.983     0.976      0.949    1
+Weighted Avg.    0.956     0.279      0.954     0.956     0.955      0.949
+
+  time remaining: 4.378 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.708     0.017      0.81      0.708     0.756      0.946    0
+                 0.983     0.292      0.971     0.983     0.977      0.946    1
+Weighted Avg.    0.958     0.266      0.956     0.958     0.957      0.946
+
+  time remaining: 3.796 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.771     0.036      0.685     0.771     0.725      0.963    0
+                 0.964     0.229      0.977     0.964     0.97       0.963    1
+Weighted Avg.    0.947     0.211      0.95      0.947     0.948      0.963
+
+  time remaining: 4 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.755     0.027      0.74      0.755     0.747      0.953    0
+                 0.973     0.245      0.975     0.973     0.974      0.953    1
+Weighted Avg.    0.952     0.225      0.953     0.952     0.953      0.953
+
+  time remaining: 3.479 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.011      0.872     0.694     0.773      0.918    0
+                 0.989     0.306      0.969     0.989     0.979      0.918    1
+Weighted Avg.    0.962     0.278      0.96      0.962     0.96       0.918
+
+  time remaining: 3.073 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.816     0.019      0.816     0.816     0.816      0.971    0
+                 0.981     0.184      0.981     0.981     0.981      0.971    1
+Weighted Avg.    0.966     0.168      0.966     0.966     0.966      0.971
+
+  time remaining: 2.709 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.681     0.021      0.762     0.681     0.719      0.969    0
+                 0.979     0.319      0.969     0.979     0.974      0.969    1
+Weighted Avg.    0.952     0.292      0.95      0.952     0.951      0.969
+
+  time remaining: 2.424 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.813     0.025      0.765     0.813     0.788      0.966    0
+                 0.975     0.188      0.981     0.975     0.978      0.966    1
+Weighted Avg.    0.96      0.173      0.961     0.96      0.96       0.966
+
+  time remaining: 2.371 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.714     0.025      0.745     0.714     0.729      0.933    0
+                 0.975     0.286      0.971     0.975     0.973      0.933    1
+Weighted Avg.    0.95      0.261      0.95      0.95      0.95       0.933
+
+  time remaining: 2.107 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.017      0.81      0.694     0.747      0.96     0
+                 0.983     0.306      0.969     0.983     0.976      0.96     1
+Weighted Avg.    0.956     0.279      0.954     0.956     0.955      0.96 
+
+  time remaining: 1.871 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.653     0.011      0.865     0.653     0.744      0.937    0
+                 0.989     0.347      0.965     0.989     0.977      0.937    1
+Weighted Avg.    0.958     0.315      0.956     0.958     0.955      0.937
+
+  time remaining: 1.666 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.851     0.038      0.69      0.851     0.762      0.983    0
+                 0.962     0.149      0.985     0.962     0.973      0.983    1
+Weighted Avg.    0.952     0.139      0.958     0.952     0.954      0.983
+
+  time remaining: 1.479 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.771     0.023      0.771     0.771     0.771      0.968    0
+                 0.977     0.229      0.977     0.977     0.977      0.968    1
+Weighted Avg.    0.958     0.21       0.958     0.958     0.958      0.968
+
+  time remaining: 1.377 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.796     0.025      0.765     0.796     0.78       0.965    0
+                 0.975     0.204      0.979     0.975     0.977      0.965    1
+Weighted Avg.    0.958     0.187      0.959     0.958     0.958      0.965
+
+  time remaining: 1.196 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.673     0.021      0.767     0.673     0.717      0.957    0
+                 0.979     0.327      0.967     0.979     0.973      0.957    1
+Weighted Avg.    0.95      0.298      0.948     0.95      0.949      0.957
+
+  time remaining: 1.021 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.776     0.034      0.704     0.776     0.738      0.962    0
+                 0.966     0.224      0.977     0.966     0.971      0.962    1
+Weighted Avg.    0.948     0.207      0.951     0.948     0.95       0.962
+
+  time remaining: 0.856 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.723     0.011      0.872     0.723     0.791      0.969    0
+                 0.989     0.277      0.973     0.989     0.981      0.969    1
+Weighted Avg.    0.966     0.253      0.964     0.966     0.964      0.969
+
+  time remaining: 0.702 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.75      0.029      0.72      0.75      0.735      0.953    0
+                 0.971     0.25       0.975     0.971     0.973      0.953    1
+Weighted Avg.    0.95      0.23       0.951     0.95      0.951      0.953
+
+  time remaining: 0.576 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.776     0.021      0.792     0.776     0.784      0.949    0
+                 0.979     0.224      0.977     0.979     0.978      0.949    1
+Weighted Avg.    0.96      0.205      0.96      0.96      0.96       0.949
+
+  time remaining: 0.424 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.735     0.021      0.783     0.735     0.758      0.938    0
+                 0.979     0.265      0.973     0.979     0.976      0.938    1
+Weighted Avg.    0.956     0.242      0.955     0.956     0.955      0.938
+
+  time remaining: 0.278 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.714     0.029      0.714     0.714     0.714      0.95     0
+                 0.971     0.286      0.971     0.971     0.971      0.95     1
+Weighted Avg.    0.947     0.262      0.947     0.947     0.947      0.95 
+
+  time remaining: 0.137 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.66      0.013      0.838     0.66      0.738      0.935    0
+                 0.987     0.34       0.967     0.987     0.977      0.935    1
+Weighted Avg.    0.958     0.311      0.955     0.958     0.956      0.935
+
+  time remaining: 0 sec
+repetitions: 5, inner repetitions: 1, classifier: DecisionTree, InFile: /home/jtyurkovich/git/TFPredict/resources/RegulonDB/featurefile.txt, folds: 5
+Normalizing data ...
+
+Classifier: Decision Tree
+  Multiruns: 5  Folds: 5  Model selection: false
+
+Nested CV for J48 tree ...
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.813     0.029      0.736     0.813     0.772      0.927    0
+                 0.971     0.188      0.981     0.971     0.976      0.927    1
+Weighted Avg.    0.956     0.173      0.958     0.956     0.957      0.927
+
+  time remaining: 2.808 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.833     0.019      0.816     0.833     0.825      0.987    0
+                 0.981     0.167      0.983     0.981     0.982      0.987    1
+Weighted Avg.    0.968     0.153      0.968     0.968     0.968      0.987
+
+  time remaining: 1.759 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.551     0.004      0.931     0.551     0.692      0.963    0
+                 0.996     0.449      0.956     0.996     0.975      0.963    1
+Weighted Avg.    0.954     0.407      0.953     0.954     0.949      0.963
+
+  time remaining: 1.305 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.653     0.008      0.889     0.653     0.753      0.976    0
+                 0.992     0.347      0.965     0.992     0.978      0.976    1
+Weighted Avg.    0.96      0.315      0.958     0.96      0.957      0.976
+
+  time remaining: 1.129 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.708     0.013      0.85      0.708     0.773      0.982    0
+                 0.987     0.292      0.971     0.987     0.979      0.982    1
+Weighted Avg.    0.962     0.266      0.96      0.962     0.96       0.982
+
+  time remaining: 0.972 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.688     0.008      0.892     0.688     0.776      0.955    0
+                 0.992     0.313      0.969     0.992     0.98       0.955    1
+Weighted Avg.    0.964     0.285      0.962     0.964     0.962      0.955
+
+  time remaining: 0.868 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.755     0.017      0.822     0.755     0.787      0.982    0
+                 0.983     0.245      0.975     0.983     0.979      0.982    1
+Weighted Avg.    0.962     0.224      0.961     0.962     0.961      0.982
+
+  time remaining: 0.787 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.653     0.004      0.941     0.653     0.771      0.828    0
+                 0.996     0.347      0.965     0.996     0.98       0.828    1
+Weighted Avg.    0.964     0.315      0.963     0.964     0.961      0.828
+
+  time remaining: 0.72 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.776     0.013      0.864     0.776     0.817      0.974    0
+                 0.987     0.224      0.977     0.987     0.982      0.974    1
+Weighted Avg.    0.968     0.205      0.966     0.968     0.967      0.974
+
+  time remaining: 0.647 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.66      0.013      0.838     0.66      0.738      0.968    0
+                 0.987     0.34       0.967     0.987     0.977      0.968    1
+Weighted Avg.    0.958     0.311      0.955     0.958     0.956      0.968
+
+  time remaining: 0.592 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.75      0.023      0.766     0.75      0.758      0.98     0
+                 0.977     0.25       0.975     0.977     0.976      0.98     1
+Weighted Avg.    0.956     0.229      0.956     0.956     0.956      0.98 
+
+  time remaining: 0.541 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.816     0.017      0.833     0.816     0.825      0.964    0
+                 0.983     0.184      0.981     0.983     0.982      0.964    1
+Weighted Avg.    0.968     0.168      0.967     0.968     0.967      0.964
+
+  time remaining: 0.493 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.837     0.029      0.745     0.837     0.788      0.962    0
+                 0.971     0.163      0.983     0.971     0.977      0.962    1
+Weighted Avg.    0.958     0.151      0.961     0.958     0.959      0.962
+
+  time remaining: 0.443 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.571     0.011      0.848     0.571     0.683      0.925    0
+                 0.989     0.429      0.957     0.989     0.973      0.925    1
+Weighted Avg.    0.95      0.389      0.947     0.95      0.946      0.925
+
+  time remaining: 0.4 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.83      0.017      0.83      0.83      0.83       0.969    0
+                 0.983     0.17       0.983     0.983     0.983      0.969    1
+Weighted Avg.    0.969     0.156      0.969     0.969     0.969      0.969
+
+  time remaining: 0.359 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.771     0.017      0.822     0.771     0.796      0.95     0
+                 0.983     0.229      0.977     0.983     0.98       0.95     1
+Weighted Avg.    0.964     0.21       0.963     0.964     0.963      0.95 
+
+  time remaining: 0.32 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.714     0.006      0.921     0.714     0.805      0.972    0
+                 0.994     0.286      0.971     0.994     0.982      0.972    1
+Weighted Avg.    0.968     0.26       0.967     0.968     0.966      0.972
+
+  time remaining: 0.282 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.755     0.013      0.86      0.755     0.804      0.972    0
+                 0.987     0.245      0.975     0.987     0.981      0.972    1
+Weighted Avg.    0.966     0.223      0.964     0.966     0.965      0.972
+
+  time remaining: 0.242 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.714     0.027      0.729     0.714     0.722      0.914    0
+                 0.973     0.286      0.971     0.973     0.972      0.914    1
+Weighted Avg.    0.948     0.262      0.948     0.948     0.948      0.914
+
+  time remaining: 0.205 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.702     0          1         0.702     0.825      0.98     0
+                 1         0.298      0.971     1         0.986      0.98     1
+Weighted Avg.    0.973     0.271      0.974     0.973     0.971      0.98 
+
+  time remaining: 0.169 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.792     0.034      0.704     0.792     0.745      0.973    0
+                 0.966     0.208      0.979     0.966     0.973      0.973    1
+Weighted Avg.    0.95      0.192      0.954     0.95      0.952      0.973
+
+  time remaining: 0.133 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.755     0.011      0.881     0.755     0.813      0.987    0
+                 0.989     0.245      0.975     0.989     0.982      0.987    1
+Weighted Avg.    0.968     0.223      0.966     0.968     0.966      0.987
+
+  time remaining: 0.099 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.008      0.895     0.694     0.782      0.974    0
+                 0.992     0.306      0.969     0.992     0.98       0.974    1
+Weighted Avg.    0.964     0.278      0.962     0.964     0.962      0.974
+
+  time remaining: 0.065 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.735     0.019      0.8       0.735     0.766      0.982    0
+                 0.981     0.265      0.973     0.981     0.977      0.982    1
+Weighted Avg.    0.958     0.242      0.957     0.958     0.957      0.982
+
+  time remaining: 0.033 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.787     0.019      0.804     0.787     0.796      0.904    0
+                 0.981     0.213      0.979     0.981     0.98       0.904    1
+Weighted Avg.    0.964     0.195      0.963     0.964     0.963      0.904
+
+  time remaining: 0 sec
+repetitions: 5, inner repetitions: 1, classifier: SVM_rbf, InFile: /home/jtyurkovich/git/TFPredict/resources/RegulonDB/featurefile.txt, folds: 5
+Normalizing data ...
+
+Classifier: SVM rbf kernel
+  Multiruns: 5  Folds: 5  Model selection: false
+
+Nested CV for LIBSVM ...
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.167     0.006      0.727     0.167     0.271      0.925    0
+                 0.994     0.833      0.922     0.994     0.957      0.925    1
+Weighted Avg.    0.918     0.758      0.904     0.918     0.894      0.925
+
+  time remaining: 102.12 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.229     0.008      0.733     0.229     0.349      0.89     0
+                 0.992     0.771      0.927     0.992     0.958      0.89     1
+Weighted Avg.    0.922     0.701      0.91      0.922     0.903      0.89 
+
+  time remaining: 97.681 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.224     0.006      0.786     0.224     0.349      0.761    0
+                 0.994     0.776      0.925     0.994     0.958      0.761    1
+Weighted Avg.    0.922     0.704      0.912     0.922     0.901      0.761
+
+  time remaining: 92.173 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.224     0.008      0.733     0.224     0.344      0.837    0
+                 0.992     0.776      0.925     0.992     0.957      0.837    1
+Weighted Avg.    0.92      0.704      0.907     0.92      0.9        0.837
+
+  time remaining: 87.98 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.229     0.013      0.647     0.229     0.338      0.832    0
+                 0.987     0.771      0.927     0.987     0.956      0.832    1
+Weighted Avg.    0.918     0.701      0.901     0.918     0.899      0.832
+
+  time remaining: 83.16 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.104     0.004      0.714     0.104     0.182      0.909    0
+                 0.996     0.896      0.917     0.996     0.955      0.909    1
+Weighted Avg.    0.914     0.814      0.898     0.914     0.884      0.909
+
+  time remaining: 78.803 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.306     0.015      0.682     0.306     0.423      0.84     0
+                 0.985     0.694      0.932     0.985     0.958      0.84     1
+Weighted Avg.    0.922     0.63       0.909     0.922     0.908      0.84 
+
+  time remaining: 74.476 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.245     0          1         0.245     0.393      0.841    0
+                 1         0.755      0.928     1         0.963      0.841    1
+Weighted Avg.    0.929     0.684      0.934     0.929     0.909      0.841
+
+  time remaining: 69.968 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.204     0.008      0.714     0.204     0.317      0.86     0
+                 0.992     0.796      0.924     0.992     0.956      0.86     1
+Weighted Avg.    0.918     0.722      0.904     0.918     0.897      0.86 
+
+  time remaining: 65.5 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.277     0.013      0.684     0.277     0.394      0.817    0
+                 0.987     0.723      0.933     0.987     0.959      0.817    1
+Weighted Avg.    0.924     0.66       0.91      0.924     0.908      0.817
+
+  time remaining: 61.211 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.25      0.013      0.667     0.25      0.364      0.819    0
+                 0.987     0.75       0.929     0.987     0.957      0.819    1
+Weighted Avg.    0.92      0.682      0.905     0.92      0.903      0.819
+
+  time remaining: 57.644 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.102     0.002      0.833     0.102     0.182      0.873    0
+                 0.998     0.898      0.915     0.998     0.955      0.873    1
+Weighted Avg.    0.914     0.814      0.907     0.914     0.882      0.873
+
+  time remaining: 53.775 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.265     0.006      0.813     0.265     0.4        0.855    0
+                 0.994     0.735      0.929     0.994     0.96       0.855    1
+Weighted Avg.    0.926     0.667      0.918     0.926     0.908      0.855
+
+  time remaining: 49.735 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.245     0.006      0.8       0.245     0.375      0.691    0
+                 0.994     0.755      0.927     0.994     0.959      0.691    1
+Weighted Avg.    0.924     0.685      0.915     0.924     0.905      0.691
+
+  time remaining: 46.167 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.319     0.025      0.556     0.319     0.405      0.926    0
+                 0.975     0.681      0.935     0.975     0.955      0.926    1
+Weighted Avg.    0.916     0.622      0.901     0.916     0.905      0.926
+
+  time remaining: 42.289 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.229     0.013      0.647     0.229     0.338      0.873    0
+                 0.987     0.771      0.927     0.987     0.956      0.873    1
+Weighted Avg.    0.918     0.701      0.901     0.918     0.9        0.873
+
+  time remaining: 37.928 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.184     0.008      0.692     0.184     0.29       0.92     0
+                 0.992     0.816      0.922     0.992     0.955      0.92     1
+Weighted Avg.    0.916     0.741      0.9       0.916     0.893      0.92 
+
+  time remaining: 33.691 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.184     0.004      0.818     0.184     0.3        0.784    0
+                 0.996     0.816      0.922     0.996     0.957      0.784    1
+Weighted Avg.    0.92      0.74       0.912     0.92      0.896      0.784
+
+  time remaining: 29.5 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.224     0.017      0.579     0.224     0.324      0.863    0
+                 0.983     0.776      0.925     0.983     0.953      0.863    1
+Weighted Avg.    0.912     0.705      0.892     0.912     0.894      0.863
+
+  time remaining: 25.341 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.191     0          1         0.191     0.321      0.821    0
+                 1         0.809      0.926     1         0.962      0.821    1
+Weighted Avg.    0.927     0.736      0.933     0.927     0.904      0.821
+
+  time remaining: 21.146 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.25      0.011      0.706     0.25      0.369      0.829    0
+                 0.989     0.75       0.929     0.989     0.958      0.829    1
+Weighted Avg.    0.922     0.682      0.909     0.922     0.904      0.829
+
+  time remaining: 16.888 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.184     0.013      0.6       0.184     0.281      0.863    0
+                 0.987     0.816      0.921     0.987     0.953      0.863    1
+Weighted Avg.    0.912     0.741      0.891     0.912     0.89       0.863
+
+  time remaining: 12.643 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.143     0.002      0.875     0.143     0.246      0.8      0
+                 0.998     0.857      0.919     0.998     0.957      0.8      1
+Weighted Avg.    0.918     0.777      0.915     0.918     0.89       0.8  
+
+  time remaining: 8.422 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.306     0.015      0.682     0.306     0.423      0.878    0
+                 0.985     0.694      0.932     0.985     0.958      0.878    1
+Weighted Avg.    0.922     0.63       0.909     0.922     0.908      0.878
+
+  time remaining: 4.229 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.298     0.008      0.778     0.298     0.431      0.852    0
+                 0.992     0.702      0.935     0.992     0.962      0.852    1
+Weighted Avg.    0.929     0.64       0.921     0.929     0.915      0.852
+
+  time remaining: 0 sec
+repetitions: 5, inner repetitions: 1, classifier: SVM_linear, InFile: /home/jtyurkovich/git/TFPredict/resources/RegulonDB/featurefile.txt, folds: 5
+Normalizing data ...
+
+Classifier: SVM linear kernel
+  Multiruns: 5  Folds: 5  Model selection: false
+
+Nested CV for LIBLINEAR ...
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.792     0.013      0.864     0.792     0.826      0.988    0
+                 0.987     0.208      0.979     0.987     0.983      0.988    1
+Weighted Avg.    0.969     0.19       0.969     0.969     0.969      0.988
+
+  time remaining: 1.32 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.75      0.006      0.923     0.75      0.828      0.989    0
+                 0.994     0.25       0.975     0.994     0.984      0.989    1
+Weighted Avg.    0.971     0.228      0.97      0.971     0.97       0.989
+
+  time remaining: 1 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.633     0.004      0.939     0.633     0.756      0.989    0
+                 0.996     0.367      0.963     0.996     0.979      0.989    1
+Weighted Avg.    0.962     0.333      0.961     0.962     0.958      0.989
+
+  time remaining: 0.851 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.714     0.004      0.946     0.714     0.814      0.983    0
+                 0.996     0.286      0.971     0.996     0.983      0.983    1
+Weighted Avg.    0.969     0.259      0.969     0.969     0.968      0.983
+
+  time remaining: 0.751 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.646     0.013      0.838     0.646     0.729      0.978    0
+                 0.987     0.354      0.965     0.987     0.976      0.978    1
+Weighted Avg.    0.956     0.323      0.953     0.956     0.953      0.978
+
+  time remaining: 0.68 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.75      0.008      0.9       0.75      0.818      0.982    0
+                 0.992     0.25       0.975     0.992     0.983      0.982    1
+Weighted Avg.    0.969     0.228      0.968     0.969     0.968      0.982
+
+  time remaining: 0.605 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.008      0.895     0.694     0.782      0.987    0
+                 0.992     0.306      0.969     0.992     0.98       0.987    1
+Weighted Avg.    0.964     0.278      0.962     0.964     0.962      0.987
+
+  time remaining: 0.545 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.673     0.002      0.971     0.673     0.795      0.984    0
+                 0.998     0.327      0.967     0.998     0.982      0.984    1
+Weighted Avg.    0.968     0.296      0.968     0.968     0.965      0.984
+
+  time remaining: 0.493 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.735     0.004      0.947     0.735     0.828      0.991    0
+                 0.996     0.265      0.973     0.996     0.984      0.991    1
+Weighted Avg.    0.971     0.241      0.971     0.971     0.97       0.991
+
+  time remaining: 0.448 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.681     0.015      0.821     0.681     0.744      0.981    0
+                 0.985     0.319      0.969     0.985     0.977      0.981    1
+Weighted Avg.    0.958     0.292      0.956     0.958     0.956      0.981
+
+  time remaining: 0.408 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.688     0.013      0.846     0.688     0.759      0.985    0
+                 0.987     0.313      0.969     0.987     0.978      0.985    1
+Weighted Avg.    0.96      0.285      0.958     0.96      0.958      0.985
+
+  time remaining: 0.383 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.004      0.944     0.694     0.8        0.984    0
+                 0.996     0.306      0.969     0.996     0.982      0.984    1
+Weighted Avg.    0.968     0.278      0.967     0.968     0.965      0.984
+
+  time remaining: 0.347 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.002      0.971     0.694     0.81       0.985    0
+                 0.998     0.306      0.969     0.998     0.983      0.985    1
+Weighted Avg.    0.969     0.278      0.97      0.969     0.967      0.985
+
+  time remaining: 0.312 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.612     0.006      0.909     0.612     0.732      0.984    0
+                 0.994     0.388      0.961     0.994     0.977      0.984    1
+Weighted Avg.    0.958     0.352      0.956     0.958     0.954      0.984
+
+  time remaining: 0.28 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.851     0.013      0.87      0.851     0.86       0.989    0
+                 0.987     0.149      0.985     0.987     0.986      0.989    1
+Weighted Avg.    0.975     0.137      0.975     0.975     0.975      0.989
+
+  time remaining: 0.251 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.75      0.011      0.878     0.75      0.809      0.988    0
+                 0.989     0.25       0.975     0.989     0.982      0.988    1
+Weighted Avg.    0.968     0.228      0.966     0.968     0.966      0.988
+
+  time remaining: 0.223 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.006      0.919     0.694     0.791      0.979    0
+                 0.994     0.306      0.969     0.994     0.981      0.979    1
+Weighted Avg.    0.966     0.278      0.964     0.966     0.963      0.979
+
+  time remaining: 0.196 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.612     0.004      0.938     0.612     0.741      0.986    0
+                 0.996     0.388      0.961     0.996     0.978      0.986    1
+Weighted Avg.    0.96      0.352      0.959     0.96      0.956      0.986
+
+  time remaining: 0.171 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.776     0.021      0.792     0.776     0.784      0.983    0
+                 0.979     0.224      0.977     0.979     0.978      0.983    1
+Weighted Avg.    0.96      0.205      0.96      0.96      0.96       0.983
+
+  time remaining: 0.146 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.681     0          1         0.681     0.81       0.992    0
+                 1         0.319      0.969     1         0.984      0.992    1
+Weighted Avg.    0.971     0.29       0.972     0.971     0.969      0.992
+
+  time remaining: 0.121 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.729     0.011      0.875     0.729     0.795      0.984    0
+                 0.989     0.271      0.973     0.989     0.981      0.984    1
+Weighted Avg.    0.966     0.247      0.964     0.966     0.964      0.984
+
+  time remaining: 0.096 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.735     0.011      0.878     0.735     0.8        0.986    0
+                 0.989     0.265      0.973     0.989     0.981      0.986    1
+Weighted Avg.    0.966     0.241      0.964     0.966     0.964      0.986
+
+  time remaining: 0.071 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.673     0.006      0.917     0.673     0.776      0.992    0
+                 0.994     0.327      0.967     0.994     0.98       0.992    1
+Weighted Avg.    0.964     0.297      0.962     0.964     0.961      0.992
+
+  time remaining: 0.047 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.633     0.008      0.886     0.633     0.738      0.979    0
+                 0.992     0.367      0.963     0.992     0.977      0.979    1
+Weighted Avg.    0.958     0.334      0.956     0.958     0.955      0.979
+
+  time remaining: 0.024 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.766     0.002      0.973     0.766     0.857      0.984    0
+                 0.998     0.234      0.977     0.998     0.988      0.984    1
+Weighted Avg.    0.977     0.213      0.977     0.977     0.976      0.984
+
+  time remaining: 0 sec
+repetitions: 5, inner repetitions: 1, classifier: NaiveBayes, InFile: /home/jtyurkovich/git/TFPredict/resources/RegulonDB/featurefile.txt, folds: 5
+Normalizing data ...
+
+Classifier: Naive Bayes
+  Multiruns: 5  Folds: 5  Model selection: false
+
+Nested CV for Naive Bayes ...
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.813     0.029      0.736     0.813     0.772      0.961    0
+                 0.971     0.188      0.981     0.971     0.976      0.967    1
+Weighted Avg.    0.956     0.173      0.958     0.956     0.957      0.967
+
+  time remaining: 1.584 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.75      0.029      0.72      0.75      0.735      0.953    0
+                 0.971     0.25       0.975     0.971     0.973      0.957    1
+Weighted Avg.    0.95      0.23       0.951     0.95      0.951      0.956
+
+  time remaining: 1.081 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.653     0.019      0.78      0.653     0.711      0.954    0
+                 0.981     0.347      0.965     0.981     0.973      0.954    1
+Weighted Avg.    0.95      0.316      0.948     0.95      0.948      0.954
+
+  time remaining: 0.821 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.755     0.017      0.822     0.755     0.787      0.972    0
+                 0.983     0.245      0.975     0.983     0.979      0.973    1
+Weighted Avg.    0.962     0.224      0.961     0.962     0.961      0.973
+
+  time remaining: 0.667 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.688     0.027      0.717     0.688     0.702      0.959    0
+                 0.973     0.313      0.969     0.973     0.971      0.961    1
+Weighted Avg.    0.946     0.286      0.946     0.946     0.946      0.961
+
+  time remaining: 0.556 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.75      0.021      0.783     0.75      0.766      0.965    0
+                 0.979     0.25       0.975     0.979     0.977      0.969    1
+Weighted Avg.    0.958     0.229      0.957     0.958     0.958      0.969
+
+  time remaining: 0.472 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.755     0.044      0.638     0.755     0.692      0.96     0
+                 0.956     0.245      0.974     0.956     0.965      0.963    1
+Weighted Avg.    0.937     0.226      0.943     0.937     0.939      0.962
+
+  time remaining: 0.411 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.019      0.791     0.694     0.739      0.956    0
+                 0.981     0.306      0.969     0.981     0.975      0.956    1
+Weighted Avg.    0.954     0.279      0.952     0.954     0.953      0.956
+
+  time remaining: 0.376 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.755     0.011      0.881     0.755     0.813      0.968    0
+                 0.989     0.245      0.975     0.989     0.982      0.969    1
+Weighted Avg.    0.968     0.223      0.966     0.968     0.966      0.969
+
+  time remaining: 0.334 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.702     0.025      0.733     0.702     0.717      0.956    0
+                 0.975     0.298      0.971     0.975     0.973      0.958    1
+Weighted Avg.    0.95      0.273      0.949     0.95      0.95       0.958
+
+  time remaining: 0.299 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.771     0.034      0.698     0.771     0.733      0.958    0
+                 0.966     0.229      0.977     0.966     0.971      0.962    1
+Weighted Avg.    0.948     0.211      0.951     0.948     0.95       0.962
+
+  time remaining: 0.266 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.021      0.773     0.694     0.731      0.952    0
+                 0.979     0.306      0.969     0.979     0.974      0.953    1
+Weighted Avg.    0.952     0.279      0.95      0.952     0.951      0.953
+
+  time remaining: 0.238 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.735     0.021      0.783     0.735     0.758      0.96     0
+                 0.979     0.265      0.973     0.979     0.976      0.961    1
+Weighted Avg.    0.956     0.242      0.955     0.956     0.955      0.961
+
+  time remaining: 0.213 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.612     0.021      0.75      0.612     0.674      0.952    0
+                 0.979     0.388      0.961     0.979     0.97       0.953    1
+Weighted Avg.    0.945     0.353      0.941     0.945     0.942      0.953
+
+  time remaining: 0.19 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.851     0.025      0.769     0.851     0.808      0.983    0
+                 0.975     0.149      0.985     0.975     0.98       0.984    1
+Weighted Avg.    0.964     0.138      0.966     0.964     0.964      0.984
+
+  time remaining: 0.168 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.75      0.029      0.72      0.75      0.735      0.961    0
+                 0.971     0.25       0.975     0.971     0.973      0.967    1
+Weighted Avg.    0.95      0.23       0.951     0.95      0.951      0.966
+
+  time remaining: 0.162 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.714     0.019      0.795     0.714     0.753      0.95     0
+                 0.981     0.286      0.971     0.981     0.976      0.951    1
+Weighted Avg.    0.956     0.261      0.954     0.956     0.955      0.951
+
+  time remaining: 0.141 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.653     0.023      0.744     0.653     0.696      0.954    0
+                 0.977     0.347      0.965     0.977     0.971      0.955    1
+Weighted Avg.    0.947     0.317      0.944     0.947     0.945      0.955
+
+  time remaining: 0.12 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.816     0.042      0.667     0.816     0.734      0.96     0
+                 0.958     0.184      0.981     0.958     0.969      0.967    1
+Weighted Avg.    0.945     0.17       0.951     0.945     0.947      0.967
+
+  time remaining: 0.101 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.723     0.013      0.85      0.723     0.782      0.977    0
+                 0.987     0.277      0.973     0.987     0.98       0.977    1
+Weighted Avg.    0.964     0.253      0.962     0.964     0.962      0.977
+
+  time remaining: 0.083 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.771     0.032      0.712     0.771     0.74       0.956    0
+                 0.968     0.229      0.977     0.968     0.973      0.96     1
+Weighted Avg.    0.95      0.211      0.952     0.95      0.951      0.96 
+
+  time remaining: 0.065 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.755     0.021      0.787     0.755     0.771      0.964    0
+                 0.979     0.245      0.975     0.979     0.977      0.967    1
+Weighted Avg.    0.958     0.224      0.957     0.958     0.958      0.967
+
+  time remaining: 0.048 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.029      0.708     0.694     0.701      0.958    0
+                 0.971     0.306      0.968     0.971     0.97       0.96     1
+Weighted Avg.    0.945     0.28       0.944     0.945     0.944      0.96 
+
+  time remaining: 0.032 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.653     0.025      0.727     0.653     0.688      0.955    0
+                 0.975     0.347      0.965     0.975     0.97       0.957    1
+Weighted Avg.    0.945     0.317      0.942     0.945     0.943      0.957
+
+  time remaining: 0.016 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.787     0.019      0.804     0.787     0.796      0.973    0
+                 0.981     0.213      0.979     0.981     0.98       0.973    1
+Weighted Avg.    0.964     0.195      0.963     0.964     0.963      0.973
+
+  time remaining: 0 sec
+repetitions: 5, inner repetitions: 1, classifier: Kstar, InFile: /home/jtyurkovich/git/TFPredict/resources/RegulonDB/featurefile.txt, folds: 5
+Normalizing data ...
+
+Classifier: K*
+  Multiruns: 5  Folds: 5  Model selection: false
+
+Nested CV for K Star ...
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.833     0.023      0.784     0.833     0.808      0.992    0
+                 0.977     0.167      0.983     0.977     0.98       0.992    1
+Weighted Avg.    0.964     0.154      0.965     0.964     0.964      0.992
+
+  time remaining: 218.496 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.771     0.017      0.822     0.771     0.796      0.99     0
+                 0.983     0.229      0.977     0.983     0.98       0.99     1
+Weighted Avg.    0.964     0.21       0.963     0.964     0.963      0.99 
+
+  time remaining: 206.977 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.673     0.013      0.846     0.673     0.75       0.989    0
+                 0.987     0.327      0.967     0.987     0.977      0.989    1
+Weighted Avg.    0.958     0.297      0.956     0.958     0.956      0.989
+
+  time remaining: 202.488 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.714     0.011      0.875     0.714     0.787      0.99     0
+                 0.989     0.286      0.971     0.989     0.98       0.99     1
+Weighted Avg.    0.964     0.26       0.962     0.964     0.962      0.99 
+
+  time remaining: 191.404 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.646     0.019      0.775     0.646     0.705      0.982    0
+                 0.981     0.354      0.965     0.981     0.973      0.982    1
+Weighted Avg.    0.95      0.323      0.947     0.95      0.948      0.982
+
+  time remaining: 182.348 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.813     0.017      0.83      0.813     0.821      0.991    0
+                 0.983     0.188      0.981     0.983     0.982      0.991    1
+Weighted Avg.    0.968     0.172      0.967     0.968     0.967      0.991
+
+  time remaining: 173.043 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.714     0.025      0.745     0.714     0.729      0.985    0
+                 0.975     0.286      0.971     0.975     0.973      0.985    1
+Weighted Avg.    0.95      0.261      0.95      0.95      0.95       0.985
+
+  time remaining: 163.905 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.633     0.004      0.939     0.633     0.756      0.991    0
+                 0.996     0.367      0.963     0.996     0.979      0.991    1
+Weighted Avg.    0.962     0.333      0.961     0.962     0.958      0.991
+
+  time remaining: 154.951 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.755     0.011      0.881     0.755     0.813      0.989    0
+                 0.989     0.245      0.975     0.989     0.982      0.989    1
+Weighted Avg.    0.968     0.223      0.966     0.968     0.966      0.989
+
+  time remaining: 145.833 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.702     0.021      0.767     0.702     0.733      0.985    0
+                 0.979     0.298      0.971     0.979     0.975      0.985    1
+Weighted Avg.    0.954     0.273      0.953     0.954     0.953      0.985
+
+  time remaining: 137.553 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.75      0.019      0.8       0.75      0.774      0.988    0
+                 0.981     0.25       0.975     0.981     0.978      0.988    1
+Weighted Avg.    0.96      0.229      0.959     0.96      0.959      0.988
+
+  time remaining: 128.408 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.714     0.013      0.854     0.714     0.778      0.986    0
+                 0.987     0.286      0.971     0.987     0.979      0.986    1
+Weighted Avg.    0.962     0.26       0.96      0.962     0.96       0.986
+
+  time remaining: 119.301 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.673     0.011      0.868     0.673     0.759      0.986    0
+                 0.989     0.327      0.967     0.989     0.978      0.986    1
+Weighted Avg.    0.96      0.297      0.958     0.96      0.958      0.986
+
+  time remaining: 109.961 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.571     0.006      0.903     0.571     0.7        0.986    0
+                 0.994     0.429      0.957     0.994     0.975      0.986    1
+Weighted Avg.    0.954     0.389      0.952     0.954     0.949      0.986
+
+  time remaining: 100.894 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.851     0.025      0.769     0.851     0.808      0.992    0
+                 0.975     0.149      0.985     0.975     0.98       0.992    1
+Weighted Avg.    0.964     0.138      0.966     0.964     0.964      0.992
+
+  time remaining: 91.645 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.75      0.019      0.8       0.75      0.774      0.987    0
+                 0.981     0.25       0.975     0.981     0.978      0.987    1
+Weighted Avg.    0.96      0.229      0.959     0.96      0.959      0.987
+
+  time remaining: 82.302 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.755     0.019      0.804     0.755     0.779      0.988    0
+                 0.981     0.245      0.975     0.981     0.978      0.988    1
+Weighted Avg.    0.96      0.224      0.959     0.96      0.959      0.988
+
+  time remaining: 73.056 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.653     0.011      0.865     0.653     0.744      0.986    0
+                 0.989     0.347      0.965     0.989     0.977      0.986    1
+Weighted Avg.    0.958     0.315      0.956     0.958     0.955      0.986
+
+  time remaining: 63.931 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.796     0.025      0.765     0.796     0.78       0.987    0
+                 0.975     0.204      0.979     0.975     0.977      0.987    1
+Weighted Avg.    0.958     0.187      0.959     0.958     0.958      0.987
+
+  time remaining: 54.846 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.723     0.004      0.944     0.723     0.819      0.993    0
+                 0.996     0.277      0.973     0.996     0.984      0.993    1
+Weighted Avg.    0.971     0.252      0.971     0.971     0.97       0.993
+
+  time remaining: 45.71 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.708     0.017      0.81      0.708     0.756      0.984    0
+                 0.983     0.292      0.971     0.983     0.977      0.984    1
+Weighted Avg.    0.958     0.266      0.956     0.958     0.957      0.984
+
+  time remaining: 36.658 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.796     0.025      0.765     0.796     0.78       0.99     0
+                 0.975     0.204      0.979     0.975     0.977      0.99     1
+Weighted Avg.    0.958     0.187      0.959     0.958     0.958      0.99 
+
+  time remaining: 27.521 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.008      0.895     0.694     0.782      0.992    0
+                 0.992     0.306      0.969     0.992     0.98       0.992    1
+Weighted Avg.    0.964     0.278      0.962     0.964     0.962      0.992
+
+  time remaining: 18.37 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.673     0.029      0.702     0.673     0.688      0.983    0
+                 0.971     0.327      0.966     0.971     0.968      0.983    1
+Weighted Avg.    0.943     0.299      0.942     0.943     0.942      0.983
+
+  time remaining: 9.183 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.702     0.008      0.892     0.702     0.786      0.984    0
+                 0.992     0.298      0.971     0.992     0.981      0.984    1
+Weighted Avg.    0.966     0.272      0.964     0.966     0.964      0.984
+
+  time remaining: 0 sec
+repetitions: 5, inner repetitions: 1, classifier: KNN, InFile: /home/jtyurkovich/git/TFPredict/resources/RegulonDB/featurefile.txt, folds: 5
+Normalizing data ...
+
+Classifier: kNN
+  Multiruns: 5  Folds: 5  Model selection: false
+
+Nested CV for kNN ...
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.854     0.04       0.683     0.854     0.759      0.908    0
+                 0.96      0.146      0.985     0.96      0.972      0.908    1
+Weighted Avg.    0.95      0.136      0.957     0.95      0.953      0.908
+
+  time remaining: 3.624 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.771     0.036      0.685     0.771     0.725      0.868    0
+                 0.964     0.229      0.977     0.964     0.97       0.868    1
+Weighted Avg.    0.947     0.211      0.95      0.947     0.948      0.868
+
+  time remaining: 2.99 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.592     0.025      0.707     0.592     0.644      0.795    0
+                 0.975     0.408      0.959     0.975     0.967      0.795    1
+Weighted Avg.    0.939     0.372      0.935     0.939     0.936      0.795
+
+  time remaining: 2.721 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.017      0.81      0.694     0.747      0.84     0
+                 0.983     0.306      0.969     0.983     0.976      0.84     1
+Weighted Avg.    0.956     0.279      0.954     0.956     0.955      0.84 
+
+  time remaining: 2.52 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.688     0.025      0.733     0.688     0.71       0.822    0
+                 0.975     0.313      0.969     0.975     0.972      0.822    1
+Weighted Avg.    0.948     0.286      0.947     0.948     0.948      0.822
+
+  time remaining: 2.356 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.771     0.032      0.712     0.771     0.74       0.873    0
+                 0.968     0.229      0.977     0.968     0.973      0.873    1
+Weighted Avg.    0.95      0.211      0.952     0.95      0.951      0.873
+
+  time remaining: 2.214 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.735     0.038      0.667     0.735     0.699      0.851    0
+                 0.962     0.265      0.972     0.962     0.967      0.851    1
+Weighted Avg.    0.941     0.244      0.944     0.941     0.942      0.851
+
+  time remaining: 2.08 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.015      0.829     0.694     0.756      0.832    0
+                 0.985     0.306      0.969     0.985     0.977      0.832    1
+Weighted Avg.    0.958     0.279      0.956     0.958     0.956      0.832
+
+  time remaining: 1.944 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.837     0.025      0.774     0.837     0.804      0.907    0
+                 0.975     0.163      0.983     0.975     0.979      0.907    1
+Weighted Avg.    0.962     0.15       0.963     0.962     0.962      0.907
+
+  time remaining: 1.82 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.745     0.027      0.729     0.745     0.737      0.86     0
+                 0.973     0.255      0.975     0.973     0.974      0.86     1
+Weighted Avg.    0.952     0.235      0.953     0.952     0.952      0.86 
+
+  time remaining: 1.7 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.792     0.027      0.745     0.792     0.768      0.884    0
+                 0.973     0.208      0.979     0.973     0.976      0.884    1
+Weighted Avg.    0.956     0.192      0.957     0.956     0.957      0.884
+
+  time remaining: 1.582 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.694     0.034      0.68      0.694     0.687      0.831    0
+                 0.966     0.306      0.968     0.966     0.967      0.831    1
+Weighted Avg.    0.941     0.281      0.941     0.941     0.941      0.831
+
+  time remaining: 1.461 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.755     0.019      0.804     0.755     0.779      0.879    0
+                 0.981     0.245      0.975     0.981     0.978      0.879    1
+Weighted Avg.    0.96      0.224      0.959     0.96      0.959      0.879
+
+  time remaining: 1.345 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.673     0.023      0.75      0.673     0.71       0.818    0
+                 0.977     0.327      0.967     0.977     0.972      0.818    1
+Weighted Avg.    0.948     0.298      0.946     0.948     0.947      0.818
+
+  time remaining: 1.231 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.851     0.042      0.667     0.851     0.748      0.907    0
+                 0.958     0.149      0.985     0.958     0.971      0.907    1
+Weighted Avg.    0.948     0.139      0.956     0.948     0.951      0.907
+
+  time remaining: 1.116 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.813     0.034      0.709     0.813     0.757      0.892    0
+                 0.966     0.188      0.981     0.966     0.974      0.892    1
+Weighted Avg.    0.952     0.173      0.956     0.952     0.954      0.892
+
+  time remaining: 1.001 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.796     0.029      0.736     0.796     0.765      0.884    0
+                 0.971     0.204      0.979     0.971     0.975      0.884    1
+Weighted Avg.    0.954     0.188      0.956     0.954     0.955      0.884
+
+  time remaining: 0.888 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.714     0.029      0.714     0.714     0.714      0.845    0
+                 0.971     0.286      0.971     0.971     0.971      0.845    1
+Weighted Avg.    0.947     0.262      0.947     0.947     0.947      0.845
+
+  time remaining: 0.776 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.816     0.044      0.656     0.816     0.727      0.888    0
+                 0.956     0.184      0.981     0.956     0.968      0.888    1
+Weighted Avg.    0.943     0.171      0.95      0.943     0.946      0.888
+
+  time remaining: 0.665 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.745     0.019      0.795     0.745     0.769      0.863    0
+                 0.981     0.255      0.975     0.981     0.978      0.863    1
+Weighted Avg.    0.96      0.234      0.959     0.96      0.959      0.863
+
+  time remaining: 0.553 sec
+
+External prediction at fold = 0
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.792     0.036      0.691     0.792     0.738      0.877    0
+                 0.964     0.208      0.979     0.964     0.971      0.877    1
+Weighted Avg.    0.948     0.193      0.952     0.948     0.95       0.877
+
+  time remaining: 0.442 sec
+
+External prediction at fold = 1
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.776     0.032      0.717     0.776     0.745      0.874    0
+                 0.968     0.224      0.977     0.968     0.973      0.874    1
+Weighted Avg.    0.95      0.206      0.952     0.95      0.951      0.874
+
+  time remaining: 0.332 sec
+
+External prediction at fold = 2
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.735     0.025      0.75      0.735     0.742      0.847    0
+                 0.975     0.265      0.973     0.975     0.974      0.847    1
+Weighted Avg.    0.952     0.243      0.952     0.952     0.952      0.847
+
+  time remaining: 0.22 sec
+
+External prediction at fold = 3
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.735     0.034      0.692     0.735     0.713      0.86     0
+                 0.966     0.265      0.972     0.966     0.969      0.86     1
+Weighted Avg.    0.945     0.244      0.946     0.945     0.945      0.86 
+
+  time remaining: 0.11 sec
+
+External prediction at fold = 4
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.681     0.021      0.762     0.681     0.719      0.832    0
+                 0.979     0.319      0.969     0.979     0.974      0.832    1
+Weighted Avg.    0.952     0.292      0.95      0.952     0.951      0.832
+
+  time remaining: 0 sec
+
+=======================
+Classification results:
+=======================
+  Best classifier:       K*
+
+  Classifier             ROC score
+    Random Forest:         0.953
+    Decision Tree:         0.958
+    SVM rbf kernel:        0.846
+    SVM linear kernel:     0.985
+    Naive Bayes:           0.962
+    K*:                    0.988
+    kNN:                   0.861
+  
+Runtime of training: 350 sec.
+Time elapsed: 97 minutes

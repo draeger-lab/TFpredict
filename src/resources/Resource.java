@@ -1,6 +1,6 @@
 /*  
- * $Id$
- * $URL$
+ * $Id: Resource.java 99 2014-01-09 21:57:51Z draeger $
+ * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/resources/Resource.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
  *  
@@ -25,7 +25,7 @@ package resources;
 /**
  * 
  * @author Johannes Eichner
- * @version $Rev$
+ * @version $Rev: 99 $
  * @since 1.0
  */
 public final class Resource {

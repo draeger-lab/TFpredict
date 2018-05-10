@@ -1,6 +1,6 @@
 /*  
- * $Id$
- * $URL$
+ * $Id: IntArrayPointer.java 99 2014-01-09 21:57:51Z draeger $
+ * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/liblinear/IntArrayPointer.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
  *  
@@ -25,7 +25,7 @@ package liblinear;
 /**
  * 
  * @author Johannes Eichner
- * @version $Rev$
+ * @version $Rev: 99 $
  * @since 1.0
  */
 final class IntArrayPointer {

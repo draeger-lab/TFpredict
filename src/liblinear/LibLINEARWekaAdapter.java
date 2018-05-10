@@ -136,7 +136,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * <!-- options-end -->
  * 
  * @author Benedikt Waldvogel (mail at bwaldvogel.de)
- * @version $Rev$
+ * @version $Rev: 80 $
  */
 public class LibLINEARWekaAdapter extends AbstractClassifier implements TechnicalInformationHandler {
 
@@ -1237,7 +1237,7 @@ public class LibLINEARWekaAdapter extends AbstractClassifier implements Technica
 	 * @return the revision
 	 */
 	public String getRevision() {
-		return RevisionUtils.extract("$Revision$");
+		return RevisionUtils.extract("$Revision: 80 $");
 	}
 
 	/**

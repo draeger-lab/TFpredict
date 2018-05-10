@@ -1,6 +1,6 @@
 /*
- * $Id$
- * $URL$
+ * $Id: NaiveBayesExternalPredictionTest.java 99 2014-01-09 21:57:51Z draeger $
+ * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/liblinear/NaiveBayesExternalPredictionTest.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
  * 
@@ -40,7 +40,7 @@ import weka.filters.unsupervised.instance.NonSparseToSparse;
 /**
  * 
  * @author Johannes Eichner
- * @version $Rev$
+ * @version $Rev: 99 $
  * @since 1.0
  */
 public class NaiveBayesExternalPredictionTest {
@@ -48,7 +48,6 @@ public class NaiveBayesExternalPredictionTest {
 	/**
 	 * @param args
 	 * @throws IOException
-	 * @throws Exception
 	 */
 	public static void main(String[] args) throws IOException {
 
