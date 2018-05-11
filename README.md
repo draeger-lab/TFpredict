@@ -1,6 +1,5 @@
-
-  -----------------------------------------------------------------------------------
-  TFpredict - Identification and structural characterization of transcription factors
+# ![tfpredict_logo](https://github.com/draeger-lab/TFpredict/blob/master/doc/tfpredict_logo.png)
+## TFpredict - Identification and structural characterization of transcription factors
   -----------------------------------------------------------------------------------
   (version 1.1, Copyright (C) 2013 Florian Topf and Johannes Eichner)
 
