@@ -28,37 +28,13 @@ TFpredict
 **TFpredict** is a tool which implements a novel three-step classification method which expects a protein sequence as input and (1) distinguishes transcription factors (TF) from other proteins (Non-TF), (2) predicts the structural superclass of TFs (see TransFac classification), and (3) identifies the DNA-binding domains of TFs. The latter two classification steps are only to be performed if the given protein sequence was identified as a TF. The tool incorporates the results from a [BLAST+](http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) search into a novel feature representation which allows TF/non-TF classification by state-of-the-art machine learning methods. Specific supervised classifiers were constructed for the task of identifying TFs and their structural superclasses, respectively. Next, known protein domains are detected by the tool [InterProScan](http://www.ebi.ac.uk/Tools/pfa/iprscan/), and then the DNA-binding domains among these are filtered through GO-terms. TFpredict was implemented as an additional preprocessing tool for [SABINE](http://www.cogsys.cs.uni-tuebingen.de/software/SABINE), which predicts the DNA-motif bound by a transcription factor, given its amino acid sequence, superclass, DNA-binding domains and organism.
   ___________________________________________________________________________________________________________
   
-## Availability:
+  Availability
+  ------------
+  
 TFpredict is available in two different versions for classification of
 1. eukaryotic transcription factors ([master branch](https://github.com/draeger-lab/TFpredict/tree/master))
 2. prokaryotic σ-factors ([prokaryote branch](https://github.com/draeger-lab/TFpredict/tree/prokaryote))
 
-  Contents
-  --------
-  - License
-  - Installation
-  - Manual
-  - Format specification
-  - Website and questions
-  ___________________________________________________________________________________________________________  
-
-  License
-  -------
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or (at
-  your option) any later version.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, see <http://www.gnu.org/licenses/>.
-
-  ___________________________________________________________________________________________________________
 
   Installation
   ------------
@@ -75,26 +51,7 @@ TFpredict is available in two different versions for classification of
 
 
   Manual
-  ------
-
-  DESCRIPTION:  TFpredict is a tool which implements a novel three-step classification method which expects 
-  		a protein sequence as input and 
-		(1) distinguishes transcription factors (TF) from other proteins (non-TF), 
-		(2) predicts the structural superclass of TFs (see TransFac classification), and 
-		(3) identifies the DNA-binding domains of TFs. 
-		Obviously, the latter two classification steps can only be performed if the given 
-		protein sequence corresponds to a TF. For the TF/non-TF classification the tool 
-		converts the given protein sequence into a feature vector built from the BLAST alignment score  
-		distributions with annotated TFs and non-TFs.		 
-		Next, a supervised machine learning-based classifier is used to discriminate 
-		TFs from non-TFs based on the computed feature representation. Another classifier is 
-		then used to predict the structural superclass for protein sequences classified as TFs. 
-		In the last step, the domain composition of the sequence is inferred by the tool InterProScan 
-		and the results are filtered under consideration of relevant GO-terms to identify the 
-		DNA-binding domains of a given TF. 
-		TFpredict is particularly useful in combination with SABINE, a related tool which predicts the 
-		DNA-motif bound by a transcription factor, given its amino acid sequence, superclass, 
-		DNA-binding domains and organism. 
+  ------ 
 
   INPUT:  	FASTA file: 
   		contains the protein identifiers and sequences in FASTA format  (see Format Specification)
@@ -125,16 +82,12 @@ TFpredict is available in two different versions for classification of
 				
 				-blastPath      <path_to_blast>     Path to "bin" directory containing BLAST executables (e.g. /opt/blast/latest). 
 													Only needed if environment variable BLAST_PATH is not set. 
-													
 
-  A full documentation including a tutorial is available at the supplementary website of TFpredict:
-  http://www.cogsys.cs.uni-tuebingen.de/software/TFpredict/ 
 
   ___________________________________________________________________________________________________________
 
   Format specification
   --------------------
-
 
   FASTA file:
   __________________________________________________________________________________________
