@@ -40,10 +40,12 @@ TFpredict is available in two different versions for classification of
   ------------
 
   To extract the gzipped tar archive of TFpredict obtained from our downloads section use the command:
+  
   ```
     tar -xzf tf_predict.tar.gz
   ```
-  TFpredict is completely implemented in Java and provided as a runnable JAR file. All platforms (Windows, Mac, Linux) 
+  
+  TFpredict is completely implemented in Java and provided as a runnable JAR file. All platforms (Windows, Mac, Linux) 
   are supported provided that Java (JDK 1.6 or later) and BLAST (NCBI BLAST 2.2.27+ or later) is installed. 
   You can download the latest version of BLAST from ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/. 
 
@@ -54,11 +56,15 @@ TFpredict is available in two different versions for classification of
   ------ 
 
   **INPUT:**  FASTA file: contains the protein identifiers and sequences in FASTA format  (see Format Specification)
+  
   **OUTPUT:** SABINE input file: contains all information required for post-processing the results with SABINE (see Format Specification at http://www.cogsys.cs.uni-tuebingen.de/software/SABINE). The output filename can be specified by the user (see OPTIONS: `-sabineOutfile`). The argument `-species` also has to be specified if an output file for SABINE shall be created.
-  **USAGE:** 
+  
+  **USAGE:**
+  
   ```
   java -jar TFpredict.jar <input_filename> [OPTIONS]
   ```
+  
   **OPTIONS:** 	
   * `-sabineOutfile <output_filename>` Output file for post-processing of the results with SABINE.
   * `-species <organism_name>` Organism name (e.g., Homo sapiens). See list of supported organisms: http://www.cogsys.cs.uni-tuebingen.de/software/SABINE/doc/organism_list.txt
