@@ -41,9 +41,9 @@ TFpredict is available in two different versions for classification of
 
   To extract the gzipped tar archive of TFpredict obtained from our downloads section use the command:
   
-  ```
-    tar -xzf tf_predict.tar.gz
-  ```
+```
+tar -xzf tf_predict.tar.gz
+```
   
   TFpredict is completely implemented in Java and provided as a runnable JAR file. All platforms (Windows, Mac, Linux) 
   are supported provided that Java (JDK 1.6 or later) and BLAST (NCBI BLAST 2.2.27+ or later) is installed. 
@@ -79,7 +79,6 @@ TFpredict is available in two different versions for classification of
   --------------------
 
   FASTA file:
-  __________________________________________________________________________________________
   
 ```
   >Sequence_1
