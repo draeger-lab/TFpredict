@@ -19,15 +19,22 @@ TFpredict
   </dd>
   <dt>Please cite:</dt>
   <dd>Johannes Eichner, Florian Topf, Andreas Dräger, Clemens Wrzodek, Dierk Wanke, and Andreas Zell. <a href="http://dx.doi.org/10.1371%2Fjournal.pone.0082238">TFpredict and SABINE: Sequence-Based Prediction of Structural and Functional Characteristics of Transcription Factors</a>. PLoS ONE, 8(12):e82238, December 2013.
-  [ <a href="http://dx.doi.org/10.1371/journal.pone.0082238">DOI:10.1371/journal.pone.0082238</a> | <a href="http://www.plosone.org/article/fetchObject.action?uri=info%3Adoi%2F10.1371%2Fjournal.pone.0082238&representation=PDF">PDF</a> ]</dd>
+  [ <a href="http://dx.doi.org/10.1371/journal.pone.0082238">DOI:10.1371/journal.pone.0082238</a> | <a href="http://www.plosone.org/article/fetchObject.action?uri=info%3Adoi%2F10.1371%2Fjournal.pone.0082238&representation=PDF">PDF</a> ]  
+  </dd>
 </dl>
 
   ___________________________________________________________________________________________________________
 
-**TFpredict** is a tool which implements a novel three-step classification method which expects a protein sequence as input and (1) distinguishes transcription factors (TF) from other proteins (Non-TF), (2) predicts the structural superclass of TFs (see TransFac classification), and (3) identifies the DNA-binding domains of TFs. The latter two classification steps are only be performed if the given protein sequence was identified as a TF. The tool incorporates the results from a BLAST+ search into a novel feature representation which allows TF/non-TF classification by state-of-the-art machine learning methods. Specific supervised classifiers were contructed for the task of identifying TFs and their structural superclasses, respectively. Next, known protein domains are detected by the tool InterProScan and then the DNA-binding domains among these are filtered by means of GO-terms. TFpredict was implemented as a supplementary preprocessing tool for SABINE, which predicts the DNA-motif bound by a transcription factor, given its amino acid sequence, superclass, DNA-binding domains and organism.
+**TFpredict** is a tool which implements a novel three-step classification method which expects a protein sequence as input and (1) distinguishes transcription factors (TF) from other proteins (Non-TF), (2) predicts the structural superclass of TFs (see TransFac classification), and (3) identifies the DNA-binding domains of TFs. The latter two classification steps are only to be performed if the given protein sequence was identified as a TF. The tool incorporates the results from a [BLAST+](http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) search into a novel feature representation which allows TF/non-TF classification by state-of-the-art machine learning methods. Specific supervised classifiers were constructed for the task of identifying TFs and their structural superclasses, respectively. Next, known protein domains are detected by the tool [InterProScan](http://www.ebi.ac.uk/Tools/pfa/iprscan/), and then the DNA-binding domains among these are filtered through GO-terms. TFpredict was implemented as an additional preprocessing tool for [SABINE](http://www.cogsys.cs.uni-tuebingen.de/software/SABINE), which predicts the DNA-motif bound by a transcription factor, given its amino acid sequence, superclass, DNA-binding domains and organism.
   ___________________________________________________________________________________________________________
+  
+## Availability:
+TFpredict is available in two different versions for classification of
+1. eukaryotic transcription factors ([master branch](https://github.com/draeger-lab/TFpredict/tree/master))
+2. prokaryotic σ-factors ([prokaryote branch](https://github.com/draeger-lab/TFpredict/tree/prokaryote))
 
-  Contents:
+  Contents
+  --------
   - License
   - Installation
   - Manual
@@ -35,7 +42,6 @@ TFpredict
   - Website and questions
   ___________________________________________________________________________________________________________  
 
-  -------
   License
   -------
 
@@ -54,7 +60,6 @@ TFpredict
 
   ___________________________________________________________________________________________________________
 
-  ------------
   Installation
   ------------
 
@@ -69,7 +74,6 @@ TFpredict
   _____________________________________________________________________________________________________________
 
 
-  ------
   Manual
   ------
 
@@ -128,7 +132,6 @@ TFpredict
 
   ___________________________________________________________________________________________________________
 
-  --------------------
   Format specification
   --------------------
 
@@ -167,11 +170,7 @@ TFpredict
 
   _____________________________________________________________________________________________________________
 
+  Contact
   ---------------------
-  Website and questions
-  ---------------------
 
-  To obtain more detailed information about TFpredict, see the website: http://www.cogsys.cs.uni-tuebingen.de/software/TFpredict/ 
-  If you have any further questions, please contact me by e-mail:    	johannes.eichner@uni-tuebingen.de
-
-
+  In case of any questions, please contact <a href="mailto:andreas.draeger@uni-tuebingen.de?subject=TFpredict">Andreas Dräger</a>.
