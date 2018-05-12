@@ -1,11 +1,33 @@
-# ![tfpredict_logo](https://github.com/draeger-lab/TFpredict/blob/master/doc/tfpredict_logo.png)
-## TFpredict - Identification and structural characterization of transcription factors
-  -----------------------------------------------------------------------------------
-  (version 1.1, Copyright (C) 2013 Florian Topf and Johannes Eichner)
+TFpredict
+=========
+<img align="right" src="https://github.com/draeger-lab/TFpredict/blob/master/doc/tfpredict_logo.png" title="TFpredict"/> 
 
+[![License (GPL version 3)](https://img.shields.io/badge/license-GPLv3.0-blue.svg?style=flat-square)](http://opensource.org/licenses/GPL-3.0)
+[![Stable version](https://img.shields.io/badge/Stable_version-1.3-brightgreen.svg)](http://shields.io)
+
+**Identification and structural characterization of transcription factors based on supervised machine learning**
+  ___________________________________________________________________________________________________________
+
+<dl>
+  <dt>Authors:</dt>
+  <dd>
+    <a href="http://www.cogsys.cs.uni-tuebingen.de/mitarb/eichner/">Johannes Eichner</a>,
+    Florian Topf,
+    <a href="http://draeger-lab.org">Andreas Dräger</a>,
+    <a href="http://sbrg.ucsd.edu/researchers/yurkovich/">James T. Yurkovich</a>,
+    <a href="http://www.cogsys.cs.uni-tuebingen.de/mitarb/roemer/">Michael Römer</a>
+  </dd>
+  <dt>Please cite:</dt>
+  <dd>Johannes Eichner, Florian Topf, Andreas Dräger, Clemens Wrzodek, Dierk Wanke, and Andreas Zell. <a href="http://dx.doi.org/10.1371%2Fjournal.pone.0082238">TFpredict and SABINE: Sequence-Based Prediction of Structural and Functional Characteristics of Transcription Factors</a>. PLoS ONE, 8(12):e82238, December 2013.
+  [ <a href="http://dx.doi.org/10.1371/journal.pone.0082238">DOI:10.1371/journal.pone.0082238</a> | <a href="http://www.plosone.org/article/fetchObject.action?uri=info%3Adoi%2F10.1371%2Fjournal.pone.0082238&representation=PDF">PDF</a> ]</dd>
+</dl>
+
+  ___________________________________________________________________________________________________________
+
+**TFpredict** is a tool which implements a novel three-step classification method which expects a protein sequence as input and (1) distinguishes transcription factors (TF) from other proteins (Non-TF), (2) predicts the structural superclass of TFs (see TransFac classification), and (3) identifies the DNA-binding domains of TFs. The latter two classification steps are only be performed if the given protein sequence was identified as a TF. The tool incorporates the results from a BLAST+ search into a novel feature representation which allows TF/non-TF classification by state-of-the-art machine learning methods. Specific supervised classifiers were contructed for the task of identifying TFs and their structural superclasses, respectively. Next, known protein domains are detected by the tool InterProScan and then the DNA-binding domains among these are filtered by means of GO-terms. TFpredict was implemented as a supplementary preprocessing tool for SABINE, which predicts the DNA-motif bound by a transcription factor, given its amino acid sequence, superclass, DNA-binding domains and organism.
+  ___________________________________________________________________________________________________________
 
   Contents:
- _________________________
   - License
   - Installation
   - Manual
