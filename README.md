@@ -2,25 +2,19 @@ TFpredict
 =========
 <img align="right" src="https://github.com/draeger-lab/TFpredict/blob/master/doc/tfpredict_logo.png" title="TFpredict"/> 
 
+**Identification and structural characterization of transcription factors based on supervised machine learning**
+
 [![License (GPL version 3)](https://img.shields.io/badge/license-GPLv3.0-blue.svg?style=flat-square)](http://opensource.org/licenses/GPL-3.0)
 [![Stable version](https://img.shields.io/badge/Stable_version-1.3-brightgreen.svg)](http://shields.io)
+[![DOI](http://img.shields.io/badge/DOI-10.1371%20%2F%20journal.pone.0082238-blue.svg)](http://dx.doi.org/10.1371/journal.pone.0082238)
 
-**Identification and structural characterization of transcription factors based on supervised machine learning**
-  ___________________________________________________________________________________________________________
+*Authors:* [Johannes Eichner](http://www.cogsys.cs.uni-tuebingen.de/mitarb/eichner/), Florian Topf, [Andreas Dräger](http://draeger-lab.org), [James T. Yurkovich](http://sbrg.ucsd.edu/researchers/yurkovich/), [Michael Römer](http://www.cogsys.cs.uni-tuebingen.de/mitarb/roemer/)
+___________________________________________________________________________________________________________
 
 
 Article citations are **critical** for us to be able to continue support for TFpredict.  If you use TFpredict and you publish papers about work that uses TFpredict, we ask that you **please cite the TFpredict paper**.
 
 <dl>
-  <dt>Authors:</dt>
-  <dd>
-    <a href="http://www.cogsys.cs.uni-tuebingen.de/mitarb/eichner/">Johannes Eichner</a>,
-    Florian Topf,
-    <a href="http://draeger-lab.org">Andreas Dräger</a>,
-    <a href="http://sbrg.ucsd.edu/researchers/yurkovich/">James T. Yurkovich</a>,
-    <a href="http://www.cogsys.cs.uni-tuebingen.de/mitarb/roemer/">Michael Römer</a>
-  </dd>
-  <dt>Please cite:</dt>
   <dd>Johannes Eichner, Florian Topf, Andreas Dräger, Clemens Wrzodek, Dierk Wanke, and Andreas Zell. <a href="http://dx.doi.org/10.1371%2Fjournal.pone.0082238">TFpredict and SABINE: Sequence-Based Prediction of Structural and Functional Characteristics of Transcription Factors</a>. PLoS ONE, 8(12):e82238, December 2013.
   [ <a href="http://dx.doi.org/10.1371/journal.pone.0082238">DOI:10.1371/journal.pone.0082238</a> | <a href="http://www.plosone.org/article/fetchObject.action?uri=info%3Adoi%2F10.1371%2Fjournal.pone.0082238&representation=PDF">PDF</a> ]  
   </dd>
