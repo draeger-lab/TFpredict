@@ -4,11 +4,11 @@ TFpredict
 
 **Identification and structural characterization of transcription factors based on supervised machine learning**
 
-[![License (GPL version 3)](https://img.shields.io/badge/license-GPLv3.0-blue.svg?style=flat-square)](http://opensource.org/licenses/GPL-3.0)
-[![Stable version](https://img.shields.io/badge/Stable_version-1.3-brightgreen.svg)](http://shields.io)
-[![DOI](http://img.shields.io/badge/DOI-10.1371%20%2F%20journal.pone.0082238-blue.svg)](http://dx.doi.org/10.1371/journal.pone.0082238)
+[![License (GPL version 3)](https://img.shields.io/badge/license-GPLv3.0-blue.svg?style=plastic)](http://opensource.org/licenses/GPL-3.0)
+[![Stable version](https://img.shields.io/badge/Stable_version-1.3-brightgreen.svg?style=plastic)](https://github.com/draeger-lab/TFpredict/releases/)
+[![DOI](http://img.shields.io/badge/DOI-10.1371%20%2F%20journal.pone.0082238-blue.svg?style=plastic)](http://dx.doi.org/10.1371/journal.pone.0082238)
 
-*Authors:* [Johannes Eichner](http://www.cogsys.cs.uni-tuebingen.de/mitarb/eichner/), Florian Topf, [Andreas Dräger](http://draeger-lab.org), [James T. Yurkovich](http://sbrg.ucsd.edu/researchers/yurkovich/), [Michael Römer](http://www.cogsys.cs.uni-tuebingen.de/mitarb/roemer/)
+*Authors:* [Johannes Eichner](https://github.com/jeichner/), Florian Topf, [Andreas Dräger](https://github.com/draeger/), [James T. Yurkovich](https://github.com/jtyurkovich/), [Michael Römer](https://github.com/mroemer/)
 ___________________________________________________________________________________________________________
 
 
