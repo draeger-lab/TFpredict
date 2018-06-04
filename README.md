@@ -15,14 +15,15 @@ ________________________________________________________________________________
 Article citations are **critical** for us to be able to continue support for TFpredict.  If you use TFpredict and you publish papers about work that uses TFpredict, we ask that you **please cite the TFpredict paper**.
 
 <dl>
+  <dt>Research Article:</dt>
   <dd>Johannes Eichner, Florian Topf, Andreas Dräger, Clemens Wrzodek, Dierk Wanke, and Andreas Zell. <a href="http://dx.doi.org/10.1371%2Fjournal.pone.0082238">TFpredict and SABINE: Sequence-Based Prediction of Structural and Functional Characteristics of Transcription Factors</a>. PLoS ONE, 8(12):e82238, December 2013.
-  [ <a href="http://dx.doi.org/10.1371/journal.pone.0082238">DOI:10.1371/journal.pone.0082238</a> | <a href="http://www.plosone.org/article/fetchObject.action?uri=info%3Adoi%2F10.1371%2Fjournal.pone.0082238&representation=PDF">PDF</a> ]  
+  [ <a href="http://dx.doi.org/10.1371/journal.pone.0082238">DOI</a> | <a href="http://www.plosone.org/article/fetchObject.action?uri=info%3Adoi%2F10.1371%2Fjournal.pone.0082238&representation=PDF">PDF</a> ]  
   </dd>
 </dl>
 
   ___________________________________________________________________________________________________________
 
-**TFpredict** is a tool which implements a novel three-step classification method which expects a protein sequence as input and (1) distinguishes transcription factors (TF) from other proteins (Non-TF), (2) predicts the structural superclass of TFs (see TransFac classification), and (3) identifies the DNA-binding domains of TFs. The latter two classification steps are only to be performed if the given protein sequence was identified as a TF. The tool incorporates the results from a [BLAST+](http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) search into a novel feature representation which allows TF/non-TF classification by state-of-the-art machine learning methods. Specific supervised classifiers were constructed for the task of identifying TFs and their structural superclasses, respectively. Next, known protein domains are detected by the tool [InterProScan](http://www.ebi.ac.uk/Tools/pfa/iprscan/), and then the DNA-binding domains among these are filtered through GO-terms. TFpredict was implemented as an additional preprocessing tool for [SABINE](http://www.cogsys.cs.uni-tuebingen.de/software/SABINE), which predicts the DNA-motif bound by a transcription factor, given its amino acid sequence, superclass, DNA-binding domains and organism.
+**TFpredict** is a tool which implements a novel three-step classification method which expects a protein sequence as input and (1) distinguishes transcription factors (TF) from other proteins (Non-TF), (2) predicts the structural superclass of TFs (see TransFac classification), and (3) identifies the DNA-binding domains of TFs. The latter two classification steps are only to be performed if the given protein sequence was identified as a TF. The tool incorporates the results from a [BLAST+](http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) search into a novel feature representation which allows TF/non-TF classification by state-of-the-art machine learning methods. Specific supervised classifiers were constructed for the task of identifying TFs and their structural superclasses, respectively. Next, known protein domains are detected by the tool [InterProScan](http://www.ebi.ac.uk/Tools/pfa/iprscan/), and then the DNA-binding domains among these are filtered through GO-terms. TFpredict was implemented as an additional preprocessing tool for [SABINE](https://github.com/draeger-lab/SABINE), which predicts the DNA-motif bound by a transcription factor, given its amino acid sequence, superclass, DNA-binding domains and organism.
   ___________________________________________________________________________________________________________
   
   Availability
@@ -38,10 +39,9 @@ Table of Contents
 
  - [Installation](#-Installation)
  - [Manual](#-Manual)
- - [Format specification](#-format-and-specification)
- - [Website and questions](#-website-and-questions)
- - [Copyright and license](#-copyright-and-license)
- - [Contact](#-contact)
+ - [Format specification](#-Format-specification)
+ - [Copyright and license](#-Copyright-and_License)
+ - [Contact](#-Contact)
 
 
   Installation
@@ -126,8 +126,9 @@ tar -xzf tf_predict.tar.gz
   Copyright and License
   ---------------------
 
-  Copyright (c) 2013 by the individual authors of this software.
+  Copyright © 2013-2018 by the individual authors of this software.
 
+  <img align="right" src="https://www.gnu.org/graphics/gplv3-88x31.png" title="GPL Version 3" alt="GPL Version 3"/>
   This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
  
   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
