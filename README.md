@@ -28,11 +28,10 @@ ________________________________________________________________________________
   
 Availability
 ------------
-  
-TFpredict is available in two different versions for classification of
-1. eukaryotic transcription factors ([master branch](https://github.com/draeger-lab/TFpredict/tree/master))
-2. prokaryotic σ-factors ([prokaryote branch](https://github.com/draeger-lab/TFpredict/tree/prokaryote))
 
+Please note that TFpredict is available in **two different versions** that are currently organized in two separate branches. Each branch can be used for classification of transcription factors from a different domain:
+1. Eukaryotic transcription factors ([master branch](https://github.com/draeger-lab/TFpredict/tree/master))
+2. Prokaryotic σ-factors ([prokaryote branch](https://github.com/draeger-lab/TFpredict/tree/prokaryote))
 
 Table of Contents
 -----------------
