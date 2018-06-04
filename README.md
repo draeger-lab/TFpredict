@@ -37,13 +37,14 @@ TFpredict is available in two different versions for classification of
 Table of Contents
 -----------------
 
- - [Introduction](#-Introduction)
- - [How to get started](#-How-to-get-started)
- - [Installation](#-Installation)
- - [Manual](#-Manual)
- - [Format specification](#-Format-specification)
- - [Copyright and license](#-Copyright-and_License)
- - [Contact](#-Contact)
+ * [Introduction](#-Introduction)
+ * [How to get started](#-How-to-get-started)
+ * [Installation](#-Installation)
+ * [Manual](#-manual)
+ * [Format specification](#-Format-specification)
+ * [Copyright and license](#-Copyright-and_License)
+ * [Acknowledgments](#-acknowledgments)
+ * [Contact](#-Contact)
 
 Introduction
 ------------
@@ -103,7 +104,7 @@ Installation
   * `-ignoreCharacteristicDomains` no classification based on predefined InterPro domains.
   * `--help` to display the usage of the script and an overview of the command line options.
   
-  **How to proceed**
+  ### How to proceed
   First, you need to generate an input file in FASTA format (see [format specification](#-Format-specification) below) or [example input file](test_seq.fasta). The input file should contain the following information about the protein under study:
 * Name or identifier
 * Organism (see [list of supported organisms](src/resources/organism_list.txt))
@@ -190,7 +191,14 @@ The input file format description specifies the input data for an individual TF.
 
   _____________________________________________________________________________________________________________
 
+  Acknowledgments
+  ---------------
+  
+  This project is promoted by
+
+![Federal Ministry of Education and Research](https://www.bmbf.de/site/img/logo.png) ![The Virtual Liver Network](doc/VLN_left_small.png) ![Spher4Sys](doc/spher4sys_logo_small.png) ![Marie Skłowdowska-Curie Actions](doc/mca.jpg)
+
   Contact
-  ---------------------
+  -------
 
   In case of any questions, please contact <a href="mailto:andreas.draeger@uni-tuebingen.de?subject=TFpredict">Andreas Dräger</a>.
