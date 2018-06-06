@@ -32,6 +32,7 @@ Availability
 Please note that TFpredict is available in **two different versions** that are currently organized in two separate branches. Each branch can be used for classification of transcription factors from a different domain:
 1. Eukaryotic transcription factors ([master branch](https://github.com/draeger-lab/TFpredict/tree/master))
 2. Prokaryotic σ-factors ([prokaryote branch](https://github.com/draeger-lab/TFpredict/tree/prokaryote))
+The algorithm itself is identical. What is different are the training data and weights for both scenarios. So, this distinctionis more for convenience to directly provide preconfigured versions of TFpredict for both domains of organisms.
 
 Table of Contents
 -----------------
@@ -76,8 +77,33 @@ Installation
   + BLAST (NCBI BLAST 2.2.27+ or later)
   
   The analysis framework of TFpredict is entirely written in Java. Thus, it requires that Java Virtual Machine (JDK version 1.6 or newer) is installed on your system.
+  
+### Installation and configuration of BLAST
+  
+Follow the instructions at the BLAST home-page for your operating system. For Unix, go to http://www.ncbi.nlm.nih.gov/books/NBK52640/
+For Windows, see the instructions http://www.ncbi.nlm.nih.gov/books/NBK52637/.
+   
+Having BLAST successfully installed, it is necessary to pass the path to the executable to TFpredict. To this end, define the environment variable
+   
+    BLAST_DIR
+   
+on your system to point to the installation directory of your copy of BLAST. This might be, for instance,
+   
+|Path|Operating System|
+|--|--|
+| `/usr/local/ncbi/blast/` | macOS |
+| `/opt/blast/latest/`     | Linux |
+| `C:\program~\NCBI\blast-x.x.xxx\` | MS Windows |
+   
+Note that `x.x.xxx` stands for some arbitrary version number of BLAST and must be replaced as necessary.
 
-  _____________________________________________________________________________________________________________
+So, the variable `BLAST_DIR` could be set to one of the above example folders. In the bash under MacOS you would, e.g., type
+   
+    export BLAST_DIR=/usr/local/ncbi/blast/
+   
+before executing TFpredict.
+
+_____________________________________________________________________________________________________________
 
 
   Manual
