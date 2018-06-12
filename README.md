@@ -37,14 +37,14 @@ The algorithm itself is identical. What is different are the training data and w
 Table of Contents
 -----------------
 
- * [Introduction](#-Introduction)
- * [How to get started](#-How-to-get-started)
- * [Installation](#-Installation)
- * [Manual](#-manual)
- * [Format specification](#-Format-specification)
- * [Copyright and license](#-Copyright-and_License)
- * [Acknowledgments](#-acknowledgments)
- * [Contact](#-Contact)
+ * [Introduction](#Introduction)
+ * [How to get started](#How-to-get-started)
+ * [Installation](#Installation)
+ * [Manual](#Manual)
+ * [Format specification](#Format-specification)
+ * [Copyright and license](#Copyright-and_License)
+ * [Acknowledgments](#Acknowledgments)
+ * [Contact](#Contact)
 
 Introduction
 ------------
@@ -67,6 +67,10 @@ Installation
 ------------
 
   Download the JAR file TFPredict from https://github.com/draeger-lab/TFpredict/releases and also the example file [test_seq.fasta](test_seq.fasta).
+  
+  You can also clone this repository and build a new snapshot release using the `ant` script shipped with this project by executing the following command:
+  
+    ant jar_incl-lib
 
   TFpredict is completely implemented in Java and provided as a runnable JAR file. All platforms (Windows, Mac, Linux) 
   are supported provided that Java (JDK 1.6 or later) and BLAST (NCBI BLAST 2.2.27+ or later) is installed. 
