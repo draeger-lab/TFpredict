@@ -1,9 +1,9 @@
-/*  
+/*
  * $Id: GenerateROC.java 99 2014-01-09 21:57:51Z draeger $
  * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/tfpredict/src/io/GenerateROC.java $
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
- *  
+ *
  * Copyright (C) 2010-2014 Center for Bioinformatics Tuebingen (ZBIT),
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
@@ -27,41 +27,42 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import weka.core.*;
-import weka.classifiers.*;
-import weka.classifiers.evaluation.*;
+import weka.classifiers.Evaluation;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
-  * Generates and displays a ROC curve from a dataset.
-  * @author Florian Topf
-  * @version $Rev: 99 $
-  * @since 1.0
-  */
+ * Generates and displays a ROC curve from a dataset.
+ * @author Florian Topf
+ * @version $Rev: 99 $
+ * @since 1.0
+ */
 public class GenerateROC {
-  
+
   public static void plot(Evaluation eval, String outfile) {
 
     // generate curve
     ThresholdCurve tc = new ThresholdCurve();
     int classIndex = 0;
     Instances result = tc.getCurve(eval.predictions(), classIndex);
-    
+
     String rocr = "";
-    
+
     for (Instance curr : result) {
-    	rocr = rocr.concat(curr.value(4)+"\t"+curr.value(5)+"\n");
-    	//System.out.println(curr.value(4)+"\t"+curr.value(5));
+      rocr = rocr.concat(curr.value(4)+"\t"+curr.value(5)+"\n");
+      //System.out.println(curr.value(4)+"\t"+curr.value(5));
     }
 
-	BufferedWriter bw;
-	try {
-		bw = new BufferedWriter(new FileWriter(new File(outfile)));
-		bw.write(rocr);
-		bw.flush();
-		bw.close();
-	} catch (IOException e) {
-		e.printStackTrace();
-	}
+    BufferedWriter bw;
+    try {
+      bw = new BufferedWriter(new FileWriter(new File(outfile)));
+      bw.write(rocr);
+      bw.flush();
+      bw.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
     /*
     // plot curve
@@ -80,8 +81,8 @@ public class GenerateROC {
     vmc.addPlot(tempd);
 
     // display curve
-    String plotName = vmc.getName(); 
-    final javax.swing.JFrame jf = 
+    String plotName = vmc.getName();
+    final javax.swing.JFrame jf =
       new javax.swing.JFrame(plotName);
     jf.setSize(1000,800);
     jf.getContentPane().setLayout(new BorderLayout());
@@ -92,9 +93,9 @@ public class GenerateROC {
       }
     });
     jf.setVisible(true);
-  */
+     */
   }
 
-  
+
 }
 
