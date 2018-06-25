@@ -81,8 +81,6 @@ Installation
   * [Java&trade;](https://www.java.com) (JDK 1.6 or later)
   * BLAST (NCBI BLAST 2.2.27+ or later
 
-  See [doc/Installation.txt](https://github.com/draeger-lab/TFpredict/blob/prokaryote/doc/Installation.txt) for further installation instructions.
-  
   The analysis framework of TFpredict is entirely written in Java. Thus, it requires that Java Virtual Machine (JDK version 1.6 or newer) is installed on your system.
   
 ### Installation and configuration of BLAST
@@ -109,6 +107,8 @@ So, the variable `BLAST_DIR` could be set to one of the above example folders. I
     export BLAST_DIR=/usr/local/ncbi/blast/
    
 before executing TFpredict.
+
+  See [doc/Installation.txt](https://github.com/draeger-lab/TFpredict/blob/prokaryote/doc/Installation.txt) for further installation instructions.
 
 _____________________________________________________________________________________________________________
 
@@ -214,13 +214,13 @@ The input file format description specifies the input data for an individual TF.
 
   ### Filtering for GO terms
 
-  Program arguments for class `edu.ucsd.sbrg.go.Filter`: `inputTFnonTF.fasta resources/blast_db/TFnonTF.fasta`
+  Program arguments for class `edu.ucsd.sbrg.go.Filter`: `inputTFnonTF.fasta src/resources/blast_db/TFnonTF.fasta`
 
   ### `PercentileFeatureGenerator`
 
   Program arguments:
-  * `reources/blast_db/TFnonTF.fasta`
-  * `resources/blast_db/featurefile.txt`
+  * `src/resources/blast_db/TFnonTF.fasta`
+  * `src/resources/blast_db/featurefile.txt`
 
   VM arguments: `-Xms16G -Xmx16G`
 
@@ -229,7 +229,7 @@ The input file format description specifies the input data for an individual TF.
   Program arguments:
 
     -train
-    -featureFile resources/blast_db/featurefile.txt
+    -featureFile src/resources/blast_db/featurefile.txt
     -resultsFileDir resultsFileDir/
     -modelFileDir resultsFileDir/
     -multiruns 5
