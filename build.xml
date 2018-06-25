@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-<<<<<<< HEAD
-=======
- * $Id: build.xml 1133 2015-01-21 19:15:55Z draeger $
- * $URL: https://rarepos.cs.uni-tuebingen.de/svn-path/SBMLsqueezer/trunk/build.xml $
->>>>>>> p2
  * =================================================================== 
  * This file is part of the program TFpredict. TFpredict performs the
  * identification and structural characterization of transcription factors.
  *  
-<<<<<<< HEAD
  * Copyright (C) 2010-2018 Center for Bioinformatics Tuebingen (ZBIT),
-=======
- * Copyright (C) 2010-2015 Center for Bioinformatics Tuebingen (ZBIT),
->>>>>>> p2
  * University of Tuebingen by Johannes Eichner, Florian Topf, Andreas Draeger
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,11 +20,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  * =================================================================== 
-<<<<<<< HEAD
-=======
- *
- * Version: $Rev: 1133 $
->>>>>>> p2
 -->
 <project
 	basedir="."
@@ -152,11 +138,7 @@
 	  </manifest>
 
       <copy todir="${build.dest}/META-INF/" verbose="${verbose}">
-<<<<<<< HEAD
         <fileset file="${basedir}/LICENSE"/>
-=======
-        <fileset dir="${basedir}/licenses"/>
->>>>>>> p2
       </copy>
 		
     </target>
