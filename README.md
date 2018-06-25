@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 TFpredict
 =========
 <img align="right" src="doc/tfpredict_logo.png" title="TFpredict"/> 
@@ -232,9 +231,3 @@ The input file format description specifies the input data for an individual TF.
   -------
 
   In case of any questions, please contact <a href="mailto:andreas.draeger@uni-tuebingen.de?subject=TFpredict">Andreas Dräger</a>.
-=======
-TFPredict
-=========
-
-Transcription factor predictor
->>>>>>> p2
