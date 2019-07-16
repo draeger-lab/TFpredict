@@ -8,7 +8,9 @@ TFpredict
 [![Stable version](https://img.shields.io/badge/Stable_version-1.3-brightgreen.svg?style=plastic)](https://github.com/draeger-lab/TFpredict/releases/)
 [![DOI](http://img.shields.io/badge/DOI-10.1371%20%2F%20journal.pone.0082238-blue.svg?style=plastic)](http://dx.doi.org/10.1371/journal.pone.0082238)
 
-*Authors:* [Johannes Eichner](https://github.com/jeichner/), Florian Topf, [Andreas Dräger](https://github.com/draeger/), [James T. Yurkovich](https://github.com/jtyurkovich/), [Michael Römer](https://github.com/mroemer/)
+*Authors:* [Johannes Eichner](https://github.com/jeichner/)＊, Florian Topf＊, [Andreas Dräger](https://github.com/draeger/), [James T. Yurkovich](https://github.com/jtyurkovich/), [Michael Römer](https://github.com/mroemer/)
+
+＊These two authors contributed equally to this work.
 ___________________________________________________________________________________________________________
 
 
