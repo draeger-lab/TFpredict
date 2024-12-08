@@ -129,8 +129,8 @@ public class IPRrun {
 			}
 			
 			// prevent System.exit
-			SecurityManager SecMan = System.getSecurityManager();
-			System.setSecurityManager(new NoExitSecurityManager());
+			//SecurityManager SecMan = System.getSecurityManager();
+			//System.setSecurityManager(new NoExitSecurityManager());
 						
 			// submit job
 			try {
@@ -138,7 +138,7 @@ public class IPRrun {
 			} catch (Exception e) {	}
 			
 			// restore System.exit
-			System.setSecurityManager(SecMan);
+			//System.setSecurityManager(SecMan);
 			
 			// grab jobids
 			ArrayList<String> jobs = grabJobIDs(new ByteArrayInputStream(stdout.toByteArray()));
@@ -201,7 +201,7 @@ public class IPRrun {
 		
 		for (String job : jobs) {
 			try {
-				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".tsv.txt"));
+				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".tsv.tsv"));
 				 while ((line = br.readLine()) != null) {
 					 String[] tabpos = line.split("\t");
 					 String seqID = tabpos[0].trim();

@@ -451,8 +451,8 @@ public class Predict {
 			System.out.print("\n  Fetching domains from InterProScan. This may take several minutes... ");
 			
 			an = new AnimatedChar();
-			an.setOutputStream(System.out);
-			an.showAnimatedChar();
+			//an.setOutputStream(System.out);
+			//an.showAnimatedChar();
 		}
 		List<String[]> IPRoutput = InterProScanRunner.run(input_file, iprpath, basedir, useWeb, standAloneMode);
 		seq2job = InterProScanRunner.getSeq2job();

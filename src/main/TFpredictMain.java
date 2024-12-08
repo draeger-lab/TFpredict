@@ -26,7 +26,9 @@ package main;
 import io.BasicTools;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -159,6 +161,21 @@ public class TFpredictMain {
 		args[args.length-3] = "-standAloneMode";
 		args[args.length-2] = "-basedir";
 		args[args.length-1] = tempDir.getAbsolutePath() + File.separator;
+
+		// Check if "-output" is given and redirect output stream
+		for (int i = 0; i < args.length - 1; i++) {
+			if (args[i].equals("-output") && i + 1 < args.length) {
+				String outputFilePath = args[i + 1];
+				try {
+					System.out.println("Output redirected to: " + outputFilePath);
+					System.setOut(new PrintStream(new File(System.getProperty("user.dir") + "/" + outputFilePath)));
+				} catch (FileNotFoundException e) {
+					System.err.println("Error: Could not redirect output to the file: " + outputFilePath);
+					e.printStackTrace();
+				}
+				break;
+			}
+		}
 		
 		return(args);
 	}
@@ -230,6 +247,7 @@ public class TFpredictMain {
 		} else if (standAloneMode) {
 			
 			options.addOption("fasta", true, "input FASTA file for batch mode");
+			options.addOption("output", true, "output file name");
 			options.addOption("sabineOutfile", true, "output file in SABINE format");
 			options.addOption("species", true, "organism (e.g. Homo sapiens)");
 			options.addOption("tfClassifier", true, "file containing TF/Non-TF classifier");
@@ -279,6 +297,9 @@ public class TFpredictMain {
 			
 		// print values of provided arguments 
 		System.out.println("  Input FASTA file:       " + cmd.getOptionValue("fasta"));
+		if (cmd.hasOption("output")) {
+			System.out.println("  Output file:     " + cmd.getOptionValue("output"));
+		}
 		if (cmd.hasOption("sabineOutfile")) {
 			System.out.println("  SABINE output file:     " + cmd.getOptionValue("sabineOutfile"));
 			System.out.println("  Organism:               " + cmd.getOptionValue("species"));
@@ -343,8 +364,9 @@ public class TFpredictMain {
 	private static void usage() {
 		
 		System.out.println("  Usage   : java -jar TFpredict.jar <fasta_file> [OPTIONS]\n");
-		System.out.println("  OPTIONS : -sabineOutfile <output_file_name>");
+		System.out.println("  OPTIONS : -sabineOutfile <sabine_output_file_name>");
 		System.out.println("            -species <organism_name>            (e.g., \"Homo sapiens\")");
+		System.out.println("            -output <output_file_name>          (e.g., \"output.txt\", default is console output)");
 		System.out.println("            -tfClassifier <classifier_name>     (possible values: SVM_linear, NaiveBayes, KNN)");
 		System.out.println("            -superClassifier <classifier_name>  (possible values: SVM_linear, NaiveBayes, KNN)");
 		System.out.println("            -iprscanPath <path_to_iprscan>      (e.g., \"/opt/iprscan/bin/iprscan\")");
