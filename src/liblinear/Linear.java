@@ -239,7 +239,7 @@ public class Linear {
 
     /**
      * Loads the model from inputReader.
-     * It uses {@link Locale.ENGLISH} for number formatting.
+     * It uses {@link Locale#ENGLISH} for number formatting.
      *
      * <p><b>Note: The inputReader is closed after reading or in case of an exception.</b></p>
      */

@@ -130,19 +130,19 @@ public class WekaClassifier {
 	private String summaryFile = null;
 	private String classProbabilityFile = null;
 
-	private boolean hideLibsvmDebugOutput = true;
+	private final boolean hideLibsvmDebugOutput = true;
     boolean showProgress = true;
 	boolean showEstimatedDuration = true;
-	private PrintStream stdOut = System.out;
-	private String mainPerformanceMeasure = "ROC";
-	private String featureFileFormat = "libsvm";
+	private final PrintStream stdOut = System.out;
+	private final String mainPerformanceMeasure = "ROC";
+	private final String featureFileFormat = "libsvm";
 
 	private final static int innerRepetitions = 1;
 	
 	private static DecimalFormat df = new DecimalFormat();
 	static {
 		java.util.Locale.setDefault(java.util.Locale.ENGLISH);
-		DecimalFormatSymbols symb = new DecimalFormatSymbols();
+		final DecimalFormatSymbols symb = new DecimalFormatSymbols();
 		symb.setDecimalSeparator('.');
 		df.setDecimalFormatSymbols(symb);
 	}
@@ -199,7 +199,7 @@ public class WekaClassifier {
 		final WekaClassifier classRunner = new WekaClassifier();
 
 		// parse arguments
-		Options options = classRunner.buildCommandLine();
+		final Options options = classRunner.buildCommandLine();
 		classRunner.parseCommandLine(args, options);
 		if (!classRunner.silent) classRunner.printConfiguration();
 		
@@ -338,13 +338,13 @@ public class WekaClassifier {
 		BufferedReader dataReader = null;
 		try {
 			dataReader = new BufferedReader(new FileReader(new File(featureFile)));
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		Instances trainInsts = null;
 		try {
 			trainInsts = new Instances(dataReader);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 		trainInsts.setClassIndex(trainInsts.numAttributes() - 1);
@@ -381,25 +381,25 @@ public class WekaClassifier {
 	private static synchronized Instances readDataFromLibsvm(String featureFile, int numFolds) {
 		Instances trainInsts = null;
 		try {
-			LibSVMLoader lsl = new LibSVMLoader();
+			final LibSVMLoader lsl = new LibSVMLoader();
 			lsl.setSource(new File(featureFile));
 			trainInsts = lsl.getDataSet();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 		trainInsts.setClassIndex(trainInsts.numAttributes() - 1);
 		
 		// convert class label only
-		NumericToNominal ntm = new NumericToNominal(); 
+		final NumericToNominal ntm = new NumericToNominal();
 		Instances Insts_filtered = null;
-		String[] options = new String[2];
+		final String[] options = new String[2];
 		options[0] = "-R";
 		options[1] = "last";
 		try {
 			ntm.setOptions(options);
 			ntm.setInputFormat(trainInsts); 
 			Insts_filtered = Filter.useFilter(trainInsts, ntm);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 		if (numFolds != 0) {
@@ -410,13 +410,13 @@ public class WekaClassifier {
 	}
 
 	private static synchronized void writeDataToLibsvm(Instances instances, String featureFile) {
-		LibSVMSaver lss = new LibSVMSaver();
+		final LibSVMSaver lss = new LibSVMSaver();
 		lss.setInstances(instances);
 		try {
 			lss.setFile(new File(featureFile));
 			lss.writeBatch();
 			
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -426,18 +426,18 @@ public class WekaClassifier {
 		String[] libsvmFeatureVectors = null;
 		
 		try {
-			LibSVMSaver saver = new LibSVMSaver();
+			final LibSVMSaver saver = new LibSVMSaver();
 			saver.setInstances(instances);
 			
 			// convert instances to LibSVM format and write them to OutputStream
-			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+			final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 			saver.setDestination(outStream);
 			saver.writeBatch();
 			
-			List<String> libsvmFeatures = BasicTools.readStream2List(new ByteArrayInputStream(outStream.toByteArray()), false);
+			final List<String> libsvmFeatures = BasicTools.readStream2List(new ByteArrayInputStream(outStream.toByteArray()), false);
 			libsvmFeatureVectors = libsvmFeatures.toArray(new String[]{});
 			
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 		return libsvmFeatureVectors;
@@ -451,13 +451,13 @@ public class WekaClassifier {
 	private void normalizeData(Instances trainInsts) {
 		// normalize input data
 		if (!silent) System.out.println("Normalizing data ...");
-		Normalize normalize = new Normalize();
+		final Normalize normalize = new Normalize();
 		try {
 			normalize.setInputFormat(trainInsts);
 			for (int i = 0, n = trainInsts.numInstances(); i < n; i++) {
 				normalize.input(trainInsts.get(i));
 			}
-		} catch (Exception e1) {
+		} catch (final Exception e1) {
 			e1.printStackTrace();
 		}
 	}
@@ -509,28 +509,28 @@ public class WekaClassifier {
 			if (lvCmd.hasOption("c")) {
 				try {
 					selectedClassifier = lvCmd.getOptionValue("c");
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					System.exit(1);
 				}
 			}
 			if (lvCmd.hasOption("f")) {
 				try {
 					featureFile = new String(lvCmd.getOptionValue("f"));
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					System.exit(1);
 				}
 			}
 			if (lvCmd.hasOption("r")) {
 				try {
 					repetitions = new Integer(lvCmd.getOptionValue("r"));
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					System.exit(1);
 				}
 			}
 			if (lvCmd.hasOption("v")) {
 				try {
 					folds = new Integer(lvCmd.getOptionValue("v"));
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					System.exit(1);
 				}
 			}
@@ -538,35 +538,35 @@ public class WekaClassifier {
 				try {
 					modelFile = new String(lvCmd.getOptionValue("m"));
 					writeModelFile = true;
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					System.exit(1);
 				}
 			}
 			if (lvCmd.hasOption("n")) {
 				try {
 					performNestedCV = new Boolean(lvCmd.getOptionValue("n"));
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					System.exit(1);
 				}
 			}
 			if (lvCmd.hasOption("s")) {
 				try {
 					summaryFile = new String(lvCmd.getOptionValue("s"));
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					System.exit(1);
 				}
 			}
 			if (lvCmd.hasOption("p")) {
 				try {
 					classProbabilityFile = new String(lvCmd.getOptionValue("p"));
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					System.exit(1);
 				}
 			}
 			if (lvCmd.hasOption("t")) {
 				try {
 					multithreading = new Boolean(lvCmd.getOptionValue("t"));
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					System.exit(1);
 				}
 			}
@@ -583,7 +583,7 @@ public class WekaClassifier {
 		} else {
 			try {
 				bw.write(line + "\n");
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -592,11 +592,11 @@ public class WekaClassifier {
 	private synchronized void printSummary2File() {
 		
 		try {
-			BufferedWriter summaryWriter = new BufferedWriter(new FileWriter(new File(summaryFile)));
+			final BufferedWriter summaryWriter = new BufferedWriter(new FileWriter(new File(summaryFile)));
 			printSummary(summaryWriter);
 			summaryWriter.flush();
 			summaryWriter.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -610,7 +610,7 @@ public class WekaClassifier {
 		write2FileOrConsole("#AvgAreaUnderROC" + "\tAvgFMeasure" + "\tAvgMatthewsCorrelation" + "\tAvgAccuracy" + "\tAvgBalancedAccuracy", summaryWriter);
 
 		for (int i=0; i<classResult.length; i++) {
-			Evaluation eval = classResult[i].evaluation;
+			final Evaluation eval = classResult[i].evaluation;
 			write2FileOrConsole(df.format(getAvgROCAUC(eval, data)) + "\t" + df.format(getAvgFMeasure(eval, data)) + "\t" + df.format(getMatthewsCorrelation(eval, data)) + "\t" + df.format(getAvgAccuracy(eval, data)) + "\t" + df.format(getBalancedAccuracy(eval, data)), summaryWriter);
 		}
 		write2FileOrConsole("", summaryWriter);
@@ -619,12 +619,12 @@ public class WekaClassifier {
 	private void writeClassProbabilityFile() {
 		
 		// write only the class probabilities from first multirun
-		int numClasses = classResult[0].classProbabilities[0].length;
-		int numSamples = data.numInstances();
+		final int numClasses = classResult[0].classProbabilities[0].length;
+		final int numSamples = data.numInstances();
 		int multirunCounter = 1;
 		
 		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(classProbabilityFile)));
+			final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(classProbabilityFile)));
 			bw.write("#" + classifierPrintName + "\n");
 			
 			for (int i=0; i<classResult.length; i++) {
@@ -634,7 +634,7 @@ public class WekaClassifier {
 					bw.write("# Class Probabilities\tLabels\n");
 				}
 				
-				int testSetSize = classResult[i].classLabels.length;
+				final int testSetSize = classResult[i].classLabels.length;
 				for (int j=0; j<testSetSize; j++) {
 					bw.write("(" + df.format(classResult[i].classProbabilities[j][0]));
 					for (int k=1; k<numClasses; k++) {
@@ -645,7 +645,7 @@ public class WekaClassifier {
 			}
 			bw.flush();
 			bw.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -658,7 +658,7 @@ public class WekaClassifier {
 	 * @return
 	 */
 	private double getBalancedAccuracy(Evaluation eval, Instances data) {
-		int classes = data.numClasses();
+		final int classes = data.numClasses();
 		double bAUC = 0;
 		for (int i = 0; i < classes; i++) {
 			bAUC = bAUC + (eval.precision(i) + eval.precision(i)) / 2;
@@ -674,7 +674,7 @@ public class WekaClassifier {
 	 * @return
 	 */
 	private double getAvgROCAUC(Evaluation eval, Instances data) {
-		int classes = data.numClasses();
+		final int classes = data.numClasses();
 		double auc = 0;
 		for (int i = 0; i < classes; i++) {
 			auc = auc + eval.areaUnderROC(i);
@@ -690,7 +690,7 @@ public class WekaClassifier {
 	 * @return
 	 */
 	private double getAvgFMeasure(Evaluation eval, Instances data) {
-		int classes = data.numClasses();
+		final int classes = data.numClasses();
 		double fmeasure = 0;
 		for (int i = 0; i < classes; i++) {
 			fmeasure = fmeasure + eval.fMeasure(i);
@@ -706,14 +706,14 @@ public class WekaClassifier {
 	 * @return
 	 */
 	private double getAvgAccuracy(Evaluation eval, Instances data) {
-		int classes = data.numClasses();
+		final int classes = data.numClasses();
 
 		double acc = 0;
 		for (int i = 0; i < classes; i++) {
-			double tp = eval.numTruePositives(i);
-			double tn = eval.numTrueNegatives(i);
-			double fp = eval.numFalsePositives(i);
-			double fn = eval.numFalseNegatives(i);
+			final double tp = eval.numTruePositives(i);
+			final double tn = eval.numTrueNegatives(i);
+			final double fp = eval.numFalsePositives(i);
+			final double fn = eval.numFalseNegatives(i);
 			double acc_i = (tp + tn) / (tp + tn + fp + fn);
 
 			if (Double.isNaN(acc_i))
@@ -732,14 +732,14 @@ public class WekaClassifier {
 	 * @return
 	 */
 	private double getMatthewsCorrelation(Evaluation eval, Instances data) {
-		int classes = data.numClasses();
+		final int classes = data.numClasses();
 
 		double mcc = 0;
 		for (int i = 0; i < classes; i++) {
-			double tp = eval.numTruePositives(i);
-			double tn = eval.numTrueNegatives(i);
-			double fp = eval.numFalsePositives(i);
-			double fn = eval.numFalseNegatives(i);
+			final double tp = eval.numTruePositives(i);
+			final double tn = eval.numTrueNegatives(i);
+			final double fp = eval.numFalsePositives(i);
+			final double fn = eval.numFalseNegatives(i);
 			double mcc_i = (tp * tn - fp * fn) / Math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn));
 
 			if (Double.isNaN(mcc_i))
@@ -755,7 +755,7 @@ public class WekaClassifier {
 		if (modelFile != null) {
 			try {
 			weka.core.SerializationHelper.write(modelFile, model);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -775,7 +775,7 @@ public class WekaClassifier {
 		randomForest.setSeed(1);
 
 		final long systemMillisBegin = System.currentTimeMillis();
-		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
+		final WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
 		int run = 0;
 
 		if (! silent) System.out.println("Nested CV for Random forests ...");
@@ -783,7 +783,7 @@ public class WekaClassifier {
 		for (int rep = 0; rep < repetitions; rep++) {
 
 			// generate new splits for cross-validation
-			Instances[] splits = getSplits(data, folds, rep);
+			final Instances[] splits = getSplits(data, folds, rep);
 
 			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
 				Instances instancesTraining = new Instances(data, 1);
@@ -801,10 +801,10 @@ public class WekaClassifier {
 					for (int numFeat = bestN; numFeat <= maxFeatures * 2; numFeat
 							= numFeat * 2) {
 						randomForest.setNumFeatures(numFeat);
-						Evaluation[] evaluation =
+						final Evaluation[] evaluation =
 								performCrossvalidation(randomForest, instancesTraining,
 										folds, innerRepetitions);
-						double auc = getMeanQuality(evaluation, instancesTraining);
+						final double auc = getMeanQuality(evaluation, instancesTraining);
 						if (auc > bestAUC) {
 							if (!silent) System.out.println("score=" + df.format(auc) + ", @numFeatures=" + numFeat);
 							bestAUC = auc;
@@ -843,7 +843,7 @@ public class WekaClassifier {
 	private WekaClassifierResult[] runNestedCVJ48() {
 		final J48 decisionTree = new J48();
 		final long systemMillisBegin = System.currentTimeMillis();
-		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
+		final WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
 
 		int run = 0;
 
@@ -852,7 +852,7 @@ public class WekaClassifier {
 		for (int rep = 0; rep < repetitions; rep++) {
 
 			// generate new splits for cross-validation
-			Instances[] splits = getSplits(data, folds, rep);
+			final Instances[] splits = getSplits(data, folds, rep);
 
 			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
 				Instances instancesTraining = new Instances(data, 1);
@@ -872,8 +872,8 @@ public class WekaClassifier {
 						for (int numFeat = 2; numFeat <= 10; numFeat = numFeat * 2) {
 							decisionTree.setConfidenceFactor((float) pruningC);
 							decisionTree.setMinNumObj(numFeat);
-							Evaluation[] evaluation = performCrossvalidation(decisionTree, instancesTraining, folds, innerRepetitions);
-							double auc = getMeanQuality(evaluation, instancesTraining);
+							final Evaluation[] evaluation = performCrossvalidation(decisionTree, instancesTraining, folds, innerRepetitions);
+							final double auc = getMeanQuality(evaluation, instancesTraining);
 							if (auc > bestAUC) {
 								if (!silent) System.out.println("score=" + df.format(auc) + " @pruningC=" + pruningC + ", @numObj=" + numFeat);
 								bestPruningConfidence = pruningC;
@@ -895,7 +895,7 @@ public class WekaClassifier {
 				// System.out.println(externalEvals[run].toSummaryString());
 				try {
 					if (!silent) System.out.println(classResults[run].evaluation.toClassDetailsString());
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					if (!silent) System.out.println("could not create summary");
 				}
 
@@ -921,7 +921,7 @@ public class WekaClassifier {
 		libsvm.setProbabilityEstimates(true);
 		
 		final long systemMillisBegin = System.currentTimeMillis();
-		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
+		final WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
 
 		int run = 0;
 
@@ -930,7 +930,7 @@ public class WekaClassifier {
 		for (int rep = 0; rep < repetitions; rep++) {
 
 			// generate new splits for cross-validation
-			Instances[] splits = getSplits(data, folds, rep);
+			final Instances[] splits = getSplits(data, folds, rep);
 
 			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
 				Instances instancesTraining = new Instances(data, 1);
@@ -954,14 +954,14 @@ public class WekaClassifier {
 							libsvm.setCost(C);
 							
 							if (hideLibsvmDebugOutput) {
-								String debugOutputFile = WekaLauncher.redirectSystemOut2TempFile();
+								final String debugOutputFile = WekaLauncher.redirectSystemOut2TempFile();
 								if (!silent) System.out.println("Redirecting LibSVM debug output to temporary file: " + debugOutputFile);
 							}
-							Evaluation[] evaluation = performCrossvalidation(libsvm, instancesTraining, folds, innerRepetitions);
+							final Evaluation[] evaluation = performCrossvalidation(libsvm, instancesTraining, folds, innerRepetitions);
 							if (hideLibsvmDebugOutput) {
 								System.setOut(stdOut);
 							}
-							double auc = getMeanQuality(evaluation, instancesTraining);
+							final double auc = getMeanQuality(evaluation, instancesTraining);
 							if (auc > bestAUC) {
 								if (!silent) System.out.println("score=" + df.format(auc) + " @C=" + C + ", @gamma=" + gamma);
 								bestC = C;
@@ -977,7 +977,7 @@ public class WekaClassifier {
 				}
 				
 				if (hideLibsvmDebugOutput) {
-					String debugOutputFile = WekaLauncher.redirectSystemOut2TempFile();
+					final String debugOutputFile = WekaLauncher.redirectSystemOut2TempFile();
 					if (!silent) System.out.println("Redirecting LibSVM debug output to temporary file: " + debugOutputFile);
 				}
 				buildClassifier(libsvm, instancesTraining);
@@ -989,7 +989,7 @@ public class WekaClassifier {
 				if (!silent) System.out.println("\nExternal prediction at fold = " + splitIndex);
 				try {
 					if (!silent) System.out.println(classResults[run].evaluation.toClassDetailsString());
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					if (!silent) System.out.println("could not create summary");
 				}
 				
@@ -998,7 +998,7 @@ public class WekaClassifier {
 		}
 		if (writeModelFile) {
 			if (hideLibsvmDebugOutput) {
-				String debugOutputFile = WekaLauncher.redirectSystemOut2TempFile();
+				final String debugOutputFile = WekaLauncher.redirectSystemOut2TempFile();
 				if (!silent) System.out.println("Redirecting LibSVM debug output to temporary file: " + debugOutputFile);
 			}
 			buildClassifier(libsvm, data);
@@ -1023,7 +1023,7 @@ public class WekaClassifier {
 		libsvm.setSVMType(new SelectedTag(LibLINEAR.SVMTYPE_L2_LR, LibLINEAR.TAGS_SVMTYPE));
 		
 		final long systemMillisBegin = System.currentTimeMillis();
-		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
+		final WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
 
 		int run = 0;
 
@@ -1057,9 +1057,9 @@ public class WekaClassifier {
 							libsvm.setCost(C);
 							libsvm.setWeights((1.0 / weight) + " " + 1.0);
 							
-							Evaluation[] evaluation = performCrossvalidation(libsvm, instancesTraining, folds, innerRepetitions);
+							final Evaluation[] evaluation = performCrossvalidation(libsvm, instancesTraining, folds, innerRepetitions);
 							
-							double auc = getMeanQuality(evaluation, instancesTraining);
+							final double auc = getMeanQuality(evaluation, instancesTraining);
 							if (auc > bestAUC) {
 								if (!silent) System.out.println("score=" + df.format(auc) + " @C=" + C + " @weight=" + weight);
 								bestAUC = auc;
@@ -1082,7 +1082,7 @@ public class WekaClassifier {
 				// System.out.println(externalEvals[run].toSummaryString());
 				try {
 					if (!silent) System.out.println(classResults[run].evaluation.toClassDetailsString());
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					if (!silent) System.out.println("could not create summary");
 				}
 
@@ -1120,13 +1120,13 @@ public class WekaClassifier {
 		}
 		
 		// prepare and run binary SVM classifiers
-		int numSVMs = codeWords[0].length();
-		int numFoldsAndRep = folds * repetitions;
+		final int numSVMs = codeWords[0].length();
+		final int numFoldsAndRep = folds * repetitions;
 		writeModelFile = false;
 		
 		// get CV split (only works for 1 multirun)
-		int[][] cvSplit = WekaLauncher.getCVSplit(featureFile, folds, repetitions)[0];		
-		Instances[][] splits = new Instances[numSVMs][folds];
+		final int[][] cvSplit = WekaLauncher.getCVSplit(featureFile, folds, repetitions)[0];
+		final Instances[][] splits = new Instances[numSVMs][folds];
 		
 		for (int i=0; i<numSVMs; i++) {
 			
@@ -1135,7 +1135,7 @@ public class WekaClassifier {
 			normalizeData(data);
 			for (int j=0; j<data.numInstances(); j++) {
 				
-				int newLabel = Integer.parseInt(codeWords[(int) data.instance(j).classValue()].substring(i,i+1));
+				final int newLabel = Integer.parseInt(codeWords[(int) data.instance(j).classValue()].substring(i,i+1));
 				data.instance(j).setClassValue(newLabel);
 			}
 			
@@ -1153,7 +1153,7 @@ public class WekaClassifier {
 
 		}
 		
-		WekaClassifierResult[][] allClassResults = new WekaClassifierResult[numSVMs][numFoldsAndRep];
+		final WekaClassifierResult[][] allClassResults = new WekaClassifierResult[numSVMs][numFoldsAndRep];
 		for (int i=0; i<numSVMs; i++) {
 			data = readDataFromLibsvm(featureFile + ".svm" + (i+1), 0);
 			predefinedSplit = splits[i];
@@ -1161,15 +1161,15 @@ public class WekaClassifier {
 		}
 		
 		// compute code word for each instance
-		String[][] predCodeWords = new String[numFoldsAndRep][];
+		final String[][] predCodeWords = new String[numFoldsAndRep][];
 		for (int i=0; i<numFoldsAndRep; i++) {
-			int numInstances = allClassResults[0][i].classProbabilities.length;
-			String[] currCodeWords = new String[numInstances];
+			final int numInstances = allClassResults[0][i].classProbabilities.length;
+			final String[] currCodeWords = new String[numInstances];
 			
 			for (int j=0; j<numInstances; j++) {
-				StringBuffer currCodeWord = new StringBuffer();
+				final StringBuffer currCodeWord = new StringBuffer();
 				for (int k=0; k<numSVMs; k++) {
-					double currClassProb = allClassResults[k][i].classProbabilities[j][0];
+					final double currClassProb = allClassResults[k][i].classProbabilities[j][0];
 					currCodeWord.append((Math.round(currClassProb) + "").charAt(0));
 				}
 				currCodeWords[j] = currCodeWord.toString();
@@ -1178,15 +1178,15 @@ public class WekaClassifier {
 		}
 		
 		// decode predicted code words and infer class probabilities
-		WekaClassifierResult[] classResults = new WekaClassifierResult[numFoldsAndRep];
-		int instCnt = 0;
+		final WekaClassifierResult[] classResults = new WekaClassifierResult[numFoldsAndRep];
+		final int instCnt = 0;
 		for (int i=0; i<predCodeWords.length; i++) {
 			
 			// HACK: Use evaluation object from first two-class SVM (use only if ROC scores are calculated externally)
 			classResults[i] = new WekaClassifierResult(allClassResults[i][0].evaluation, allClassResults[i][0].classProbabilities, allClassResults[i][0].classLabels);
 			for (int j=0; j<predCodeWords[i].length; j++) {
 				
-				int [] currHammingDists = new int[codeWords.length];
+				final int [] currHammingDists = new int[codeWords.length];
 				for (int k=0; k<codeWords.length; k++) {
 					currHammingDists[k] = BasicTools.getHammingDistance(predCodeWords[i][j], codeWords[k]);
 				}
@@ -1199,10 +1199,10 @@ public class WekaClassifier {
 	// compute class probabilities based on hamming distances
 	private static double[] getClassProbsFromHammingDists(int[] hammingDists) {
 		
-		double[] classProbs = new double[hammingDists.length];
-		int[] minPos = BasicTools.getMinPositions(hammingDists);
+		final double[] classProbs = new double[hammingDists.length];
+		final int[] minPos = BasicTools.getMinPositions(hammingDists);
 		
-		for (int pos: minPos) {
+		for (final int pos: minPos) {
 			classProbs[pos] = 1.0 / minPos.length;
 		}
 		return classProbs;
@@ -1219,7 +1219,7 @@ public class WekaClassifier {
 	private WekaClassifierResult[] runNestedCVGaussianProcesses() {
 		final GaussianProcesses gaussianProcesses = new GaussianProcesses();
 		final long systemMillisBegin = System.currentTimeMillis();
-		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
+		final WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
 
 		int run = 0;
 
@@ -1228,7 +1228,7 @@ public class WekaClassifier {
 		for (int rep = 0; rep < repetitions; rep++) {
 
 			// generate new splits for cross-validation
-			Instances[] splits = getSplits(data, folds, rep);
+			final Instances[] splits = getSplits(data, folds, rep);
 
 			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
 				Instances instancesTraining = new Instances(data, 1);
@@ -1246,8 +1246,8 @@ public class WekaClassifier {
 	
 					for (double C = -12; C <= -1; C++) {
 						gaussianProcesses.setNoise(Math.pow(2, C));
-						Evaluation[] evaluation = performCrossvalidation(gaussianProcesses, instancesTraining, folds, innerRepetitions);
-						double mse = getMSEforRegression(evaluation, instancesTraining);
+						final Evaluation[] evaluation = performCrossvalidation(gaussianProcesses, instancesTraining, folds, innerRepetitions);
+						final double mse = getMSEforRegression(evaluation, instancesTraining);
 						if (mse > bestMSE) {
 							if (!silent) System.out.println("score=" + df.format(mse) + " @noise=" + Math.pow(2, C));
 							bestMSE = mse;
@@ -1266,7 +1266,7 @@ public class WekaClassifier {
 				// System.out.println(externalEvals[run].toSummaryString());
 				try {
 					if (!silent) System.out.println(classResults[run].evaluation.toClassDetailsString());
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					if (!silent) System.out.println("could not create summary");
 				}
 
@@ -1288,7 +1288,7 @@ public class WekaClassifier {
 	private WekaClassifierResult[] runNestedCVkNN() {
 		final IBk kNN = new IBk();
 		final long systemMillisBegin = System.currentTimeMillis();
-		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
+		final WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
 
 		int run = 0;
 
@@ -1297,7 +1297,7 @@ public class WekaClassifier {
 		for (int rep = 0; rep < repetitions; rep++) {
 
 			// generate new splits for cross-validation
-			Instances[] splits = getSplits(data, folds, rep);
+			final Instances[] splits = getSplits(data, folds, rep);
 
 			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
 				Instances instancesTraining = new Instances(data, 1);
@@ -1314,8 +1314,8 @@ public class WekaClassifier {
 					double bestAUC = 0.0;
 					for (int neigbor = 1; neigbor <= 16; neigbor = neigbor * 2) {
 						kNN.setKNN(neigbor);
-						Evaluation[] evaluation = performCrossvalidation(kNN, instancesTraining, folds, innerRepetitions);
-						double auc = getMeanQuality(evaluation, instancesTraining);
+						final Evaluation[] evaluation = performCrossvalidation(kNN, instancesTraining, folds, innerRepetitions);
+						final double auc = getMeanQuality(evaluation, instancesTraining);
 						if (auc > bestAUC) {
 							if (!silent) System.out.println("score=" + df.format(auc) + " @k=" + neigbor);
 							bestAUC = auc;
@@ -1333,7 +1333,7 @@ public class WekaClassifier {
 				// System.out.println(externalEvals[run].toSummaryString());
 				try {
 					if (!silent) System.out.println(classResults[run].evaluation.toClassDetailsString());
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					if (!silent) System.out.println("could not create summary");
 				}
 				
@@ -1355,7 +1355,7 @@ public class WekaClassifier {
 	private WekaClassifierResult[] runNestedCVNaiveBayes() {
 		final NaiveBayes naiveBayes = new NaiveBayes();
 		final long systemMillisBegin = System.currentTimeMillis();
-		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
+		final WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
 
 		int run = 0;
 
@@ -1364,7 +1364,7 @@ public class WekaClassifier {
 		for (int rep = 0; rep < repetitions; rep++) {
 
 			// generate new splits for cross-validation
-			Instances[] splits = getSplits(data, folds, rep);
+			final Instances[] splits = getSplits(data, folds, rep);
 
 			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
 				Instances instancesTraining = new Instances(data, 1);
@@ -1381,7 +1381,7 @@ public class WekaClassifier {
 				// System.out.println(externalEvals[run].toSummaryString());
 				try {
 					if (!silent) System.out.println(classResults[run].evaluation.toClassDetailsString());
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					if (!silent) System.out.println("could not create summary");
 				}
 				
@@ -1404,7 +1404,7 @@ public class WekaClassifier {
 		
 		final KStar pls = new KStar();
 		final long systemMillisBegin = System.currentTimeMillis();
-		WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
+		final WekaClassifierResult[] classResults = new WekaClassifierResult[folds * repetitions];
 
 		int run = 0;
 
@@ -1413,7 +1413,7 @@ public class WekaClassifier {
 		for (int rep = 0; rep < repetitions; rep++) {
 
 			// generate new splits for cross-validation
-			Instances[] splits = getSplits(data, folds, rep);
+			final Instances[] splits = getSplits(data, folds, rep);
 
 			for (int splitIndex = 0; splitIndex < splits.length; splitIndex++) {
 				Instances instancesTraining = new Instances(data, 1);
@@ -1429,7 +1429,7 @@ public class WekaClassifier {
 				if (!silent) System.out.println("\nExternal prediction at fold = " + splitIndex);
 				try {
 					if (!silent) System.out.println(classResults[run].evaluation.toClassDetailsString());
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					if (!silent) System.out.println("could not create summary");
 				}
 				
@@ -1446,10 +1446,10 @@ public class WekaClassifier {
 	private synchronized int showEstimatedDuration(long startTime, int run) {
 		
 		if (showEstimatedDuration) {
-			double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
-			double estimatedTime = getEstimatedTimeInseconds(startTime, System.currentTimeMillis(), percentDone);
+			final double percentDone = ((double) (run + 1)) / ((double) (repetitions * folds));
+			final double estimatedTime = getEstimatedTimeInseconds(startTime, System.currentTimeMillis(), percentDone);
 			if (multithreading) {
-				String classifierName = ClassificationMethod.valueOf(selectedClassifier).printName;
+				final String classifierName = ClassificationMethod.valueOf(selectedClassifier).printName;
 				if (estimatedTime == 0) {
 					System.out.println("  " + classifierName + " has finished.");
 				} else 
@@ -1471,9 +1471,9 @@ public class WekaClassifier {
 	 * @return
 	 */
 	private double getEstimatedTimeInseconds(long systemMillisBegin, long systemMillisCurrent, double percentDone) {
-		long diff = systemMillisCurrent - systemMillisBegin;
-		double SecondsElapsed = (diff / 1000.0);
-		double estimatedTime = (((1.0 / percentDone) * SecondsElapsed) - SecondsElapsed);
+		final long diff = systemMillisCurrent - systemMillisBegin;
+		final double SecondsElapsed = (diff / 1000.0);
+		final double estimatedTime = (((1.0 / percentDone) * SecondsElapsed) - SecondsElapsed);
 		return estimatedTime;
 	}
 
@@ -1483,8 +1483,8 @@ public class WekaClassifier {
 	 * @return
 	 */
 	private double getMeanQuality(Evaluation[] eval, Instances data) {
-		Mean mean = new Mean();
-		double[] aucs = new double[eval.length];
+		final Mean mean = new Mean();
+		final double[] aucs = new double[eval.length];
 		for (int i = 0; i < eval.length; i++) {
 			if (mainPerformanceMeasure.equals("ROC")) {
 				aucs[i] = getAvgROCAUC(eval[i], data);
@@ -1504,12 +1504,12 @@ public class WekaClassifier {
 	 * @return
 	 */
 	private double getMSEforRegression(Evaluation[] eval, Instances data) {
-		Mean mean = new Mean();
-		double[] aucs = new double[eval.length];
+		final Mean mean = new Mean();
+		final double[] aucs = new double[eval.length];
 		for (int i = 0; i < eval.length; i++) {
 			try {
 				aucs[i] = eval[i].correlationCoefficient();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -1542,9 +1542,9 @@ public class WekaClassifier {
 
 	private WekaClassifierResult predictAndEvaluate(Classifier classifier, Instances testSamples) {
 		
-		double[][] classProb = getClassProbabilities(classifier, testSamples);
-		int[] classLab = getClassLabels(testSamples);
-		Evaluation eval = evaluate(classifier, testSamples);
+		final double[][] classProb = getClassProbabilities(classifier, testSamples);
+		final int[] classLab = getClassLabels(testSamples);
+		final Evaluation eval = evaluate(classifier, testSamples);
 		
 		return new WekaClassifierResult(eval, classProb, classLab);
 	}
@@ -1557,7 +1557,7 @@ public class WekaClassifier {
 			eTest = new Evaluation(testSamples);
 			eTest.evaluateModel(classifier, testSamples);
 			
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 		return(eTest);
@@ -1565,15 +1565,15 @@ public class WekaClassifier {
 	
 	private double[][] getClassProbabilities(Classifier classifier, Instances testSamples) {
 		
-		double[][] classProbabilities = new double[testSamples.numInstances()][testSamples.numClasses()];
+		final double[][] classProbabilities = new double[testSamples.numInstances()][testSamples.numClasses()];
 		
 		// iterate over all instances in test set
 		for (int i=0; i<testSamples.numInstances(); i++) {
-			Instance instance = testSamples.instance(i);
+			final Instance instance = testSamples.instance(i);
 			try {
 				// get class distribution
 				classProbabilities[i] = classifier.distributionForInstance(instance);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -1582,15 +1582,15 @@ public class WekaClassifier {
 	
 	private int[] getClassLabels(Instances testSamples) {
 		
-		int[] classLabels = new int[testSamples.numInstances()];
+		final int[] classLabels = new int[testSamples.numInstances()];
 		
 		// iterate over all instances in test set
 		for (int i=0; i<testSamples.numInstances(); i++) {
-			Instance instance = testSamples.instance(i);
+			final Instance instance = testSamples.instance(i);
 			try {
 				// get class label
 				classLabels[i] = (int) instance.classValue();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -1599,11 +1599,11 @@ public class WekaClassifier {
 	
 	public static String[][] getSplittedDataset(String featureFile, int folds, int run) {
 		
-		Instances data = readDataFromLibsvm(featureFile, folds);
-		Instances[] splits = getSplits(data, folds, run);
+		final Instances data = readDataFromLibsvm(featureFile, folds);
+		final Instances[] splits = getSplits(data, folds, run);
 		
 		// save feature vectors (libSVM format) for each subset of CV split
-		String[][] splittedDataset = new String[folds][];
+		final String[][] splittedDataset = new String[folds][];
 		for (int i = 0; i < splits.length; i++) {
 			splittedDataset[i] = convertInstances2featureVectors(splits[i]);
 		}
@@ -1620,7 +1620,7 @@ public class WekaClassifier {
 	 */
 	private static synchronized Instances[] getSplits(Instances data, int folds, int seed) {
 
-		Instances[] splits = new Instances[folds];
+		final Instances[] splits = new Instances[folds];
 		for (int i = 0; i < splits.length; i++) {
 			// copy header information
 			splits[i] = new Instances(data, 1);
@@ -1651,9 +1651,9 @@ public class WekaClassifier {
 	 */
 	private Evaluation[] performCrossvalidation(Classifier classifier, Instances data, int folds, int repetitions) {
 
-		ArrayList<Evaluation> results = new ArrayList<Evaluation>();
+		final ArrayList<Evaluation> results = new ArrayList<Evaluation>();
 		for (int rep = 0; rep < repetitions; rep++) {
-			Instances[] splits = getSplits(data, folds, rep);
+			final Instances[] splits = getSplits(data, folds, rep);
 
 			for (int i = 0; i < folds; i++) {
 				Instances trainingSetTemporary = new Instances(data, 1);
@@ -1664,11 +1664,11 @@ public class WekaClassifier {
 				// train classifier
 				this.buildClassifier(classifier, trainingSetTemporary);
 				// predict the jth fold
-				Evaluation screeningResult = this.evaluate(classifier, splits[i]);
+				final Evaluation screeningResult = evaluate(classifier, splits[i]);
 				results.add(screeningResult);
 			}
 		}
-		Evaluation[] resultArray = new Evaluation[results.size()];
+		final Evaluation[] resultArray = new Evaluation[results.size()];
 		for (int i = 0; i < resultArray.length; i++) {
 			resultArray[i] = results.get(i);
 		}
@@ -1683,7 +1683,7 @@ public class WekaClassifier {
 	 * @return
 	 */
 	private Instances addInstances(Instances a, Instances b) {
-		Instances instancesA = new Instances(a);
+		final Instances instancesA = new Instances(a);
 		for (int i = 0, n = b.numInstances(); i < n; i++) {
 			instancesA.add(b.instance(i));
 		}

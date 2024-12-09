@@ -155,6 +155,8 @@ public class IPRrun {
 					  new File(basedir).mkdirs();
 						webIPR.getResults(jobid, basedir + jobid, "tsv");
 						webIPR.getResults(jobid, basedir + jobid, "svg");
+						//webIPR.getResults(jobid, basedir + jobid, "out");
+						//webIPR.getResults(jobid, basedir + jobid, "visual-png");
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (ServiceException e) {
@@ -201,7 +203,7 @@ public class IPRrun {
 		
 		for (String job : jobs) {
 			try {
-				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".tsv.tsv"));
+				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".tsv.tsv")); //.tsv.tsv or .out.txt
 				 while ((line = br.readLine()) != null) {
 					 String[] tabpos = line.split("\t");
 					 String seqID = tabpos[0].trim();

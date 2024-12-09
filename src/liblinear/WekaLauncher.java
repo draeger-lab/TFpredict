@@ -167,6 +167,13 @@ public class WekaLauncher {
 		return getCVSplit(libsvmFeatureFile, folds, multiruns);
 	}
 	
+	/**
+	 *
+	 * @param libsvmFeatureFile
+	 * @param folds
+	 * @param multiruns
+	 * @return
+	 */
 	public static int[][][] getCVSplit(String libsvmFeatureFile, int folds, int multiruns) {
 		
 		// get unscaled libsvm feature vectors for each run and split
