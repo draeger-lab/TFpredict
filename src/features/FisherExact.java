@@ -22,6 +22,8 @@
  */
 package features;
 
+import java.util.logging.Logger;
+
 
 /**
  * This does a Fisher Exact test.  The Fisher's Exact test procedure calculates an exact probability value
@@ -42,6 +44,11 @@ public class FisherExact {
     private static final boolean DEBUG = false;
     private double[] f;
     int maxSize;
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(FisherExact.class.getName());
 
 
     /**
@@ -96,31 +103,30 @@ public class FisherExact {
         }
         double p = 0;
 
-        p += getP(a, b, c, d);
-        if (DEBUG) {System.out.println("p = " + p);}
-        if ((a * d) >= (b * c)) {
-            if (DEBUG) {System.out.println("doing R-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);}
-            min = (c < b) ? c : b;
-            for (i = 0; i < min; i++) {
-                if (DEBUG) {System.out.print("doing round " + i);}
-                p += getP(++a, --b, --c, ++d);
-                if (DEBUG) {System.out.println("\ta=" + a + " b=" + b + " c=" + c + " d=" + d);}
-            }
- //           System.out.println("");
-        }
-        if ((a * d) < (b * c)) {
-            if (DEBUG) {System.out.println("doing L-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);}
-            min = (a < d) ? a : d;
-            for (i = 0; i < min; i++) {
-                if (DEBUG) {System.out.print("doing round " + i);}
-                double pTemp = getP(--a, ++b, ++c, --d);
-                if (DEBUG) {System.out.print("\tpTemp = " + pTemp);}
-                p += pTemp;
-                if (DEBUG) {System.out.println("\ta=" + a + " b=" + b + " c=" + c + " d=" + d);}
-            }
-        }
-        return p;
-    }
+		p += getP(a, b, c, d);
+		logger.fine("p = " + p);
+		if ((a * d) >= (b * c)) {
+			logger.fine("doing R-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);
+			min = (c < b) ? c : b;
+			for (i = 0; i < min; i++) {
+				logger.fine("doing round " + i);
+				p += getP(++a, --b, --c, ++d);
+				logger.fine("\ta=" + a + " b=" + b + " c=" + c + " d=" + d);
+			}
+		}
+		if ((a * d) < (b * c)) {
+			logger.fine("doing L-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);
+			min = (a < d) ? a : d;
+			for (i = 0; i < min; i++) {
+				logger.fine("doing round " + i);
+				double pTemp = getP(--a, ++b, ++c, --d);
+				logger.fine("\tpTemp = " + pTemp);
+				p += pTemp;
+				logger.fine("\ta=" + a + " b=" + b + " c=" + c + " d=" + d);
+			}
+		}
+		return p;
+	}
 
     /**
      * Calculates the right-tail P-value for the Fisher Exact test.
@@ -139,12 +145,12 @@ public class FisherExact {
         }
         double p = 0;
 
-        p += getP(a, b, c, d);
-        if (DEBUG) {System.out.println("p = " + p);}
-        if (DEBUG) {System.out.println("doing R-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);}
-        min = (c < b) ? c : b;
-        for (i = 0; i < min; i++) {
-            p += getP(++a, --b, --c, ++d);
+		p += getP(a, b, c, d);
+		logger.fine("p = " + p);
+		logger.fine("doing R-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);
+		min = (c < b) ? c : b;
+		for (i = 0; i < min; i++) {
+			p += getP(++a, --b, --c, ++d);
 
         }
         return p;
@@ -167,17 +173,17 @@ public class FisherExact {
         }
         double p = 0;
 
-        p += getP(a, b, c, d);
-        if (DEBUG) {System.out.println("p = " + p);}
-        if (DEBUG) {System.out.println("doing L-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);}
-        min = (a < d) ? a : d;
-        for (i = 0; i < min; i++) {
-            if (DEBUG) {System.out.print("doing round " + i);}
-            double pTemp = getP(--a, ++b, ++c, --d);
-            if (DEBUG) {System.out.print("\tpTemp = " + pTemp);}
-            p += pTemp;
-            if (DEBUG) {System.out.println("\ta=" + a + " b=" + b + " c=" + c + " d=" + d);}
-        }
+		p += getP(a, b, c, d);
+		logger.fine("p = " + p);
+		logger.fine("doing L-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);
+		min = (a < d) ? a : d;
+		for (i = 0; i < min; i++) {
+			logger.fine("doing round " + i);
+			double pTemp = getP(--a, ++b, ++c, --d);
+			logger.fine("\tpTemp = " + pTemp);
+			p += pTemp;
+			logger.fine("\ta=" + a + " b=" + b + " c=" + c + " d=" + d);
+		}
 
 
         return p;
@@ -216,21 +222,21 @@ public class FisherExact {
 //         By "more extreme," we mean any configuration (given observed marginals) with a smaller probability of
 //         occurrence in the same direction (one-tailed) or in both directions (two-tailed).
 
-        if (DEBUG) {System.out.println("baseP = " + baseP);}
-        int initialA = a, initialB = b, initialC = c, initialD = d;
-        p += baseP;
-        if (DEBUG) {System.out.println("p = " + p);}
-        if (DEBUG) {System.out.println("Starting with R-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);}
-        min = (c < b) ? c : b;
-        for (i = 0; i < min; i++) {
-            if (DEBUG) {System.out.print("doing round " + i);}
-            double tempP = getP(++a, --b, --c, ++d);
-            if (tempP <= baseP) {
-                if (DEBUG) {System.out.print("\ttempP (" + tempP + ") is less than baseP (" + baseP + ")");}
-                p += tempP;
-            }
-            if (DEBUG) {System.out.println(" a=" + a + " b=" + b + " c=" + c + " d=" + d);}
-        }
+		logger.fine("baseP = " + baseP);
+		int initialA = a, initialB = b, initialC = c, initialD = d;
+		p += baseP;
+		logger.fine("p = " + p);
+		logger.fine("Starting with R-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);
+		min = (c < b) ? c : b;
+		for (i = 0; i < min; i++) {
+			logger.fine("doing round " + i);
+			double tempP = getP(++a, --b, --c, ++d);
+			if (tempP <= baseP) {
+				logger.fine("\ttempP (" + tempP + ") is less than baseP (" + baseP + ")");
+				p += tempP;
+			}
+			logger.fine(" a=" + a + " b=" + b + " c=" + c + " d=" + d);
+		}
 
         // reset the values to their original so we can repeat this process for the other side
         a = initialA;
@@ -238,55 +244,55 @@ public class FisherExact {
         c = initialC;
         d = initialD;
 
-        if (DEBUG) {System.out.println("Now doing L-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);}
-        min = (a < d) ? a : d;
-        if (DEBUG) {System.out.println("min = " + min);}
-        for (i = 0; i < min; i++) {
-            if (DEBUG) {System.out.print("doing round " + i);}
-            double pTemp = getP(--a, ++b, ++c, --d);
-            if (DEBUG) {System.out.println("  pTemp = " + pTemp);}
-            if (pTemp <= baseP) {
-                if (DEBUG) {System.out.print("\ttempP (" + pTemp + ") is less than baseP (" + baseP + ")");}
-                p += pTemp;
-            }
-            if (DEBUG) {System.out.println(" a=" + a + " b=" + b + " c=" + c + " d=" + d);}
-        }
-        return p;
-    }
-//
-//    public static void main(String[] args) {
-//
-//        if(args.length != 4){
-//            System.out.println("Please enter 4 values");
-//            System.exit(0);
-//        }
-//        int[] argInts = new int[args.length];
-//
-//        for(int i = 0; i < argInts.length; i++){
-//            argInts[i] = Integer.parseInt(args[i]);
-//        }
-//        FisherExact fe = new FisherExact(100);
-//
-//        System.out.println("\n*****Original algorithm");
-//        double cumulativeP = fe.getCumlativeP(argInts[0], argInts[1], argInts[2], argInts[3]);
-//        System.out.println("cumulativeP = " + cumulativeP );
-//
-//        System.out.println("\n*****Modified algorithm");
-//        double algorithmSelectedP = fe.getAlgorithmSelected(argInts[0], argInts[1], argInts[2], argInts[3]);
-//        System.out.println("algorithmSelectedP = " + algorithmSelectedP);
-//
-//        System.out.println("\n*****Left Tailed");
-//        double leftTailedP = fe.getLeftTailedP(argInts[0], argInts[1], argInts[2], argInts[3]);
-//        System.out.println("leftTailedP = " + leftTailedP);
-//
-//        System.out.println("\n*****Right Tailed");
-//        double rightTailedP = fe.getRightTailedP(argInts[0], argInts[1], argInts[2], argInts[3]);
-//        System.out.println("rightTailedP = " + rightTailedP);
-//
-//        System.out.println("\n*****Two Tailed");
-//        double twoTailedP = fe.getTwoTailedP(argInts[0], argInts[1], argInts[2], argInts[3]);
-//        System.out.println("twoTailedP = " + twoTailedP);
-//    }
+		logger.fine("Now doing L-tail: a=" + a + " b=" + b + " c=" + c + " d=" + d);
+		min = (a < d) ? a : d;
+		logger.fine("min = " + min);
+		for (i = 0; i < min; i++) {
+			logger.fine("doing round " + i);
+			double pTemp = getP(--a, ++b, ++c, --d);
+			logger.fine("  pTemp = " + pTemp);
+			if (pTemp <= baseP) {
+				logger.fine("\ttempP (" + pTemp + ") is less than baseP (" + baseP + ")");
+				p += pTemp;
+			}
+			logger.fine(" a=" + a + " b=" + b + " c=" + c + " d=" + d);
+		}
+		return p;
+	}
+	//
+	//    public static void main(String[] args) {
+	//
+	//        if(args.length != 4){
+	//            System.out.println("Please enter 4 values");
+	//            System.exit(0);
+	//        }
+	//        int[] argInts = new int[args.length];
+	//
+	//        for(int i = 0; i < argInts.length; i++){
+	//            argInts[i] = Integer.parseInt(args[i]);
+	//        }
+	//        FisherExact fe = new FisherExact(100);
+	//
+	//        System.out.println("\n*****Original algorithm");
+	//        double cumulativeP = fe.getCumlativeP(argInts[0], argInts[1], argInts[2], argInts[3]);
+	//        System.out.println("cumulativeP = " + cumulativeP );
+	//
+	//        System.out.println("\n*****Modified algorithm");
+	//        double algorithmSelectedP = fe.getAlgorithmSelected(argInts[0], argInts[1], argInts[2], argInts[3]);
+	//        System.out.println("algorithmSelectedP = " + algorithmSelectedP);
+	//
+	//        System.out.println("\n*****Left Tailed");
+	//        double leftTailedP = fe.getLeftTailedP(argInts[0], argInts[1], argInts[2], argInts[3]);
+	//        System.out.println("leftTailedP = " + leftTailedP);
+	//
+	//        System.out.println("\n*****Right Tailed");
+	//        double rightTailedP = fe.getRightTailedP(argInts[0], argInts[1], argInts[2], argInts[3]);
+	//        System.out.println("rightTailedP = " + rightTailedP);
+	//
+	//        System.out.println("\n*****Two Tailed");
+	//        double twoTailedP = fe.getTwoTailedP(argInts[0], argInts[1], argInts[2], argInts[3]);
+	//        System.out.println("twoTailedP = " + twoTailedP);
+	//    }
 
     public static void main(String[] args) {
 

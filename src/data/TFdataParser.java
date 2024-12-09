@@ -267,8 +267,8 @@ public abstract class TFdataParser {
 		}
 	
 		catch(IOException ioe) {
-			System.out.println(ioe.getMessage());
-			System.out.println("IOException occurred while parsing transcription factors .");
+			logger.severe(ioe.getMessage());
+			logger.severe("IOException occurred while parsing transcription factors .");
 		}
 	}
 	
@@ -282,12 +282,12 @@ public abstract class TFdataParser {
 			}
 			bw.flush();
 			bw.close();
-		
-			System.out.println(tf_names.size() + " factors written to mapping file.");
-			
+
+			logger.severe(tf_names.size() + " factors written to mapping file.");
+
 		} catch(IOException ioe) {
-			System.out.println(ioe.getMessage());
-			System.out.println("IOException occurred while parsing transcription factors.");
+			logger.severe(ioe.getMessage());
+			logger.severe("IOException occurred while parsing transcription factors.");
 		}
 	}
 	

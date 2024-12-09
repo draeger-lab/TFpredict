@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.stat.inference.TestUtils;
@@ -42,7 +43,15 @@ import org.apache.commons.math.stat.inference.TestUtils;
  * @since 1.0
  */
 public class FourFieldTest {
-	
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(FourFieldTest.class.getName());
+
+	/**
+	 *
+	 */
 	List<String> iprs_fft = new ArrayList<String>();
 	List<Double> pvalues = new ArrayList<Double>();
 	
@@ -56,9 +65,9 @@ public class FourFieldTest {
 
 	
 	public void run(List<String> iprs, Map<String, List<String>> iprTF2ids, Map<String, List<String>> iprNONTF2ids) {
-		
-		System.out.println("Collecting data ...");
-		
+
+		logger.info("Collecting data ...");
+
 		long start = System.currentTimeMillis();
 
 		// simple threading ...
@@ -83,14 +92,14 @@ public class FourFieldTest {
 		int sum_nontf = nontfsummon.res;
 		
 		long end = System.currentTimeMillis();
-		System.out.println("Collecting time was "+(end-start)+" ms.");
-		
-		System.out.println("Four-Fields-Test initiated.");
+		logger.info("Collecting time was "+(end-start)+" ms.");
+
+		logger.info("Four-Fields-Test initiated.");
 		start = System.currentTimeMillis();
 		// calculate final result
 		computeP(iprs, iprTF2ids, sum_tf, iprNONTF2ids, sum_nontf);
 		end = System.currentTimeMillis();
-		System.out.println("FFT time was "+(end-start)+" ms.");
+		logger.info("FFT time was "+(end-start)+" ms.");
 	}
 
 
@@ -140,7 +149,14 @@ public class FourFieldTest {
 		}
 	}
 
-	
+	/**
+	 *
+	 * @param num_tfs_ipr
+	 * @param sum_tf
+	 * @param num_nontfs_ipr
+	 * @param sum_nontf
+	 * @return
+	 */
 	private Double computeM(int num_tfs_ipr, int sum_tf, int num_nontfs_ipr, int sum_nontf) {
 		
 		// a (tf, ipr)
@@ -153,7 +169,7 @@ public class FourFieldTest {
 		int d = sum_nontf - num_nontfs_ipr;
 		
 		if (d < 0) {
-			System.out.println(d);
+			logger.info("" + d);
 		}
 		
 		// four field test matrix
@@ -228,9 +244,9 @@ public class FourFieldTest {
 			Map<String, List<String>> iprNONTF2ids, int sum_nontf) {
 		
 		Collection<Job> queue = new ArrayList<Job>();
-		
-		System.out.println("Building queue ...");
-		
+
+		logger.info("Building queue ...");
+
 		// build queue
 		for (int i = 0; i < iprs.size(); i++) {
 			
@@ -252,9 +268,9 @@ public class FourFieldTest {
 				
 			}
 		}
-		
-		System.out.println("Processing queue ...");
-		
+
+		logger.info("Processing queue ...");
+
 		// process queue
 		//ExecutorService exec = Executors.newCachedThreadPool();
 		ExecutorService exec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -299,6 +315,9 @@ public class FourFieldTest {
 			this.sum_nontf = sum_nontf;
 		}
 
+		/* (non-Javadoc)
+		 * @see java.util.concurrent.Callable#call()
+		 */
 		@Override
 		public Result call() throws Exception {
 

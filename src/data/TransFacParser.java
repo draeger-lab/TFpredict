@@ -215,22 +215,22 @@ public class TransFacParser extends TFdataParser {
 				for(int i=0; i<entry_counter; i++) if (seq_parsed[i]) seq_counter++;
 				for(int i=0; i<entry_counter; i++) if (ref_parsed[i]) ref_counter++;
 				for(int i=0; i<entry_counter; i++) if (pfm_parsed[i]) pfm_counter++;
-			
-				System.out.println("Number of transcription factors: " + entry_counter);
-				System.out.println("Number of parsed factors:        " + tf_names.size() + "\n");
-			
-				System.out.println("Accession numbers:  " + acc_counter);
-				System.out.println("Species:            " + spec_counter);
-				System.out.println("TRANSFAC class:     " + class_counter);
-				System.out.println("Sequences:          " + seq_counter);
-				System.out.println("UniProt References: " + ref_counter);
-				System.out.println("Matrices:           " + pfm_counter);
+
+				logger.info("Number of transcription factors: " + entry_counter);
+				logger.info("Number of parsed factors:        " + tf_names.size() + "\n");
+
+				logger.info("Accession numbers:  " + acc_counter);
+				logger.info("Species:            " + spec_counter);
+				logger.info("TRANSFAC class:     " + class_counter);
+				logger.info("Sequences:          " + seq_counter);
+				logger.info("UniProt References: " + ref_counter);
+				logger.info("Matrices:           " + pfm_counter);
 			}
 		}
 		catch(IOException ioe) {
-			System.out.println(ioe.getMessage());
-			System.out.println("IOException occurred while parsing transcription factors from FACTOR table.");
-			System.out.println("Line " + line_counter + ": " + line);
+			logger.warning(ioe.getMessage());
+			logger.warning("IOException occurred while parsing transcription factors from FACTOR table.");
+			logger.warning("Line " + line_counter + ": " + line);
 		}
 	}
 	
@@ -291,7 +291,7 @@ public class TransFacParser extends TFdataParser {
 						matrix_parsed = false;
 					
 					} else {
-						System.out.println("Parse Error. Matrix entry " + entry_counter + " could not be parsed.");
+						logger.info("Parse Error. Matrix entry " + entry_counter + " could not be parsed.");
 						System.exit(0);
 					}
 				}

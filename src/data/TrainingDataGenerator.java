@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import modes.Predict;
 
@@ -45,7 +46,12 @@ import modes.Predict;
  * @since 1.0
  */
 public class TrainingDataGenerator {
-	
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(TrainingDataGenerator.class.getName());
+
 	// General form of FASTA headers: Name|UniprotID|TF|TransfacClass|Database
 	public static final int NameField = 0;
 	public static final int UniProtIDField = 1;
@@ -130,7 +136,7 @@ public class TrainingDataGenerator {
 		for (String header: headers) {
 			int idx = parser.tf_names.indexOf(header);
 			if (idx == -1) {
-				System.out.println("Error. No entry found for TF: " + header);
+				logger.severe("Error. No entry found for TF: " + header);
 				System.exit(0);
 			}
 			
@@ -273,7 +279,7 @@ public class TrainingDataGenerator {
 			String currID = parser.tf_names.get(i);
 			
 			if (currID.equals("T00650|NA|TransFac")) {
-				System.out.println("Code reached.");
+				logger.info("Code reached.");
 			}
 			if (seq2bindingDomain.containsKey(currID)) {
 				IprProcessed currDBDs = seq2bindingDomain.get(currID);
@@ -327,8 +333,8 @@ public class TrainingDataGenerator {
 		
 		// read InterProScan output file
 		List<String[]> iprOutput = BasicTools.readFile2ListSplitLines(iprFile);
-		System.out.println("Number of parsed interpro domains: " + iprOutput.size());
-				
+		logger.info("Number of parsed interpro domains: " + iprOutput.size());
+
 		// read Fasta file
 		Map<String, String> fastaSeqs = BasicTools.readFASTA(fastaFile, true);
 		List<String> tfNames = new ArrayList<String>();
@@ -350,8 +356,8 @@ public class TrainingDataGenerator {
 				iprOutput.remove(i);
 			}
 		}
-		System.out.println("Number of parsed interpro domains after filtering: " + iprOutput.size());
-		
+		logger.info("Number of parsed interpro domains after filtering: " + iprOutput.size());
+
 		BasicTools.writeSplittedList2File(iprOutput, outputFile);
 	}	
 	
@@ -398,7 +404,7 @@ public class TrainingDataGenerator {
 			if (!uniprot2header.containsKey(uniprotID)) {
 				uniprot2header.put(uniprotID, header);
 			} else {
-				System.out.println("(1) " + uniprot2header.get(uniprotID) + "\t(2) " + header);
+				logger.info("(1) " + uniprot2header.get(uniprotID) + "\t(2) " + header);
 			}
 		}
 	}
@@ -414,14 +420,14 @@ public class TrainingDataGenerator {
 			if (!tfName2uniprot.containsKey(tfName)) {
 				tfName2uniprot.put(tfName, uniprotID);
 			} else {
-				System.out.println("Name: " + tfName + "\tUniProt: " + uniprotID + " is already in map.");
+				logger.info("Name: " + tfName + "\tUniProt: " + uniprotID + " is already in map.");
 			}
 		}
 		
 		// read InterProScan output file
 		List<String[]> iprOutput = BasicTools.readFile2ListSplitLines(iprFile);
-		System.out.println("Number of parsed interpro domains: " + iprOutput.size());
-		
+		logger.info("Number of parsed interpro domains: " + iprOutput.size());
+
 		boolean[] irrelLines = new boolean[iprOutput.size()];
 		for (int i=0; i<iprOutput.size(); i++) {
 			String[] currLine = iprOutput.get(i);
@@ -431,7 +437,7 @@ public class TrainingDataGenerator {
 				if (tfName2uniprot.containsKey(currName)) {
 					String currUniprot = tfName2uniprot.get(currName);
 					currLine[0] = splittedID[NameField] + "_" + currUniprot + "_" + splittedID[DatabaseField-2];
-					System.out.println(currLine[0]);
+					logger.fine(currLine[0]);
 					iprOutput.set(i, currLine);
 					
 				} else {
@@ -444,8 +450,8 @@ public class TrainingDataGenerator {
 				iprOutput.remove(i);
 			}
 		}
-		System.out.println("Number of parsed interpro domains after filtering: " + iprOutput.size());
-		
+		logger.info("Number of parsed interpro domains after filtering: " + iprOutput.size());
+
 		BasicTools.writeSplittedList2File(iprOutput, outputFile);
 	}
 	
@@ -468,7 +474,13 @@ public class TrainingDataGenerator {
 		}	
 		BasicTools.writeFASTA(correctedNontfSeqs, outputFile);
 	}
-	
+
+	/**
+	 *
+	 * @param fastaFile
+	 * @param uniprotIDfile
+	 * @param fastaSubsetFile
+	 */
 	private static void generateFastaSubsetFile(String fastaFile, String uniprotIDfile, String fastaSubsetFile) {
 		
 		List<String> uniprotIDs = BasicTools.readFile2List(uniprotIDfile, false);
@@ -483,7 +495,12 @@ public class TrainingDataGenerator {
 		}
 		BasicTools.writeFASTA(seqsSubset, fastaSubsetFile);
 	}
-	
+
+	/**
+	 *
+	 * @param sabineFlatfile
+	 * @param sabineInputfile
+	 */
 	private static void convertSabineFlatfile2Inputfile(String sabineFlatfile, String sabineInputfile) {
 		
 		// read SABINE flatfile

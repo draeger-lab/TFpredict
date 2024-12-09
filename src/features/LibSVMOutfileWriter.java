@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import modes.Predict;
 
@@ -46,6 +47,11 @@ import modes.Predict;
  * @since 1.0
  */
 public class LibSVMOutfileWriter {
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(LibSVMOutfileWriter.class.getName());
 
 	// clean version
 	public int[] write(List<String> domainIDs, Map<String, IprEntry> seq2domain, String outfile) {
@@ -102,7 +108,7 @@ public class LibSVMOutfileWriter {
 				}
 				
 				if (currSeq.equals("GL2_P46607_MatBase")) {
-					System.out.println("Superclass: " + curr_entry.superclass);
+					logger.info("Superclass: " + curr_entry.superclass);
 				}
 				
 				// save mapping from feature vectors to (multiple) sequence IDs
@@ -136,8 +142,8 @@ public class LibSVMOutfileWriter {
 			bw_libsvmfile.close();
 		}
 		catch(IOException ioe) {
-			System.out.println(ioe.getMessage());
-			System.out.println("IOException occurred while writing output file");
+			logger.warning(ioe.getMessage());
+			logger.warning("IOException occurred while writing output file");
 		}
 		
 		// write Sequence IDs for each feature vector to file
@@ -151,7 +157,7 @@ public class LibSVMOutfileWriter {
 		// write names of proteins for which no feature vectors were generated to file
 		String excludedNamesFile = outfile.replace(".txt", "_excluded.txt");
 		if (!excludedSequences.isEmpty()) {
-			System.out.println("Excluded " + excludedSequences.size() + " protein sequences with empty feature vectors.");
+			logger.warning("Excluded " + excludedSequences.size() + " protein sequences with empty feature vectors.");
 			BasicTools.writeList2File(excludedSequences, excludedNamesFile);
 		}
 		return numFeatureVectors;

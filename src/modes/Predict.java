@@ -457,7 +457,7 @@ public class Predict {
 		List<String[]> IPRoutput = InterProScanRunner.run(input_file, iprpath, basedir, useWeb, standAloneMode);
 		seq2job = InterProScanRunner.getSeq2job();
 		if (standAloneMode) {
-			an.hideAnimatedChar();
+			//an.hideAnimatedChar();
 			System.out.println();
 		}
 		
