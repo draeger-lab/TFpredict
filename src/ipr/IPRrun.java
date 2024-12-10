@@ -203,7 +203,7 @@ public class IPRrun {
 		
 		for (String job : jobs) {
 			try {
-				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".tsv.tsv")); //.tsv.tsv or .out.txt
+				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".tsv.tsv")); //or .tsv.txt or .out.txt
 				 while ((line = br.readLine()) != null) {
 					 String[] tabpos = line.split("\t");
 					 String seqID = tabpos[0].trim();
