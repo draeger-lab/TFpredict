@@ -59,7 +59,7 @@ public class Train {
 		}
 		
 		if(cmd.hasOption("modelFileDir")) {
-			modelFileDir = new String(cmd.getOptionValue("modelFileDir"));;
+			modelFileDir = new String(cmd.getOptionValue("modelFileDir"));
 		}
 		
 		if(cmd.hasOption("multiruns")) {
