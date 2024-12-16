@@ -998,7 +998,7 @@ public class BasicTools {
 	 * @throws NumberFormatException
 	 * @throws IOException
 	 */
-	public static Map<String, Double> parseBLASTHits(File hitsOutfile) throws NumberFormatException, IOException {
+	public static Map<String, Double> parseBLASTHitsProk(File hitsOutfile) throws NumberFormatException, IOException {
 		// read PSI-BLAST output from temporary files
 
 		Map<String, Double> blastHits = new HashMap<String, Double>();

@@ -19,7 +19,7 @@ public class BLASTparserTest {
 	 * @throws IOException
 	 */
 	public static void main(String args[]) throws NumberFormatException, IOException {
-		BasicTools.parseBLASTHits(new File(BLASTparserTest.class.getResource(args[0]).getFile()));
+		BasicTools.parseBLASTHitsProk(new File(BLASTparserTest.class.getResource(args[0]).getFile()));
 	}
 
 }

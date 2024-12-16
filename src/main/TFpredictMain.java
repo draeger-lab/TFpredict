@@ -242,6 +242,7 @@ public class TFpredictMain {
 				
 			// options not needed for web-tool version of TFpredict
 			options.addOption("train", false, "switch for training mode");
+			options.addOption("prokaryote", false, "runs TFpredict training for prokaryotic data");
 			options.addOption("featureFile", true, "feature file in libsvm format");	
 			options.addOption("resultsFileDir", true, "directory containing class probabilities and evaluation results");	
 			options.addOption("modelFileDir", true, "directory where model files shall be saved");	
@@ -253,9 +254,9 @@ public class TFpredictMain {
 	    // STAND-ALONE-MODE
 		} else if (standAloneMode) {
 
-			options.addOption("prokaryote", false, "runs TFpredict for prokaryotic data");
 			options.addOption("fasta", true, "input FASTA file for batch mode");
 			options.addOption("output", true, "output file name");
+			options.addOption("prokaryote", false, "runs TFpredict prediction for prokaryotic data");
 			options.addOption("sabineOutfile", true, "output file in SABINE format");
 			options.addOption("species", true, "organism (e.g. Homo sapiens)");
 			options.addOption("tfClassifier", true, "file containing TF/Non-TF classifier");
@@ -375,6 +376,7 @@ public class TFpredictMain {
 		System.out.println("  OPTIONS : -sabineOutfile <sabine_output_file_name>");
 		System.out.println("            -species <organism_name>            (e.g., \"Homo sapiens\")");
 		System.out.println("            -output <output_file_name>          (e.g., \"output.txt\", default is console output)");
+		System.out.println("            -prokaryote                         (Run prediction/training with prokaryotic data)");
 		System.out.println("            -tfClassifier <classifier_name>     (possible values: SVM_linear, NaiveBayes, KNN)");
 		System.out.println("            -superClassifier <classifier_name>  (possible values: SVM_linear, NaiveBayes, KNN)");
 		System.out.println("            -iprscanPath <path_to_iprscan>      (e.g., \"/opt/iprscan/bin/iprscan\")");
