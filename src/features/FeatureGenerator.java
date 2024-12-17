@@ -120,6 +120,7 @@ public class FeatureGenerator {
 	private static void generatePssmFeatures(String fastaFile, String featureDir, boolean superPred) {
 		String featureFile = featureDir + FeatureType.pssm.featureFileName;
 		PSSMFeatureGenerator featureGenerator = new PSSMFeatureGenerator(fastaFile, featureFile, superPred);
+		//TODO Prok version should be included?
 		featureGenerator.generateFeatures();
 	}
 	
@@ -138,6 +139,7 @@ public class FeatureGenerator {
 	private static void generateNaiveFeatures(String fastaFile, String featureDir, boolean superPred) {
 		String featureFile = featureDir + FeatureType.naive.featureFileName;
 		NaiveFeatureGenerator featureGenerator = new NaiveFeatureGenerator(fastaFile, featureFile, superPred);
+		//TODO Prok version should be included?
 		featureGenerator.generateFeatures();
 	}
 	

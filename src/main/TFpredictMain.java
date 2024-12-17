@@ -249,7 +249,7 @@ public class TFpredictMain {
 			options.addOption("multiruns", true, "number of repetitions of cross-validation");	
 			options.addOption("folds", true, "number of folds");	
 			options.addOption("nestedCV", false, "switch to run nested cross-validation with model selection");	
-			options.addOption("multiThreading", false, "switch to enables multi-threading");	
+			options.addOption("multiThreading", false, "switch to enable multi-threading");
 			
 	    // STAND-ALONE-MODE
 		} else if (standAloneMode) {

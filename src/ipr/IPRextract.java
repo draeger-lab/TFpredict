@@ -183,7 +183,59 @@ public class IPRextract {
 		}
 		return ipr_domains;
 	}
-	
+
+	public static Map<String, IprRaw> parseIPRoutputProk(List<String[]> IPRoutput) {
+
+		Map<String, IprRaw> ipr_domains = new HashMap<String, IprRaw>();
+
+		for (int i = 0; i < IPRoutput.size(); i++) {
+
+			String[] domain_entry = IPRoutput.get(i);
+
+			String domain_id = domain_entry[11].trim();
+			// skip domains for which no InterPro-ID is given
+			if (domain_id.equals("NULL")) {
+				continue;
+			}
+			// skip domain IDs which were already added
+			if (ipr_domains.containsKey(domain_id)) {
+				continue;
+			}
+
+			String domain_name1 = domain_entry[5].trim().split(",")[0].trim();
+			String domain_name2 = domain_entry[12].trim().split(",")[0].trim();
+
+
+			// parse domain names from description fields (used for TF class annotation via TransFac)
+			HashSet<String> domain_names_set = new HashSet<String>();
+			domain_names_set.add(domain_name1);
+			domain_names_set.add(domain_name2);
+			domain_names_set.remove("no description");
+			String[] domain_names = domain_names_set.toArray(new String[]{});
+
+			// check if GO terms are available for current domain
+			List<String> domain_GOterms = null;
+			if (domain_entry.length == 14) {
+				String domain_go = domain_entry[13].trim();
+
+				// parse GO terms for current InterPro domain entry
+				domain_GOterms = new ArrayList<String>();
+				for (String go_entry : domain_go.split(",")) {
+
+					if (go_entry.contains("GO:")) {
+						int start_pos = go_entry.indexOf("(GO:")+1;
+						int end_pos = go_entry.indexOf(")", start_pos);
+
+						go_entry = go_entry.substring(start_pos, end_pos);
+						domain_GOterms.add(go_entry);
+					}
+				}
+			}
+			IprRaw ipr_domain = new IprRaw(domain_id, domain_names, domain_GOterms);
+			ipr_domains.put(domain_id, ipr_domain);
+		}
+		return ipr_domains;
+	}
 	
 
 }

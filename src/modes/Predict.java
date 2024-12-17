@@ -487,7 +487,14 @@ public class Predict {
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
 		
 		// generates map of from domain ID to object containing the InterPro ID, description, position, and GO classes
-		IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
+		if(!prokaryote){
+			IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
+		}
+		else{
+			IPRdomains = IPRextract.parseIPRoutputProk(IPRoutput);
+		}
+
+
 	
 		// process result
 		seq2bindingDomain = IPRprocess.filterIPRdomains(seq2domain, IPRdomains, relGOterms, tfName2class);

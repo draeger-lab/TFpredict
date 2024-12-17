@@ -269,6 +269,7 @@ public class TrainingDataGenerator {
 		// parse domains from InterProScan result
 		Map<String, IprEntry> seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
 		Map<String, IprRaw>	IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
+		//TODO Prok version: Map<String, IprRaw> IPRdomains = IPRextract.parseIPRoutputProk(IPRoutput);
 		
 		IprRaw domainsRaw = IPRdomains.get("T00650|NA|TransFac");
 		

@@ -38,6 +38,8 @@ public class Train {
 
 	private static boolean silent = false;
 
+	private static boolean prokaryote = false;
+
 	private static String featureFile;
 	private static String classResultsDir;
 	private static String modelFileDir;
@@ -49,7 +51,11 @@ public class Train {
 	private static boolean multithreading = false;
 	
 	private static void parseArguments(CommandLine cmd) {
-		
+
+		if(cmd.hasOption("prokaryote")) {
+			prokaryote = true;
+		}
+
 		if(cmd.hasOption("featureFile")) {
 			featureFile = new String(cmd.getOptionValue("featureFile"));
 		}
