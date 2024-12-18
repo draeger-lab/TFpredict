@@ -23,7 +23,7 @@ other refinements", Nucleic Acids Res. 29:2994-3005.
 
 
 
-Database: resources/blast_db/TFnonTF.fasta
+Database: resources/blast_db_prok/TFnonTF.fasta
            308,925 sequences; 99,221,790 total letters
 
 Results from round 1
@@ -9291,7 +9291,7 @@ Lambda      K        H        a         alpha    sigma
 Effective search space used: 21741566070
 
 
-  Database: resources/blast_db/TFnonTF.fasta
+  Database: resources/blast_db_prok/TFnonTF.fasta
     Posted date:  Feb 4, 2015  9:48 AM
   Number of letters in database: 99,221,790
   Number of sequences in database:  308,925

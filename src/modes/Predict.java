@@ -117,6 +117,10 @@ public class Predict {
 	public static String tfName2class_file = "transHMan";
 	public static String tfPredBlastFasta = "blast_db/TFnonTF.fasta";
 	public static String superPredBlastFasta = "blast_db/TF.fasta";
+
+	public static String tfPredBlastFastaProk = "blast_db_prok/TFnonTF.fasta";
+
+	public static String superPredBlastFastaProk = "blast_db_prok/TF.fasta";
 	public static String tfPredBlastDB = "blast_db/TFnonTF.db";
 	public static String superPredBlastDB = "blast_db/TF.db";
 	
@@ -529,14 +533,29 @@ public class Predict {
 	private void runPsiBlast() {
 		
 		// copy FASTA files from Jar to temporary directory
-		String blast_db_dir = basedir + "blast_db/";
+		String blast_db_dir = basedir + (prokaryote ? "blast_db_prok/" : "blast_db/");
+
 		if (! new File(blast_db_dir).exists() && ! new File(blast_db_dir).mkdir()) {
 			System.out.println("Error. Could not create directory for BLAST database.");
 		}
-		tfnontfDBfastaFile = blast_db_dir + new File(tfPredBlastFasta).getName();
-		tfDBfastaFile = blast_db_dir + new File(superPredBlastFasta).getName();
-		BasicTools.copy(tfPredBlastFasta, tfnontfDBfastaFile, true);
-		BasicTools.copy(superPredBlastFasta, tfDBfastaFile, true);
+		if(!prokaryote){
+			tfnontfDBfastaFile = blast_db_dir + new File(tfPredBlastFasta).getName();
+			tfDBfastaFile = blast_db_dir + new File(superPredBlastFasta).getName();
+		}
+		else{
+			tfnontfDBfastaFile = blast_db_dir + new File(tfPredBlastFastaProk).getName();
+			tfDBfastaFile = blast_db_dir + new File(superPredBlastFastaProk).getName();
+		}
+
+		if(!prokaryote){
+			BasicTools.copy(tfPredBlastFasta, tfnontfDBfastaFile, true);
+			BasicTools.copy(superPredBlastFasta, tfDBfastaFile, true);
+		}
+		else{
+			BasicTools.copy(tfPredBlastFastaProk, tfnontfDBfastaFile, true);
+			BasicTools.copy(superPredBlastFastaProk, tfDBfastaFile, true);
+		}
+
 		
 		// generate PSI-BLAST databases from FASTA files
 		String createDB_cmd = blastpath + "bin/makeblastdb";

@@ -121,6 +121,7 @@ public class FeatureGenerator {
 		String featureFile = featureDir + FeatureType.pssm.featureFileName;
 		PSSMFeatureGenerator featureGenerator = new PSSMFeatureGenerator(fastaFile, featureFile, superPred);
 		//TODO Prok version should be included?
+
 		featureGenerator.generateFeatures();
 	}
 	
