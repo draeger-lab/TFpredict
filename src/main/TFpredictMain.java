@@ -306,6 +306,12 @@ public class TFpredictMain {
 			
 		// print values of provided arguments 
 		System.out.println("  Input FASTA file:       " + cmd.getOptionValue("fasta"));
+		if (cmd.hasOption("prokaryote")) {
+			System.out.println("  Type:     " + "              prokaryote");
+		}
+		else{
+			System.out.println("  Type:     " + "              eukaryote");
+		}
 		if (cmd.hasOption("output")) {
 			System.out.println("  Output file:     " + cmd.getOptionValue("output"));
 		}
