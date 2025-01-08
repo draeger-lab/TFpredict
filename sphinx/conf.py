@@ -33,4 +33,10 @@ html_sidebars = {
     '**': ['globaltoc.html', 'relations.html', 'sidebar.html', 'searchbox.html'],
 }
 
+html_logo = "_static/tfpredict_logo.png"
+
+html_css_files = [
+    'custom.css',
+]
+
 html_static_path = ['_static']
