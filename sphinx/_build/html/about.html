@@ -1,0 +1,151 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About TFpredict &mdash; TFpredict 1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=0ed52906"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="#" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting Started with TFpredict" href="getting_started.html" />
+    <link rel="prev" title="Welcome to the TFpredict documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            TFpredict
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">About TFpredict</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#availability">Availability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started with TFpredict</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#how-to-get-started">How to get started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installing-tfpredict">Installing TFpredict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installation-and-configuration-of-blast">Installation and configuration of BLAST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="use.html">How to Use TFpredict - The Manual</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="use.html#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="use.html#how-to-proceed">How To Proceed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="use.html#format-specification">Format Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">Copyright and Licence</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="license.html#acknowledgements">Acknowledgements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="license.html#contact">Contact</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">TFpredict</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">About TFpredict</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/about.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="about-tfpredict">
+<h1>About TFpredict<a class="headerlink" href="#about-tfpredict" title="Link to this heading"></a></h1>
+<p>TFpredict is a tool which implements a novel three-step classification method which expects a protein sequence as input and (1) distinguishes transcription factors (TF) from other proteins (Non-TF), (2) predicts the structural superclass of TFs (see TransFac classification), and (3) identifies the DNA-binding domains of TFs. The latter two classification steps are only to be performed if the given protein sequence was identified as a TF. The tool incorporates the results from a <a class="reference external" href="https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html#downloadblastdata">BLAST+</a> search into a novel feature representation which allows TF/non-TF classification by state-of-the-art machine learning methods. Specific supervised classifiers were constructed for the task of identifying TFs and their structural superclasses, respectively. Next, known protein domains are detected by the tool <a class="reference external" href="https://www.ebi.ac.uk/interpro/about/interproscan/">InterProScan</a>, and then the DNA-binding domains among these are filtered through GO-terms. TFpredict was implemented as an additional preprocessing tool for <a class="reference external" href="https://github.com/draeger-lab/SABINE">SABINE</a>, which predicts the DNA-motif bound by a transcription factor, given its amino acid sequence, superclass, DNA-binding domains and organism.</p>
+<section id="availability">
+<h2>Availability<a class="headerlink" href="#availability" title="Link to this heading"></a></h2>
+<p>TFpredict is available in two different versions that are merged into one branch. During execution the <code class="docutils literal notranslate"><span class="pre">-prokaryote</span></code> argument can be used to choose between the classification of transcription factors from two different domains:</p>
+<ol class="arabic simple">
+<li><p>Eukaryotic transcription factors (default)</p></li>
+<li><p>Prokaryotic σ-factors (-prokaryote option) The algorithm itself is identical. What is different are the training data and weights for both scenarios. So, this distinction is more for convenience to directly provide preconfigured versions of TFpredict for both domains of organisms.</p></li>
+</ol>
+</section>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h2>
+<p>Transcription factors (TF) are the key regulators of cell- and tissue-specific regulation of gene expression and play a crucial role in the orchestration of diverse biological processes, such as cell differentiation and the adaptation to changed environmental conditions. The induction or activation of target genes is achieved by the specific recognition of a DNA-motif located in the corresponding promoter regions, which is specifically recognized by the DNA-binding domain(s) of a TF. The specific interactions between TFs and their target genes are of high relevance for a more profound understanding of transcriptional gene expression in eukaryotes.</p>
+<p>In recent work, we presented a novel method for the inference of the DNA-motif recognized by a particular TF, which is inferred from sequence-based features using Support Vector Regression. This method has been implemented in the tool <a class="reference external" href="https://github.com/draeger-lab/SABINE">SABINE</a> (Stand-Alone BINding specificity Estimator) which is also available from our website. Besides the protein sequence, SABINE requires knowledge of the structural superclass and the DNA-binding domains of the input TF. Here, we present TFpredict, a tool which can 1) reliable distinguish TFs from other proteins, 2) predict the structural superclass of a TF and 3) detects its the DNA-binding domains. As TFpredict returns all structural information needed by SABINE to predict the DNA-motif of a given TF, we recommend the combined use of the two complementary tools.</p>
+<p>TFpredict employs supervised machine learning methods implemented in the <a class="reference external" href="https://weka.sourceforge.io/packageMetaData/">WEKA</a> package for the classification of protein sequences. First, a binary classifier is used for the discrimination of TFs from other proteins (Non-TFs), and in a second step, a multi-class classifier is employed for superclass (Basic domain, Zinc Finger, Helix-turn-helix, Beta scaffold or Other) prediction. A look-up complements the second prediction step in the <a class="reference external" href="http://gene-regulation.com/pub/databases/transfac/clSM.html">TransFac TF Classification</a> in which the superclass of the input TF may already be annotated. A <a class="reference external" href="https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html#downloadblastdata">BLAST+</a> search is performed to obtain the feature representation of the input sequences and the homology of a query sequence to other proteins with known class is captured using a novel feature representation called bit score percentile features. Next, the domain composition of the query sequence is reconstructed using the tool InterProScan, and the DNA-binding domains are filtered based on a pre-defined set of <a class="reference external" href="https://www.geneontology.org/">GO terms</a>.</p>
+<p><strong>Summary:</strong> The tool TFpredict provides an effective means for the identification and structural annotation of transcription factors (TFs), based on sequence homology features inferred from their amino acid sequence using the tool BLAST. In short, TFpredict combines sequence similarity searching with supervised machine learning methods (e.g., SVM, KNN, Naive Bayes) from the WEKA package for the identification of TFs and the prediction of their structural superclass. Furthermore, using the domain detection tool <a class="reference external" href="https://www.ebi.ac.uk/interpro/about/interproscan/">InterProScan</a> in conjunction with a gene ontology-based filter the sequence regions spanned by DNA-binding domains are identified. If the tool is used in conjunction with SABINE the DNA motif of the TF may be determined in another prediction step. For this purpose, TFpredict generates a machine-readable text file which can be post-processed using the tool SABINE to perform the inference of the DNA-motif recognized by the given TF.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to the TFpredict documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="getting_started.html" class="btn btn-neutral float-right" title="Getting Started with TFpredict" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
