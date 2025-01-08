@@ -1,3 +1,5 @@
+.. _how-to-use:
+
 How to Use TFpredict - The Manual
 ==================================
 

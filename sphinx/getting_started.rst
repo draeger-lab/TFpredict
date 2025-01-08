@@ -73,11 +73,7 @@ before executing TFpredict.
 Next Steps
 ----------
 
-Now that you have TFpredict set up, explore the following:
-
-- **Tips and Tricks**: Learn best practices for using TFpredict efficiently.
-- **Python Tutorial**: Dive deeper into the Python API.
-- **Developer Guide**: Contribute to the TFpredict codebase or customize it.
+Now that you have TFpredict set up, explore the detailed :ref:`how-to-use`!
 
 If you encounter any issues or need further assistance, please refer to other sections of this documentation or feel free to create an issue on our `GitHub repository`_. 
 
