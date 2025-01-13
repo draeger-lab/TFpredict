@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'TFpredict'
-copyright = '2024, authors'
-author = 'authors'
+copyright = '2025, Johannes Eichner, Florian Topf, Andreas Dräger, James T. Yurkovich, Michael Römer, Dóra V. Molnár, Michael Gaas'
+author = 'Johannes Eichner, Florian Topf, Andreas Dräger, James T. Yurkovich, Michael Römer, Dóra V. Molnár, Michael Gaas'
 release = '1.4'
 
 # -- General configuration ---------------------------------------------------
