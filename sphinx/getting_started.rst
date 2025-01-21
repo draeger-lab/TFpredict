@@ -6,13 +6,13 @@ This section will guide you through the installation, setup, and first steps to 
 How to get started
 -------------------
 
-The stand-alone version of TFpredict is equipped with a command-line interface which can be used for the batch processing of multiple protein sequences given in FASTA format. For convenience, TFpredict uses the webservice version of InterproScan. Thus, installing the perl stand-alone version of InterProScan (approx. 40GB) is not required. To support applications, which require the processing of a large number of sequences (e.g., the genome-wide prediction of TFs in a specific organism) TFpredict can alternatively be used with a local installation of InterProScan.
+The stand-alone version of TFpredict is equipped with a command-line interface which can be used for the batch processing of multiple protein sequences given in FASTA format. For convenience, TFpredict uses the webservice version of InterproScan. Thus, installing the perl stand-alone version of InterProScan (approx. 40GB) is not required.
 
 
 Installing TFpredict
 ---------------------
 
-Download the JAR file TFpredict from https://github.com/draeger-lab/TFpredict/releases and also the example file test_seq.fasta.
+Download the JAR file TFpredict_1.4 from https://github.com/draeger-lab/TFpredict/releases and also the example file test_seq.fasta.
 
 You can also clone this repository and build a new snapshot release using the ant script shipped with this project by executing the following command in the ``dist`` folder:
 

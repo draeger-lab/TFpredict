@@ -24,7 +24,7 @@
 		<property name="classes" location="build/classes" />
 
 		<!-- the application jar file -->
-		<property name="appJar" value="TFpredict.jar" />
+		<property name="appJar" value="TFpredict_1.4.jar" />
 	</target>
 
 	<target name="clean" depends="init">

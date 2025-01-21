@@ -172,15 +172,15 @@ public class IPRrun {
 			
 			IPRoutput = readIPROutput(basedir, jobs);
 
-		} else { // local
-			
+		} else { // local - requires help, doesn't work with the newest verisions of interproscan
+
 			Runtime rt = Runtime.getRuntime();
 
-		    Process proc = null;
+			Process proc = null;
 			try {
 				proc = rt.exec(iprpath +" -cli -i " + seqfile + " -format raw -goterms -iprlookup -altjobs");
 				proc.waitFor();
-				
+
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(1);
