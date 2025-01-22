@@ -56,8 +56,7 @@ An exemplary call of the program which facilitates the post-processing of the re
    
    java -jar TFpredict_1.4.jar example_input.fasta -sabineOutfile example_output.txt -species "Homo sapiens"
 
-A sutitable example.input file
-TFpredict returns an output file, which contains the results of the performed prediction steps in the SABINE input file format.
+For a suitable example_input.fasta file (can be found in the `SABINE`_ GitHub repository) TFpredict returns an output file, which contains the results of the performed prediction steps in the SABINE input file format.
 
 
 .. _form_spec:

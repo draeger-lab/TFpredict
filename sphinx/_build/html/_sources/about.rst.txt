@@ -9,7 +9,7 @@ Availability
 TFpredict is available in two different versions that are merged into one branch. During execution the ``-prokaryote`` argument can be used to choose between the classification of transcription factors from two different domains:
 
 1. Eukaryotic transcription factors (default)
-2. Prokaryotic σ-factors (-prokaryote option) The algorithm itself is identical. What is different are the training data and weights for both scenarios. So, this distinction is more for convenience to directly provide preconfigured versions of TFpredict for both domains of organisms.
+2. Prokaryotic σ-factors (``-prokaryote`` option): The algorithm itself is identical. What is different are the training data and weights for both scenarios. So, this distinction is more for convenience to directly provide preconfigured versions of TFpredict for both domains of organisms.
 
 Introduction
 -------------
