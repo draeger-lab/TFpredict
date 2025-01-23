@@ -620,6 +620,11 @@ public class IPRScan5Client extends AbstractWsToolClient {
 			}
 			exitVal = 3;
 		}
-		System.exit(exitVal);
+
+		if(exitVal != 0)
+		{
+			System.exit(exitVal);
+		}
+
 	}
 }
