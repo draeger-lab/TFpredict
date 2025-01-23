@@ -44,7 +44,7 @@ import java.util.Map;
 
 import javax.xml.rpc.ServiceException;
 
-import uk.ac.ebi.webservices.jaxws.IPRScanClient;
+import uk.ac.ebi.webservices.axis1.stubs.iprscan5.WsResultType;
 
 /**
  * 
@@ -75,7 +75,7 @@ public class IPRrun {
 	
 	public IPRrun() {}
 	
-	private boolean silent = false;
+	private boolean silent = true; //false;
 
 	// gfx related map
 	private static Map<String, String> seq2job = new HashMap<String,String>();
@@ -129,16 +129,16 @@ public class IPRrun {
 			}
 			
 			// prevent System.exit
-			SecurityManager SecMan = System.getSecurityManager();
-			System.setSecurityManager(new NoExitSecurityManager());
+			//SecurityManager SecMan = System.getSecurityManager();
+			//System.setSecurityManager(new NoExitSecurityManager());
 						
 			// submit job
 			try {
-				IPRScanClient.main(param);
+				IPRScan5Client.main(param);
 			} catch (Exception e) {	}
 			
 			// restore System.exit
-			System.setSecurityManager(SecMan);
+			//System.setSecurityManager(SecMan);
 			
 			// grab jobids
 			ArrayList<String> jobs = grabJobIDs(new ByteArrayInputStream(stdout.toByteArray()));
@@ -146,14 +146,17 @@ public class IPRrun {
 			// restore System.out
 			System.setOut(orig_stdout);
 			
-			IPRScanClient webIPR = new IPRScanClient();
+			IPRScan5Client webIPR = new IPRScan5Client();
 
 			if (!silent) System.out.println("Waiting for " + jobs.size() + " job(s) to finish ...");
 			for (String jobid : jobs) {
 				if (!silent) System.out.println("Polling job \"" + jobid + "\" ...");
 					try {
-						webIPR.getResults(jobid, basedir + jobid, "out");
-						webIPR.getResults(jobid, basedir + jobid, "visual-png");
+					  new File(basedir).mkdirs();
+						webIPR.getResults(jobid, basedir + jobid, "tsv");
+						webIPR.getResults(jobid, basedir + jobid, "svg");
+						//webIPR.getResults(jobid, basedir + jobid, "out");
+						//webIPR.getResults(jobid, basedir + jobid, "visual-png");
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (ServiceException e) {
@@ -166,6 +169,7 @@ public class IPRrun {
 			if (silent) {
 				System.setErr(orig_stderr);
 			}
+
 			IPRoutput = readIPROutput(basedir, jobs);
 
 		} else { // local
@@ -199,7 +203,7 @@ public class IPRrun {
 		
 		for (String job : jobs) {
 			try {
-				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".out.txt"));
+				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".tsv.tsv")); //.tsv.tsv or .out.txt
 				 while ((line = br.readLine()) != null) {
 					 String[] tabpos = line.split("\t");
 					 String seqID = tabpos[0].trim();

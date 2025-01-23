@@ -39,7 +39,7 @@
     <path id="classpath">
       <pathelement location="${build.dest}"/>
       <pathelement location="lib/blas-0.8.jar"/>
-      <pathelement location="lib/commons-cli-1.2.jar"/>
+      <pathelement location="lib/ebiws-lib/commons-cli-1.2.jar"/>
       <pathelement location="lib/commons-math-2.1.jar"/>
       <pathelement location="lib/ftp4j-1.5.1.jar"/>
       <pathelement location="lib/IPRScan_JAXWS.jar"/>
@@ -183,7 +183,7 @@
       	
       	<!-- Include third-party libraries -->
       	<zipfileset excludes="${excludes}" src="lib/blas-0.8.jar"/>
-      	<zipfileset excludes="${excludes}" src="lib/commons-cli-1.2.jar"/>
+      	<zipfileset excludes="${excludes}" src="lib/ebiws-lib/commons-cli-1.2.jar"/>
       	<zipfileset excludes="${excludes}" src="lib/commons-math-2.1.jar"/>
       	<zipfileset excludes="${excludes}" src="lib/ftp4j-1.5.1.jar"/>
       	<zipfileset excludes="${excludes}" src="lib/IPRScan_JAXWS.jar"/>
