@@ -52,7 +52,7 @@ public class SabineTrainingSetParser extends TFdataParser {
 			 while((line = br.readLine()) != null && line.length() > 0) {
 				
 				if (! line.startsWith("NA")) {
-					System.out.println("Parse Error. \"NA\" expected at the beginning of the line.\nLine: " + line);
+					logger.severe("Parse Error. \"NA\" expected at the beginning of the line.\nLine: " + line);
 					System.exit(0);
 				}
 				 
@@ -83,7 +83,7 @@ public class SabineTrainingSetParser extends TFdataParser {
 					line = br.readLine();										 // CL, S1 or S2
 					
 					if (! line.startsWith("CL") && ! line.startsWith("S")) {
-						System.out.println("Parse Error. CL, S1 or S2 expected.");
+						logger.severe("Parse Error. CL, S1 or S2 expected.");
 						System.exit(0);
 					}
 				}
@@ -174,8 +174,8 @@ public class SabineTrainingSetParser extends TFdataParser {
 			 br.close();
 		}
 		catch(IOException ioe) {
-			System.out.println(ioe.getMessage());
-			System.out.println("IOException occurred while parsing transcription factors .");
+			logger.severe(ioe.getMessage());
+			logger.severe("IOException occurred while parsing transcription factors .");
 		}
 	}
 

@@ -1,0 +1,56 @@
+
+-----------------------------------------------------------------------
+TFpredict
+Identification and structural characterization of transcription factors
+-----------------------------------------------------------------------
+(version 1.3)
+
+Copyright (C) 2012 Center for Bioinformatics Tuebingen (ZBIT),
+University of Tuebingen, Florian Topf and Johannes Eichner.
+
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it under certain
+conditions.
+For details see: http://www.gnu.org/licenses/gpl-3.0.html
+
+Third-party software used by this program:
+  WEKA. Copyright (C) 1998, 1999 Eibe Frank, Leonard Trigg, Mark Hall.
+  All rights reserved.
+  InterProScan. Copyright (C) 2011 Sarah Hunter, EMBL-EBI. All rights reserved.
+
+  Input FASTA file:       test_seq.fasta
+  Output file:     test_seq_output.txt
+  SABINE output file:     not generated
+  TF/non-TF classifier:   SVM linear kernel
+  Superclass classifier:  SVM linear kernel
+
+  Fetching domains from InterProScan. This may take several minutes... 
+
+Processed Sequence1:
+  9 InterPro domain(s) found.
+  6 / 9 InterPro domain(s) are relevant for TF/Non-TF classification.
+  6 / 9 InterPro domain(s) are relevant for Superclass prediction.
+  0 / 9 InterPro domain(s) were identified as DNA-binding domain(s).
+
+==========================================
+Results report for sequence: Sequence1
+==========================================
+
+  TF/Non-TF prediction:
+  -----------------------
+                Probability
+  TF            1.00
+  Non-TF        0.00
+
+  Superclass prediction:
+  -----------------------
+                      Probability
+  Basic domain        0.00
+  Zinc finger         0.00
+  Helix-turn-helix    0.00
+  Beta scaffold       1.00
+  Other               0.00
+
+  DNA-binding domain could not be predicted.
+
+Time elapsed: 94 seconds

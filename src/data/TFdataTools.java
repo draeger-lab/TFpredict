@@ -29,6 +29,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 import resources.Resource;
 
@@ -42,8 +43,13 @@ import main.TFpredictMain;
  * @since 1.0
  */
 public class TFdataTools {
-	
-	
+
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(TFdataTools.class.getName());
+
 	public static String getTransfacClass(String class_id) {
 		
 		String CLASS_FORMAT =    "[0-4]\\p{Punct}[0-9][0-2]?\\p{Punct}";
@@ -83,13 +89,13 @@ public class TFdataTools {
 				}	
 			}
 			br.close();
-		
-		} catch (IOException e) {		
-			System.out.println("IOException caught while fetching class."); 
+
+		} catch (IOException e) {
+			logger.severe("IOException caught while fetching class.");
 		}
 		
 		if(!found) {
-			System.out.println("No classification found for \"" + class_id + "\". Aborting.");
+			logger.severe("No classification found for \"" + class_id + "\". Aborting.");
 			System.exit(0);
 		}
 		return res;

@@ -26,7 +26,9 @@ package main;
 import io.BasicTools;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,9 +62,14 @@ public class TFpredictMain {
 	
 	/**
 	 * @param args
+	 * @throws FileNotFoundException
 	 */
-	public static void main(String[] args) {
-		
+	public static void main(String[] args) throws FileNotFoundException {
+
+		//System.setOut(new PrintStream(new File(System.getProperty("user.dir") + "/output.txt")));
+
+		final long time = System.currentTimeMillis();
+
 		java.util.Locale.setDefault(java.util.Locale.ENGLISH);
 		
 		if (args.length == 0) {
@@ -81,15 +88,15 @@ public class TFpredictMain {
 		}
 		
 		// create Options object
-		Options options = createOptions(args);
+		final Options options = createOptions(args);
 
 		// parse arguments	
 		CommandLine cmd = null;
-		CommandLineParser cmdparser = new PosixParser();
+		final CommandLineParser cmdparser = new PosixParser();
 		try {
 			cmd = cmdparser.parse(options, args);
-			
-		} catch (ParseException e) {
+
+		} catch (final ParseException e) {
 			printCopyright();
 			System.out.println("Error. Invalid argument.\n");
 			usage();
@@ -98,14 +105,14 @@ public class TFpredictMain {
 		if (galaxyMode) {
 			try {
 				Predict.main(cmd);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		
 		} else if (trainMode) {
 			try {
 				Train.main(cmd);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 			
@@ -114,10 +121,12 @@ public class TFpredictMain {
 			checkArguments(cmd);
 			try {
 				Predict.main(cmd);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
+
+		System.out.println("Time elapsed: " + ((System.currentTimeMillis() - time)/1000) + " seconds");
 	}
 	
 	// returns the correct mode based on the string passed as first argument
@@ -145,12 +154,12 @@ public class TFpredictMain {
 				System.out.println("Error. Directory to save temporary files could not be created.");
 				System.exit(0);
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
         
 		// append argument name "-fasta" and base directory to complete command line input
-		String[] originalArgs = args;
+		final String[] originalArgs = args;
 		args = new String[originalArgs.length+4];
 		args[0] = "-fasta";
 		for (int i=0; i<originalArgs.length; i++) {
@@ -159,6 +168,21 @@ public class TFpredictMain {
 		args[args.length-3] = "-standAloneMode";
 		args[args.length-2] = "-basedir";
 		args[args.length-1] = tempDir.getAbsolutePath() + File.separator;
+
+		// Check if "-output" is given and redirect output stream
+		for (int i = 0; i < args.length - 1; i++) {
+			if (args[i].equals("-output") && i + 1 < args.length) {
+				String outputFilePath = args[i + 1];
+				try {
+					System.out.println("Output redirected to: " + outputFilePath);
+					System.setOut(new PrintStream(new File(System.getProperty("user.dir") + "/" + outputFilePath)));
+				} catch (FileNotFoundException e) {
+					System.err.println("Error: Could not redirect output to the file: " + outputFilePath);
+					e.printStackTrace();
+				}
+				break;
+			}
+		}
 		
 		return(args);
 	}
@@ -168,7 +192,7 @@ public class TFpredictMain {
 		// concatenate species name to a single argument
 		boolean containsSpecies = false;
 		int speciesPos = 0;
-		for (String arg: args) {
+		for (final String arg: args) {
 			if (arg.equals("-species")) {
 				containsSpecies = true;
 				break;
@@ -176,7 +200,7 @@ public class TFpredictMain {
 			speciesPos++;
 		}
 		if (containsSpecies) {
-			String[] originalArgs = args;
+			final String[] originalArgs = args;
 			args = new String[originalArgs.length-1];
 			for (int i=0; i<=speciesPos; i++) {
 				args[i] = originalArgs[i];
@@ -190,9 +214,9 @@ public class TFpredictMain {
 	}
 	
 	private static Options createOptions(String[] args) {
-		
-		Options options = new Options();
-		
+
+		final Options options = new Options();
+
 		// GALAXY MODE
 		if (galaxyMode) {
 			
@@ -218,18 +242,21 @@ public class TFpredictMain {
 				
 			// options not needed for web-tool version of TFpredict
 			options.addOption("train", false, "switch for training mode");
+			options.addOption("prokaryote", false, "runs TFpredict training for prokaryotic data");
 			options.addOption("featureFile", true, "feature file in libsvm format");	
 			options.addOption("resultsFileDir", true, "directory containing class probabilities and evaluation results");	
 			options.addOption("modelFileDir", true, "directory where model files shall be saved");	
 			options.addOption("multiruns", true, "number of repetitions of cross-validation");	
 			options.addOption("folds", true, "number of folds");	
 			options.addOption("nestedCV", false, "switch to run nested cross-validation with model selection");	
-			options.addOption("multiThreading", false, "switch to enables multi-threading");	
+			options.addOption("multiThreading", false, "switch to enable multi-threading");
 			
 	    // STAND-ALONE-MODE
 		} else if (standAloneMode) {
-			
+
 			options.addOption("fasta", true, "input FASTA file for batch mode");
+			options.addOption("output", true, "output file name");
+			options.addOption("prokaryote", false, "runs TFpredict prediction for prokaryotic data");
 			options.addOption("sabineOutfile", true, "output file in SABINE format");
 			options.addOption("species", true, "organism (e.g. Homo sapiens)");
 			options.addOption("tfClassifier", true, "file containing TF/Non-TF classifier");
@@ -258,9 +285,9 @@ public class TFpredictMain {
 		}
 		
 		// check species for compatibility with SABINE
-		if (cmd.hasOption("species")) { 
-			List<String> speciesList = BasicTools.readResource2List(sabineSpeciesList, true);
-			String species = cmd.getOptionValue("species");
+		if (cmd.hasOption("species")) {
+			final List<String> speciesList = BasicTools.readResource2List(sabineSpeciesList, true);
+			final String species = cmd.getOptionValue("species");
 			if (!speciesList.contains(species.toUpperCase())) {
 				System.out.println("  Error. Unknown species: \"" + species + "\". A list of accepted values for the argument \"-species\" can be found here:");
 				System.out.println("  http://www.cogsys.cs.uni-tuebingen.de/software/SABINE/doc/organism_list.txt");
@@ -279,6 +306,15 @@ public class TFpredictMain {
 			
 		// print values of provided arguments 
 		System.out.println("  Input FASTA file:       " + cmd.getOptionValue("fasta"));
+		if (cmd.hasOption("prokaryote")) {
+			System.out.println("  Type:     " + "              prokaryote");
+		}
+		else{
+			System.out.println("  Type:     " + "              eukaryote");
+		}
+		if (cmd.hasOption("output")) {
+			System.out.println("  Output file:     " + cmd.getOptionValue("output"));
+		}
 		if (cmd.hasOption("sabineOutfile")) {
 			System.out.println("  SABINE output file:     " + cmd.getOptionValue("sabineOutfile"));
 			System.out.println("  Organism:               " + cmd.getOptionValue("species"));
@@ -299,10 +335,10 @@ public class TFpredictMain {
 	
  	public static void checkClassifier(String classifierType, String givenClassifier) {
 
- 		ArrayList<String> classificationMethods = new ArrayList<String>();
- 		for (String classMethod: validClassifiers) {
- 			classificationMethods.add(classMethod);
- 		}
+		final ArrayList<String> classificationMethods = new ArrayList<String>();
+		for (final String classMethod: validClassifiers) {
+			classificationMethods.add(classMethod);
+		}
 
  		if (!classificationMethods.contains(givenClassifier)) {
  			System.out.println("  Error. Unknown classifier: \"" + givenClassifier + "\". The following values are possible for the argument \"" + classifierType + "\":");
@@ -343,8 +379,10 @@ public class TFpredictMain {
 	private static void usage() {
 		
 		System.out.println("  Usage   : java -jar TFpredict.jar <fasta_file> [OPTIONS]\n");
-		System.out.println("  OPTIONS : -sabineOutfile <output_file_name>");
+		System.out.println("  OPTIONS : -sabineOutfile <sabine_output_file_name>");
 		System.out.println("            -species <organism_name>            (e.g., \"Homo sapiens\")");
+		System.out.println("            -output <output_file_name>          (e.g., \"output.txt\", default is console output)");
+		System.out.println("            -prokaryote                         (Run prediction/training with prokaryotic data)");
 		System.out.println("            -tfClassifier <classifier_name>     (possible values: SVM_linear, NaiveBayes, KNN)");
 		System.out.println("            -superClassifier <classifier_name>  (possible values: SVM_linear, NaiveBayes, KNN)");
 		System.out.println("            -iprscanPath <path_to_iprscan>      (e.g., \"/opt/iprscan/bin/iprscan\")");

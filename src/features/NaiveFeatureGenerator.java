@@ -23,6 +23,7 @@
 package features;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -31,6 +32,11 @@ import java.util.Map;
  * @since 1.0
  */
 public class NaiveFeatureGenerator extends BLASTfeatureGenerator {
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(NaiveFeatureGenerator.class.getName());
 
 	/**
 	 * 

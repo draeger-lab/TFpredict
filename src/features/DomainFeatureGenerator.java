@@ -32,9 +32,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import modes.Predict;
-
 import data.TrainingDataGenerator;
 
 /**
@@ -130,7 +130,12 @@ public abstract class DomainFeatureGenerator {
 		
 		return(allDomainIDs);
 	}
-	
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(DomainFeatureGenerator.class.getName());
+
 	/**
 	 * 
 	 * @param fastaFileHeaders

@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -39,9 +40,12 @@ import java.util.Map;
  * @since 1.0
  */
 public class KmerFeatureGenerator {
-	
-	private static boolean silent = false;
-	
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final Logger logger = Logger.getLogger(KmerFeatureGenerator.class.getName());
+
 	private boolean superPred;
 	private String fastaFile;
 	private String featureFile;
@@ -139,8 +143,8 @@ public class KmerFeatureGenerator {
 				}
 			}
 		}
-		
-		if (!silent) System.out.println("Number of unique k-mers in all sequences: " + allKmers.size());
+
+		logger.fine("Number of unique k-mers in all sequences: " + allKmers.size());
 	}
 	
 	

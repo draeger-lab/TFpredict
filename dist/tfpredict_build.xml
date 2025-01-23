@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project default="jar" name="Create Runnable Jar for Project TFPredict">
+<project default="jar" name="Create Runnable Jar for Project TFpredict">
 	<target name="help">
 		<echo>
 	      This is an ANT build script to build a stand-alone JAR for
@@ -24,7 +24,7 @@
 		<property name="classes" location="build/classes" />
 
 		<!-- the application jar file -->
-		<property name="appJar" value="TFpredict.jar" />
+		<property name="appJar" value="TFpredict_1.4.jar" />
 	</target>
 
 	<target name="clean" depends="init">

@@ -32,6 +32,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 import org.apache.commons.math.stat.descriptive.moment.Mean;
 import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
@@ -54,7 +56,12 @@ import resources.Resource;
  * @since 1.0
  */
 public class BasicTools {
-	
+
+	/**
+	 * A {@link Logger} for this class.
+	 */
+	private static final transient Logger logger = Logger.getLogger(BasicTools.class.getName());
+
 	/**
 	 * 
 	 */
@@ -141,8 +148,18 @@ public class BasicTools {
 	 * @param outfile
 	 */
 	public static void writeList2File(List<String> list, String outfile) {
-		String[] array = list.toArray(new String[] {});
-		writeArray2File(array, outfile);
+		//String[] array = list.toArray(new String[] {});
+		//writeArray2File(array, outfile);
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
+			for (String line : list) {
+				bw.append(line);
+				bw.newLine();
+			}
+			bw.close();
+		} catch (IOException exc) {
+			exc.printStackTrace();
+		}
 	}
 	
 	/**
@@ -151,7 +168,14 @@ public class BasicTools {
 	 * @param outfile
 	 */
 	public static void writeString2File(String lines, String outfile) {
-		writeArray2File(lines.split("\\n"), outfile);
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outfile)));
+			bw.write(lines);
+			bw.close();
+			//writeArray2File(lines.split("\\n"), outfile);
+		} catch (IOException exc) {
+			exc.printStackTrace();
+		}
 	}
 
 	/**
@@ -276,10 +300,11 @@ public class BasicTools {
 	public static Map<String, String> readFASTA(String fasta_file, boolean readFullHeader) {
 		
 		Map<String, String> sequences = new HashMap<String, String>();
-		
+
+		BufferedReader br = null;
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(new File(fasta_file)));
-		
+			br = new BufferedReader(new FileReader(new File(fasta_file)));
+
 			StringBuffer curr_seq = new StringBuffer();
 			String line;
 			String header = "";
@@ -326,6 +351,14 @@ public class BasicTools {
 			
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return(sequences);
 	}
@@ -469,9 +502,10 @@ public class BasicTools {
 		
 		String lines = "";
 		String line;
-		
+
+		BufferedReader br = null;
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(infile));
+			br = new BufferedReader(new FileReader(infile));
 			
 			while ((line = br.readLine()) != null) {
 				 lines += (line + "\n");
@@ -479,7 +513,15 @@ public class BasicTools {
 		}
 		catch (IOException ioe) {
 			ioe.printStackTrace();
-		}	
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		return lines;
 	}
 	
@@ -718,6 +760,8 @@ public class BasicTools {
 					stdout.add(line.trim());
 				}
 				consoleOutput = stdout.toArray(new String[]{});
+
+				br.close();
 			}
 			
 		} catch (IOException e) {
@@ -870,7 +914,13 @@ public class BasicTools {
 	public static void copy(String infile, String outfile) {
 		copy(infile, outfile, false);
 	}
-			
+
+	/**
+	 *
+	 * @param infile
+	 * @param outfile
+	 * @param isResource
+	 */
 	public static void copy(String infile, String outfile, boolean isResource) {
 		
 		try {
@@ -885,7 +935,8 @@ public class BasicTools {
 			
 			String line;
 			while ((line = br.readLine()) != null) {
-				bw.write(line + "\n");
+				bw.append(line);
+				bw.newLine();
 			}
 			br.close();
 			bw.flush();
@@ -915,7 +966,12 @@ public class BasicTools {
 		}
 		return hammingDist;
 	}
-	
+
+	/**
+	 *
+	 * @param array
+	 * @return
+	 */
 	public static int[] getMinPositions(int[] array) {
 	
 		int minDist = Integer.MAX_VALUE;
@@ -934,6 +990,53 @@ public class BasicTools {
 		}
 		return Integer2int(minPos.toArray(new Integer[]{}));
 	}
-} 
+
+	/**
+	 *
+	 * @param hitsOutfile
+	 * @return
+	 * @throws NumberFormatException
+	 * @throws IOException
+	 */
+	public static Map<String, Double> parseBLASTHitsProk(File hitsOutfile) throws NumberFormatException, IOException {
+		// read PSI-BLAST output from temporary files
+
+		Map<String, Double> blastHits = new HashMap<String, Double>();
+
+		int lineIdx = 1;
+		String line;
+
+		//List<String> hitsTable = BasicTools.readFile2List(hitsOutfile, false);
+		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(hitsOutfile)));
+		for (boolean startReading = false; ((line = br.readLine()) != null) && !(startReading && line.startsWith(">")); lineIdx++) {
+			line = line.trim();
+
+			// skip header and empty or invalid lines
+			if (line.startsWith("Sequences producing significant alignments")) {
+				startReading = true;
+				continue;
+			}
+			if (startReading && !line.isEmpty() && !line.startsWith(">")) {
+
+				StringTokenizer strtok = new StringTokenizer(line);
+				String hitID = strtok.nextToken();
+				// correct wrong UniProt ID for T03281 in factor.dat
+				if (hitID.contains("|41817|TF|")) {
+					hitID = hitID.replace("|41817|TF|", "|P41817|TF|");
+				}
+				String nextToken = null;
+				while (strtok.hasMoreTokens() && (nextToken = strtok.nextToken()).startsWith("GO:")) {
+					// skip GO terms in non-TF headers
+				}
+				blastHits.put(hitID, Double.parseDouble(nextToken)); // hit score
+
+			}
+		}
+		br.close();
+		logger.fine(MessageFormat.format("Successfully read {0,number,integer} lines from hits file {1}.", lineIdx, hitsOutfile));
+
+		return blastHits;
+	}
+}
 
 

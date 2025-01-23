@@ -129,8 +129,8 @@ public class IPRrun {
 			}
 			
 			// prevent System.exit
-			SecurityManager SecMan = System.getSecurityManager();
-			System.setSecurityManager(new NoExitSecurityManager());
+			//SecurityManager SecMan = System.getSecurityManager();
+			//System.setSecurityManager(new NoExitSecurityManager());
 						
 			// submit job
 			try {
@@ -138,7 +138,7 @@ public class IPRrun {
 			} catch (Exception e) {	}
 			
 			// restore System.exit
-			System.setSecurityManager(SecMan);
+			//System.setSecurityManager(SecMan);
 			
 			// grab jobids
 			ArrayList<String> jobs = grabJobIDs(new ByteArrayInputStream(stdout.toByteArray()));
@@ -155,6 +155,8 @@ public class IPRrun {
 					  new File(basedir).mkdirs();
 						webIPR.getResults(jobid, basedir + jobid, "tsv");
 						webIPR.getResults(jobid, basedir + jobid, "svg");
+						//webIPR.getResults(jobid, basedir + jobid, "out");
+						//webIPR.getResults(jobid, basedir + jobid, "visual-png");
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (ServiceException e) {
@@ -170,15 +172,15 @@ public class IPRrun {
 			
 			IPRoutput = readIPROutput(basedir, jobs);
 
-		} else { // local
-			
+		} else { // local - requires help, doesn't work with the newest verisions of interproscan
+
 			Runtime rt = Runtime.getRuntime();
 
-		    Process proc = null;
+			Process proc = null;
 			try {
 				proc = rt.exec(iprpath +" -cli -i " + seqfile + " -format raw -goterms -iprlookup -altjobs");
 				proc.waitFor();
-				
+
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(1);
@@ -201,7 +203,7 @@ public class IPRrun {
 		
 		for (String job : jobs) {
 			try {
-				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".tsv.txt"));
+				 BufferedReader br = new BufferedReader(new FileReader(basedir+job+".tsv.tsv")); //or .tsv.txt or .out.txt
 				 while ((line = br.readLine()) != null) {
 					 String[] tabpos = line.split("\t");
 					 String seqID = tabpos[0].trim();

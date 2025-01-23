@@ -44,7 +44,8 @@ Table of Contents
  * [Installation](#Installation)
  * [Manual](#Manual)
  * [Format specification](#Format-specification)
- * [Copyright and license](#Copyright-and_License)
+ * [Copyright and license](#Copyright-and-License)
+ * [Training examples](#Training-examples)
  * [Acknowledgments](#Acknowledgments)
  * [Contact](#Contact)
 
@@ -207,6 +208,41 @@ The input file format description specifies the input data for an individual TF.
   //
   XX
 ```
+
+  Training examples
+  --------
+
+  ### Filtering for GO terms
+
+  Program arguments for class `edu.ucsd.sbrg.go.Filter`: `inputTFnonTF.fasta src/resources/blast_db/TFnonTF.fasta`
+
+  ### `PercentileFeatureGenerator`
+
+  Program arguments:
+  * `src/resources/blast_db/TFnonTF.fasta`
+  * `src/resources/blast_db/featurefile.txt`
+
+  VM arguments: `-Xms16G -Xmx16G`
+
+  ### `TFpredictMain`
+  
+  Program arguments:
+
+    -train
+    -featureFile src/resources/blast_db/featurefile.txt
+    -resultsFileDir resultsFileDir/
+    -modelFileDir resultsFileDir/
+    -multiruns 5
+    -folds 5
+
+  ### `TFpredictMain` classification
+
+  Program arguments:
+    
+    test_data/ygene_sequence.fasta
+    -tfClassifier SVM_linear
+    -ignoreCharacteristicDomains
+
 
   Copyright and License
   ---------------------

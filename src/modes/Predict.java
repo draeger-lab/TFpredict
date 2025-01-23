@@ -24,6 +24,7 @@ package modes;
 
 import features.DomainFeatureGenerator;
 import features.PercentileFeatureGenerator;
+import features.PercentileFeatureGeneratorProk;
 import io.AnimatedChar;
 import io.BasicTools;
 import io.ObjectRW;
@@ -91,7 +92,8 @@ public class Predict {
 		logger.setLevel(Level.SEVERE);
 	}
 
-	
+
+	static boolean prokaryote = false;
 	// use webservice version by default (local version is used if argument "iprscanPath" is provided)
 	static boolean useWeb = true;
 	static boolean standAloneMode = false;
@@ -115,6 +117,10 @@ public class Predict {
 	public static String tfName2class_file = "transHMan";
 	public static String tfPredBlastFasta = "blast_db/TFnonTF.fasta";
 	public static String superPredBlastFasta = "blast_db/TF.fasta";
+
+	public static String tfPredBlastFastaProk = "blast_db_prok/TFnonTF.fasta";
+
+	public static String superPredBlastFastaProk = "blast_db_prok/TF.fasta";
 	public static String tfPredBlastDB = "blast_db/TFnonTF.db";
 	public static String superPredBlastDB = "blast_db/TF.db";
 	
@@ -251,7 +257,10 @@ public class Predict {
 	}
 
 	private void parseArguments(CommandLine cmd) {
-		
+
+		if(cmd.hasOption("prokaryote")) {
+			prokaryote = true;
+		}
 		if(cmd.hasOption("sequence")) {
 			sequence = cmd.getOptionValue("sequence").replaceAll("\\s", "");
 		}
@@ -414,13 +423,26 @@ public class Predict {
 		} else {
 			// SingleQueryMode --> add default header and write protein sequence to file
 			String[] inputSeq = BasicTools.wrapString(sequence);
-			String[] fastaSeq = new String[inputSeq.length+1];
-			fastaSeq[0] = ">" + tfName;
+
+			//			String[] fastaSeq = new String[inputSeq.length+1];
+			//			fastaSeq[0] = ">" + tfName;
+			try {
+				BufferedWriter bw = new BufferedWriter(new FileWriter(new File(input_file)));
+				bw.append('>');
+				bw.append(tfName);
+				bw.append('\n');
+
 			sequence_ids = new String[] {tfName};
 			for (int i=0; i<inputSeq.length; i++) {
-				fastaSeq[i+1] = inputSeq[i];
+					//					fastaSeq[i+1] = inputSeq[i];
+					bw.append(inputSeq[i]);
+					bw.append('\n');
 			}
-			BasicTools.writeArray2File(fastaSeq, input_file);
+				//BasicTools.writeArray2File(fastaSeq, input_file);
+				bw.close();
+			} catch (IOException exc) {
+				exc.printStackTrace();
+			}
 		}
 	}
 	
@@ -451,13 +473,13 @@ public class Predict {
 			System.out.print("\n  Fetching domains from InterProScan. This may take several minutes... ");
 			
 			an = new AnimatedChar();
-			an.setOutputStream(System.out);
-			an.showAnimatedChar();
+			//an.setOutputStream(System.out);
+			//an.showAnimatedChar();
 		}
 		List<String[]> IPRoutput = InterProScanRunner.run(input_file, iprpath, basedir, useWeb, standAloneMode);
 		seq2job = InterProScanRunner.getSeq2job();
 		if (standAloneMode) {
-			an.hideAnimatedChar();
+			//an.hideAnimatedChar();
 			System.out.println();
 		}
 		
@@ -469,7 +491,14 @@ public class Predict {
 		seq2domain = IPRextract.getSeq2DomainMap(IPRoutput);
 		
 		// generates map of from domain ID to object containing the InterPro ID, description, position, and GO classes
-		IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
+		if(!prokaryote){
+			IPRdomains = IPRextract.parseIPRoutput(IPRoutput);
+		}
+		else{
+			IPRdomains = IPRextract.parseIPRoutputProk(IPRoutput);
+		}
+
+
 	
 		// process result
 		seq2bindingDomain = IPRprocess.filterIPRdomains(seq2domain, IPRdomains, relGOterms, tfName2class);
@@ -504,14 +533,29 @@ public class Predict {
 	private void runPsiBlast() {
 		
 		// copy FASTA files from Jar to temporary directory
-		String blast_db_dir = basedir + "blast_db/";
+		String blast_db_dir = basedir + (prokaryote ? "blast_db_prok/" : "blast_db/");
+
 		if (! new File(blast_db_dir).exists() && ! new File(blast_db_dir).mkdir()) {
 			System.out.println("Error. Could not create directory for BLAST database.");
 		}
-		tfnontfDBfastaFile = blast_db_dir + new File(tfPredBlastFasta).getName();
-		tfDBfastaFile = blast_db_dir + new File(superPredBlastFasta).getName();
-		BasicTools.copy(tfPredBlastFasta, tfnontfDBfastaFile, true);
-		BasicTools.copy(superPredBlastFasta, tfDBfastaFile, true);
+		if(!prokaryote){
+			tfnontfDBfastaFile = blast_db_dir + new File(tfPredBlastFasta).getName();
+			tfDBfastaFile = blast_db_dir + new File(superPredBlastFasta).getName();
+		}
+		else{
+			tfnontfDBfastaFile = blast_db_dir + new File(tfPredBlastFastaProk).getName();
+			tfDBfastaFile = blast_db_dir + new File(superPredBlastFastaProk).getName();
+		}
+
+		if(!prokaryote){
+			BasicTools.copy(tfPredBlastFasta, tfnontfDBfastaFile, true);
+			BasicTools.copy(superPredBlastFasta, tfDBfastaFile, true);
+		}
+		else{
+			BasicTools.copy(tfPredBlastFastaProk, tfnontfDBfastaFile, true);
+			BasicTools.copy(superPredBlastFastaProk, tfDBfastaFile, true);
+		}
+
 		
 		// generate PSI-BLAST databases from FASTA files
 		String createDB_cmd = blastpath + "bin/makeblastdb";
@@ -552,12 +596,30 @@ public class Predict {
 			String runBLAST_cmdSuper = runBLAST_cmd + " -query " + seq2fasta.get(seqID) + " -num_iterations " + numBlastIter +  " -out " + currHitsFileSuper + " -db " +  tfDBfastaFile + ".db";
 			BasicTools.runCommand(runBLAST_cmdTF, false);
 			BasicTools.runCommand(runBLAST_cmdSuper, false);
-			seq2blastHitsTF.put(seqID, getBlastHits(currHitsFileTF));
-			seq2blastHitsSuper.put(seqID, getBlastHits(currHitsFileSuper));
+			try {
+				if(!prokaryote){
+					seq2blastHitsTF.put(seqID, getBlastHits(currHitsFileTF));
+					seq2blastHitsSuper.put(seqID, getBlastHits(currHitsFileSuper));
+				}
+				else{
+					seq2blastHitsTF.put(seqID, getBlastHitsProk(new File(currHitsFileTF)));
+					seq2blastHitsSuper.put(seqID, getBlastHitsProk(new File(currHitsFileSuper)));
+				}
+
+			} catch (NumberFormatException | IOException exc) {
+				logger.severe(exc.getMessage());
+				exc.printStackTrace();
+			}
 		}
 	}
-	
-	// read PSI-BLAST output from temporary files
+
+	/**
+	 * Read PSI-BLAST output from temporary files
+	 */
+	private Map<String, Double> getBlastHitsProk(File blastHitsFile) throws NumberFormatException, IOException {
+		return BasicTools.parseBLASTHitsProk(blastHitsFile);
+	}
+
 	private Map<String, Double> getBlastHits(String blastHitsFile) { 
 			
 		List<String> hitsTable = BasicTools.readFile2List(blastHitsFile, false);
@@ -584,6 +646,7 @@ public class Predict {
 			}
 			return blastHits;
 	}
+
 	
 	
 	private void performClassification() {
@@ -1062,10 +1125,18 @@ public class Predict {
 	 * function used to create the bit score percentile feature vectors for TF/non-TF and superclass prediction
 	 */
 	private static Map<String, Instance> createPercentileFeatureVectors(Map<String, Map<String, Double>> seq2blastHits, Map<String, Integer> seq2label, boolean superPred) {
-		
-		PercentileFeatureGenerator percFeatGen = new PercentileFeatureGenerator(seq2blastHits, seq2label, superPred);
-		percFeatGen.computeFeaturesFromBlastResult();
-		Map<String, double[]> seq2feat = percFeatGen.getFeatures();
+		Map<String, double[]> seq2feat;
+		if(!prokaryote){
+			PercentileFeatureGenerator percFeatGen = new PercentileFeatureGenerator(seq2blastHits, seq2label, superPred);
+			percFeatGen.computeFeaturesFromBlastResult();
+			seq2feat = percFeatGen.getFeatures();
+		}
+		else{
+			PercentileFeatureGeneratorProk percFeatGen = new PercentileFeatureGeneratorProk(seq2label, superPred);
+			percFeatGen.computeFeaturesFromBlastResult(seq2blastHits);
+			seq2feat = percFeatGen.getFeatures();
+		}
+
 		
 		Map<String, Instance> seq2fvector = new HashMap<String, Instance>();
 		for  (String seqID: seq2feat.keySet()) {
@@ -1075,6 +1146,11 @@ public class Predict {
 		return seq2fvector;
 	}
 
+	/**
+	 *
+	 * @param fvector
+	 * @return
+	 */
 	private static Instance getInst(String fvector) {
 
 		Instance inst = null;

@@ -1,0 +1,220 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to Use TFpredict - The Manual &mdash; TFpredict 1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=a295aa97" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=0ed52906"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Copyright and Licence" href="license.html" />
+    <link rel="prev" title="Getting Started with TFpredict" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            TFpredict
+              <img src="_static/tfpredict_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About TFpredict</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="about.html#availability">Availability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="about.html#introduction">Introduction</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started with TFpredict</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#how-to-get-started">How to get started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installing-tfpredict">Installing TFpredict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installation-and-configuration-of-blast">Installation and configuration of BLAST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How to Use TFpredict - The Manual</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-proceed">How To Proceed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#format-specification">Format Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">Copyright and Licence</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="license.html#acknowledgements">Acknowledgements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="license.html#contact">Contact</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">TFpredict</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">How to Use TFpredict - The Manual</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/use.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="how-to-use-tfpredict-the-manual">
+<span id="how-to-use"></span><h1>How to Use TFpredict - The Manual<a class="headerlink" href="#how-to-use-tfpredict-the-manual" title="Link to this heading"></a></h1>
+<p><strong>INPUT:</strong></p>
+<p>The input of TFpredict is a FASTA file: contains the protein identifiers and sequences in FASTA format (see <a class="reference internal" href="#form-spec"><span class="std std-ref">Format Specification</span></a> section). You can find the example (eukaryotic) file test_seq.fasta in the project’s main folder.</p>
+<p><strong>OUTPUT:</strong></p>
+<ol class="arabic simple">
+<li><p>Without any specification, TFpredict produces a console output.</p></li>
+<li><p>With the use of the <code class="docutils literal notranslate"><span class="pre">-output</span></code> option, the user can specify an output file that contains what the console output would be.</p></li>
+<li><p>With the use of the <code class="docutils literal notranslate"><span class="pre">-sabineOutfile</span></code> option, a SABINE input file can be generated as output. It contains all information required for post-processing the results with SABINE (see Format Specification at <a class="reference external" href="https://github.com/draeger-lab/SABINE/">https://github.com/draeger-lab/SABINE/</a>). The output filename can be specified by the user. The argument <code class="docutils literal notranslate"><span class="pre">-species</span></code> also has to be specified if an output file for SABINE shall be created.</p></li>
+</ol>
+<p><strong>USAGE:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>java -jar TFpredict_1.4.jar &lt;input_filename&gt; [OPTIONS]
+</pre></div>
+</div>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-prokaryote</span></code> Run TFpredict for prokaryotic data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-output</span> <span class="pre">&lt;output_filename&gt;</span></code> Output file instead of console output.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-sabineOutfile</span> <span class="pre">&lt;sabine_output_filename&gt;</span></code> Output file for post-processing of the results with SABINE.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-species</span> <span class="pre">&lt;organism_name&gt;</span></code> Organism name (e.g., Homo sapiens). See list of <a class="reference external" href="https://github.com/draeger-lab/TFpredict/blob/master/src/resources/organism_list.txt">supported organisms</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-tfClassifier</span> <span class="pre">&lt;classifier_name&gt;</span></code> Classifier used for TF/non-TF classification possible values: SVM_linear, NaiveBayes, KNN</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-superClassifier</span> <span class="pre">&lt;classifier_name&gt;</span></code> Classifier used for superclass prediction possible values: SVM_linear, NaiveBayes, KNN</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-blastPath</span> <span class="pre">&lt;path_to_blast&gt;</span></code> Path to “bin” directory containing BLAST executables (e.g., /opt/blast/latest). Only needed if environment variable BLAST_PATH is not set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-ignoreCharacteristicDomains</span></code> no classification based on predefined InterPro domains.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code> to display the usage of the script and an overview of the command line options.</p></li>
+</ul>
+</section>
+<section id="how-to-proceed">
+<h2>How To Proceed<a class="headerlink" href="#how-to-proceed" title="Link to this heading"></a></h2>
+<p>First, you need to generate an input file in FASTA format (see <a class="reference internal" href="#form-spec"><span class="std std-ref">Format Specification</span></a> section below) or use the example input file: <a class="reference external" href="https://github.com/draeger-lab/TFpredict/blob/master/test_seq.fasta">test_seq.fasta</a>. The input file should contain the following information about the protein under study:</p>
+<ul class="simple">
+<li><p>Name or identifier</p></li>
+<li><p>Organism (see list of <a class="reference external" href="https://github.com/draeger-lab/TFpredict/blob/master/src/resources/organism_list.txt">supported organisms</a>)</p></li>
+<li><p>Protein sequence</p></li>
+</ul>
+<p>To run the newest version of TFpredict on the example input file, use the command:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>java -jar TFpredict_1.4.jar test_seq.fasta
+</pre></div>
+</div>
+<p>To post-process the results generated by TFpredict with SABINE to predict DNA-motives for transcription factors identified among the input protein sequences, you have to pass two additional arguments to the program. First, the destination to which the output file shall be written has to be specified, and second, the correct species has to be provided. Please ensure that SABINE supports the given species (see list of <a class="reference external" href="https://github.com/draeger-lab/TFpredict/blob/master/src/resources/organism_list.txt">supported organisms</a>).</p>
+<p>An exemplary call of the program which facilitates the post-processing of the results using the tool SABINE is shown here:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>java -jar TFpredict_1.4.jar example_input.fasta -sabineOutfile example_output.txt -species &quot;Homo sapiens&quot;
+</pre></div>
+</div>
+<p>For a suitable example_input.fasta file (can be found in the <a class="reference external" href="https://github.com/draeger-lab/SABINE">SABINE</a> GitHub repository) TFpredict returns an output file, which contains the results of the performed prediction steps in the SABINE input file format.</p>
+</section>
+<section id="format-specification">
+<span id="form-spec"></span><h2>Format Specification<a class="headerlink" href="#format-specification" title="Link to this heading"></a></h2>
+<p>To analyze a given protein with TFpredict, the tool needs the corresponding amino acid sequence and organism. This information has to be formatted as specified in the TFpredict input file format description.</p>
+<p>The results of TFpredict are returned to the user via the standard console output or an output file if the <code class="docutils literal notranslate"><span class="pre">-output</span></code> option is used. Optionally, an output file can be generated which can be processed using SABINE to predict the DNA-binding specificity of transcription factors identified among the protein sequences analyzed by TFpredict. See <a class="reference external" href="https://github.com/draeger-lab/SABINE">SABINE</a> for a detailed description of the file format.</p>
+<p>The input file format description specifies the input data for an individual TF. You can pack multiple TFs in one input file to sequentially process more extensive datasets with SABINE. In addition to the general description of the file formats, example input and output files for SABINE are provided on its <a class="reference external" href="https://github.com/draeger-lab/SABINE">page</a>.</p>
+<p><strong>FASTA file:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&gt;Sequence_1
+MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGP
+DEAPRMPEAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKTYQGSYGFRLGFLHSGTAK
+SVTCTYSPALNKMFCQLAKTCPVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHE
+RCSDSDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNS
+SCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELP
+PGSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRGRERFEMFRELNEALELKDAQAGKEPG
+GSRAHSSHLKSKKGQSTSRHKKLMFKTEGPDSD
+
+&gt;Sequence_2
+...
+
+&gt;Sequence_3
+...
+</pre></div>
+</div>
+<p><strong>SABINE input file:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>NA  Identifier
+XX
+SP  Organism
+XX
+CL  Classification (decimal classification no. as in TRANSFAC)
+XX
+S1  Amino acid sequence
+XX
+FT  DNA-binding domain (InterPro ID   start position   end position)
+XX
+//
+XX
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started with TFpredict" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="license.html" class="btn btn-neutral float-right" title="Copyright and Licence" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Johannes Eichner, Florian Topf, Andreas Dräger, James T. Yurkovich, Michael Römer, Dóra V. Molnár, Michael Gaas.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

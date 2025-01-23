@@ -1,0 +1,12 @@
+TFPredict has been implemented by:
+
+* Johannes Eichner
+* Florian Topf
+* Andreas Draeger
+* James T. Yurkovich
+* Clemens Wrzodek
+
+Supervision:
+* Dierk Wanke
+* Andreas Zell
+* Bernhard O. Palsson
