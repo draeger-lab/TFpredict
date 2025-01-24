@@ -37,6 +37,8 @@ Please note that TFpredict is available in **two different versions** that are c
 2. Prokaryotic σ-factors ([prokaryote branch](https://github.com/draeger-lab/TFpredict/tree/prokaryote))
 The algorithm itself is identical. What is different are the training data and weights for both scenarios. So, this distinctionis more for convenience to directly provide preconfigured versions of TFpredict for both domains of organisms.
 
+For more information, please visit our [Read the Docs page](https://tfpredict.readthedocs.io/en/latest/).
+
 Table of Contents
 -----------------
 
